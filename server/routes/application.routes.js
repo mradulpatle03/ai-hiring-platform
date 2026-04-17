@@ -1,7 +1,7 @@
 import express from 'express'
 import {
   applyToJob, getMyApplications,
-  getJobApplicants, updateApplicationStatus
+  getJobApplicants, updateApplicationStatus, getRecommendedJobs
 } from '../controllers/application.controller.js'
 import { protect, restrictTo } from '../middleware/auth.middleware.js'
 import { upload } from '../config/multer.js'
@@ -16,6 +16,7 @@ router.post('/',
   applyToJob
 )
 router.get('/mine', protect, restrictTo('candidate'), getMyApplications)
+router.get('/recommended', protect, restrictTo('candidate'), getRecommendedJobs)
 
 // Recruiter
 router.get('/job/:jobId',  protect, restrictTo('recruiter'), getJobApplicants)

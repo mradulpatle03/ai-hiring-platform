@@ -7,8 +7,12 @@ import authRoutes from './routes/auth.routes.js'
 import jobRoutes from './routes/job.routes.js'
 import applicationRoutes from './routes/application.routes.js'
 import { errorHandler } from './middleware/error.middleware.js'
+import { initPinecone } from './services/pinecone.service.js'
 import dotenv from 'dotenv'
 dotenv.config()
+import fetch from "node-fetch";
+
+globalThis.fetch = fetch;
 
 const app = express()
 
@@ -25,7 +29,8 @@ app.use('/api/applications', applicationRoutes)
 // Error handler (always last)
 app.use(errorHandler)
 
-connectDB().then(() => {
+connectDB().then(async () => {
+  await initPinecone() 
   app.listen(process.env.PORT || 5000, () => {
     console.log(`Server running on port ${process.env.PORT || 5000}`)
   })

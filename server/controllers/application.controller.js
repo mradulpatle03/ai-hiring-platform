@@ -2,6 +2,9 @@ import Application from '../models/application.model.js'
 import Resume      from '../models/resume.model.js'
 import Job         from '../models/job.model.js'
 import { extractTextFromPDF } from '../services/pdf.service.js'
+import { screeningQueue } from '../queues/screeningQueue.js'
+import { generateEmbedding } from '../services/ai.service.js'
+import { findSimilarJobs }   from '../services/pinecone.service.js'
 
 // Candidate: apply to a job
 export const applyToJob = async (req, res) => {
@@ -38,8 +41,15 @@ export const applyToJob = async (req, res) => {
     status:    'pending',
   })
 
-  // TODO Phase 3: add to Bull Queue for AI screening here
-
+  // add to Bull Queue for AI screening here
+  await screeningQueue.add(
+  { applicationId: application._id.toString() },
+  {
+    attempts: 3,                    // retry up to 3 times on failure
+    backoff: { type: 'exponential', delay: 5000 },
+    removeOnComplete: true,
+  }
+)
   res.status(201).json({ success: true, application })
 }
 
@@ -83,4 +93,25 @@ export const updateApplicationStatus = async (req, res) => {
   application.status = status
   await application.save()
   res.json({ success: true, application })
+}
+
+export const getRecommendedJobs = async (req, res) => {
+  // Get candidate's latest resume
+  const latestResume = await Resume.findOne({ candidate: req.user._id })
+    .sort({ createdAt: -1 })
+
+  if (!latestResume?.parsedText)
+    return res.json({ success: true, jobs: [] })
+
+  // Generate embedding for their resume
+  const embedding = await generateEmbedding(latestResume.parsedText)
+
+  // Find similar jobs from Pinecone
+  const matches = await findSimilarJobs(embedding, 5)
+
+  // Fetch actual job documents
+  const jobIds = matches.map(m => m.id.replace('job_', ''))
+  const jobs   = await Job.find({ _id: { $in: jobIds }, status: 'open' })
+
+  res.json({ success: true, jobs })
 }
