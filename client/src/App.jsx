@@ -1,48 +1,103 @@
-import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
-import { AuthProvider } from './context/AuthContext'
-import ProtectedRoute from './components/ProtectedRoute'
+import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
+import { AuthProvider } from "./context/AuthContext";
+import ProtectedRoute from "./components/ProtectedRoute";
 
-// Auth pages
-import Login    from './pages/auth/Login'
-import Register from './pages/auth/Register'
+import Login from "./pages/auth/Login";
+import Register from "./pages/auth/Register";
+import Unauthorized from "./pages/Unauthorized";
 
-// Recruiter pages
-import RecruiterDashboard from './pages/recruiter/Dashboard'
+import RecruiterDashboard from "./pages/recruiter/Dashboard";
+import MyJobs from "./pages/recruiter/MyJobs";
+import PostJob from "./pages/recruiter/PostJob";
+import Applicants from "./pages/recruiter/Applicants";
 
-// Candidate pages
-import CandidateDashboard from './pages/candidate/Dashboard'
+import CandidateDashboard from "./pages/candidate/Dashboard";
+import BrowseJobs from "./pages/candidate/BrowseJobs";
+import JobDetail from "./pages/candidate/JobDetail";
+import MyApplications from "./pages/candidate/MyApplications";
 
-// Misc
-import Unauthorized from './pages/Unauthorized'
+const R = ({ children, role }) => (
+  <ProtectedRoute role={role}>{children}</ProtectedRoute>
+);
 
 export default function App() {
   return (
     <AuthProvider>
       <BrowserRouter>
         <Routes>
-          {/* Public */}
-          <Route path="/login"        element={<Login />} />
-          <Route path="/register"     element={<Register />} />
+          <Route path="/login" element={<Login />} />
+          <Route path="/register" element={<Register />} />
           <Route path="/unauthorized" element={<Unauthorized />} />
 
-          {/* Recruiter only */}
-          <Route path="/recruiter/*" element={
-            <ProtectedRoute role="recruiter">
-              <RecruiterDashboard />
-            </ProtectedRoute>
-          } />
+          <Route
+            path="/recruiter"
+            element={
+              <R role="recruiter">
+                <RecruiterDashboard />
+              </R>
+            }
+          />
+          <Route
+            path="/recruiter/jobs"
+            element={
+              <R role="recruiter">
+                <MyJobs />
+              </R>
+            }
+          />
+          <Route
+            path="/recruiter/jobs/new"
+            element={
+              <R role="recruiter">
+                <PostJob />
+              </R>
+            }
+          />
+          <Route
+            path="/recruiter/jobs/:jobId/applicants"
+            element={
+              <R role="recruiter">
+                <Applicants />
+              </R>
+            }
+          />
 
-          {/* Candidate only */}
-          <Route path="/candidate/*" element={
-            <ProtectedRoute role="candidate">
-              <CandidateDashboard />
-            </ProtectedRoute>
-          } />
+          <Route
+            path="/candidate"
+            element={
+              <R role="candidate">
+                <CandidateDashboard />
+              </R>
+            }
+          />
+          <Route
+            path="/candidate/jobs"
+            element={
+              <R role="candidate">
+                <BrowseJobs />
+              </R>
+            }
+          />
+          <Route
+            path="/candidate/jobs/:id"
+            element={
+              <R role="candidate">
+                <JobDetail />
+              </R>
+            }
+          />
+          <Route
+            path="/candidate/applied"
+            element={
+              <R role="candidate">
+                <MyApplications />
+              </R>
+            }
+          />
 
-          {/* Default redirect */}
           <Route path="*" element={<Navigate to="/login" replace />} />
         </Routes>
       </BrowserRouter>
     </AuthProvider>
-  )
+  );
 }

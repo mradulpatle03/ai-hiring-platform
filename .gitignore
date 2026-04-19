@@ -5,3 +5,4 @@ server/recreate-index.js
 server/test-ai.js
 .codex
 .codex/
+server/uploads
