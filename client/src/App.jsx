@@ -15,6 +15,7 @@ import CandidateDashboard from "./pages/candidate/Dashboard";
 import BrowseJobs from "./pages/candidate/BrowseJobs";
 import JobDetail from "./pages/candidate/JobDetail";
 import MyApplications from "./pages/candidate/MyApplications";
+import Messages from "./pages/shared/Messages";
 
 const R = ({ children, role }) => (
   <ProtectedRoute role={role}>{children}</ProtectedRoute>
@@ -61,6 +62,14 @@ export default function App() {
               </R>
             }
           />
+          <Route
+            path="/recruiter/messages"
+            element={
+              <R role="recruiter">
+                <Messages />
+              </R>
+            }
+          />
 
           <Route
             path="/candidate"
@@ -91,6 +100,14 @@ export default function App() {
             element={
               <R role="candidate">
                 <MyApplications />
+              </R>
+            }
+          />
+          <Route
+            path="/candidate/messages"
+            element={
+              <R role="candidate">
+                <Messages />
               </R>
             }
           />

@@ -1,6 +1,6 @@
 import { Link, useNavigate, useLocation } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
-import { LogOut, Briefcase, User, LayoutDashboard, Star } from "lucide-react";
+import { LogOut, Briefcase, User, LayoutDashboard, Star, MessageSquare } from 'lucide-react';
 
 const s = {
   shell: { display: "flex", flexDirection: "column", minHeight: "100vh" },
@@ -73,6 +73,11 @@ export default function Layout({ children }) {
       label: "Dashboard",
     },
     { to: "/recruiter/jobs", icon: <Briefcase size={14} />, label: "My Jobs" },
+    {
+      to: "/recruiter/messages",
+      icon: <MessageSquare size={14} />,
+      label: "Messages",
+    },
   ];
   const candidateLinks = [
     {
@@ -89,6 +94,11 @@ export default function Layout({ children }) {
       to: "/candidate/applied",
       icon: <Star size={14} />,
       label: "My Applications",
+    },
+    {
+      to: "/candidate/messages",
+      icon: <MessageSquare size={14} />,
+      label: "Messages",
     },
   ];
 

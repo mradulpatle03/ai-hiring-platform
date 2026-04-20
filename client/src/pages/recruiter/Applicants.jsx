@@ -8,6 +8,8 @@ import ScoreBadge from "../../components/ScoreBadge";
 import StatusBadge from "../../components/StatusBadge";
 import toast from "react-hot-toast";
 import { ChevronDown, ChevronUp, User } from "lucide-react";
+import { fetchOrCreateConversation } from "../../api/conversations";
+import { useNavigate } from "react-router-dom";
 
 const s = {
   h1: { fontSize: "20px", fontWeight: "600", marginBottom: "4px" },
@@ -103,6 +105,16 @@ export default function Applicants() {
       toast.success("Status updated");
     },
   });
+  const navigate = useNavigate();
+
+  const openChat = async (applicationId) => {
+    try {
+      await fetchOrCreateConversation(applicationId);
+      navigate("/recruiter/messages");
+    } catch (err) {
+      toast.error(err.response?.data?.message || "Cannot open chat");
+    }
+  };
 
   const apps = data?.applications || [];
 
@@ -281,6 +293,22 @@ export default function Applicants() {
                             ))}
                           </div>
                         )}
+                        {app.status === "shortlisted" && (
+                          <button
+                            style={{
+                              ...s.btnSm,
+                              background: "#f0effc",
+                              color: "#5a52c0",
+                              marginTop: "10px",
+                            }}
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              openChat(app._id);
+                            }}
+                          >
+                            Open chat
+                          </button>
+                        )}
                         {app.status === "pending" ||
                         app.status === "screening" ? (
                           <p
@@ -290,7 +318,7 @@ export default function Applicants() {
                               marginTop: "8px",
                             }}
                           >
-                            ⏳ AI is still screening this candidate...
+                            AI is still screening this candidate...
                           </p>
                         ) : null}
                       </div>

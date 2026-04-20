@@ -12,7 +12,7 @@ const sendTokenResponse = (user, statusCode, res) => {
     sameSite: 'lax',
     maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
   })
-  res.status(statusCode).json({ success: true, user })
+  res.status(statusCode).json({ success: true, user, token })
 }
 
 export const register = async (req, res) => {
