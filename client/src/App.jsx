@@ -16,6 +16,7 @@ import BrowseJobs from "./pages/candidate/BrowseJobs";
 import JobDetail from "./pages/candidate/JobDetail";
 import MyApplications from "./pages/candidate/MyApplications";
 import Messages from "./pages/shared/Messages";
+import Analytics from "./pages/recruiter/Analytics";
 
 const R = ({ children, role }) => (
   <ProtectedRoute role={role}>{children}</ProtectedRoute>
@@ -67,6 +68,14 @@ export default function App() {
             element={
               <R role="recruiter">
                 <Messages />
+              </R>
+            }
+          />
+          <Route
+            path="/recruiter/analytics"
+            element={
+              <R role="recruiter">
+                <Analytics />
               </R>
             }
           />

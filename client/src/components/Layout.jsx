@@ -1,6 +1,14 @@
 import { Link, useNavigate, useLocation } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
-import { LogOut, Briefcase, User, LayoutDashboard, Star, MessageSquare } from 'lucide-react';
+import {
+  LogOut,
+  Briefcase,
+  User,
+  LayoutDashboard,
+  Star,
+  MessageSquare,
+  BarChart2,
+} from "lucide-react";
 
 const s = {
   shell: { display: "flex", flexDirection: "column", minHeight: "100vh" },
@@ -78,6 +86,11 @@ export default function Layout({ children }) {
       icon: <MessageSquare size={14} />,
       label: "Messages",
     },
+    {
+      to: "/recruiter/analytics",
+      icon: <BarChart2 size={14} />,
+      label: "Analytics",
+    },
   ];
   const candidateLinks = [
     {
@@ -107,7 +120,7 @@ export default function Layout({ children }) {
   return (
     <div style={s.shell}>
       <nav style={s.nav}>
-        <span style={s.brand}>⚡ HireAI</span>
+        <span style={s.brand}>HireAI</span>
         <div style={s.links}>
           {links.map((l) => (
             <Link key={l.to} to={l.to} style={isActive(l.to)}>

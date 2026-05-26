@@ -16,6 +16,7 @@ import authRoutes from "./routes/auth.routes.js";
 import jobRoutes from "./routes/job.routes.js";
 import applicationRoutes from "./routes/application.routes.js";
 import conversationRoutes from "./routes/conversation.routes.js";
+import analyticsRoutes from "./routes/analytics.routes.js";
 
 import User from "./models/user.model.js";
 import Message from "./models/message.model.js";
@@ -40,6 +41,7 @@ app.use("/api/auth", authRoutes);
 app.use("/api/jobs", jobRoutes);
 app.use("/api/applications", applicationRoutes);
 app.use("/api/conversations", conversationRoutes);
+app.use('/api/analytics', analyticsRoutes);
 
 // Error handler (always last)
 app.use(errorHandler);
