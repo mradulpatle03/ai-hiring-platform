@@ -17,13 +17,12 @@ import jobRoutes from "./routes/job.routes.js";
 import applicationRoutes from "./routes/application.routes.js";
 import conversationRoutes from "./routes/conversation.routes.js";
 import analyticsRoutes from "./routes/analytics.routes.js";
-import interviewRoutes from './routes/interview.routes.js'
-import githubRoutes from './routes/github.routes.js'
+import interviewRoutes from "./routes/interview.routes.js";
+import githubRoutes from "./routes/github.routes.js";
 
 import User from "./models/user.model.js";
 import Message from "./models/message.model.js";
 import Conversation from "./models/conversation.model.js";
-
 
 globalThis.fetch = fetch;
 
@@ -44,9 +43,9 @@ app.use("/api/auth", authRoutes);
 app.use("/api/jobs", jobRoutes);
 app.use("/api/applications", applicationRoutes);
 app.use("/api/conversations", conversationRoutes);
-app.use('/api/analytics', analyticsRoutes);
-app.use('/api/interviews', interviewRoutes);
-app.use('/api/github', githubRoutes)
+app.use("/api/analytics", analyticsRoutes);
+app.use("/api/interviews", interviewRoutes);
+app.use("/api/github", githubRoutes);
 
 // Error handler (always last)
 app.use(errorHandler);
@@ -55,14 +54,21 @@ app.use(errorHandler);
 // Reads JWT from handshake auth token
 io.use(async (socket, next) => {
   try {
-    const token = socket.handshake.auth.token;
+    // Read token from HTTP-only cookie instead of localStorage
+    const cookieHeader = socket.handshake.headers.cookie || "";
+    const token = cookieHeader
+      .split(";")
+      .map((c) => c.trim())
+      .find((c) => c.startsWith("token="))
+      ?.split("=")[1];
+
     if (!token) return next(new Error("Authentication required"));
 
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
     const user = await User.findById(decoded.id).select("-password");
     if (!user) return next(new Error("User not found"));
 
-    socket.user = user; // attach user to socket
+    socket.user = user;
     next();
   } catch (err) {
     next(new Error("Invalid token"));

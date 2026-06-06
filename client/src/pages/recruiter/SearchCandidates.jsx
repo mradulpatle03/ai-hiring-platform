@@ -5,7 +5,7 @@ import {
   updateAppStatus,
   fetchOrCreateConversation,
 } from "../../api/applications";
-import { useFilters } from "../../hooks/useSearchParams";
+import { useFilters } from '../../hooks/useFilters';
 import Layout from "../../components/Layout";
 import FilterSidebar from "../../components/search/FilterSidebar";
 import SearchBar from "../../components/search/SearchBar";

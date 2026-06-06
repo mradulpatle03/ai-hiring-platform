@@ -21,9 +21,16 @@ import Interviews from "./pages/shared/Interviews";
 import CandidateProfile from "./pages/candidate/Profile";
 import SearchCandidates from "./pages/recruiter/SearchCandidates";
 
+import ErrorBoundary         from './components/ErrorBoundary'
+import RouteErrorBoundary    from './components/RouteErrorBoundary'
+
 const R = ({ children, role }) => (
-  <ProtectedRoute role={role}>{children}</ProtectedRoute>
-);
+  <ProtectedRoute role={role}>
+    <RouteErrorBoundary>
+      {children}
+    </RouteErrorBoundary>
+  </ProtectedRoute>
+)
 
 export default function App() {
   return (

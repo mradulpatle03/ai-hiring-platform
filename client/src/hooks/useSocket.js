@@ -2,7 +2,7 @@ import { useEffect, useRef, useCallback } from 'react'
 import { io } from 'socket.io-client'
 import { useAuth } from '../context/AuthContext'
 
-let socketInstance = null  // singleton — one connection per session
+let socketInstance = null
 
 export const useSocket = () => {
   const { user } = useAuth()
@@ -11,23 +11,21 @@ export const useSocket = () => {
   useEffect(() => {
     if (!user) return
 
-    // Reuse existing connection if already open
     if (socketInstance?.connected) {
       socketRef.current = socketInstance
       return
     }
 
-    // Get JWT token from cookie via /auth/me — we need it for socket auth
-    // We store it in memory when user logs in
-    const token = localStorage.getItem('socket_token')
-
-    socketInstance = io(import.meta.env.VITE_SERVER_URL || 'http://localhost:5000', {
-      auth:              { token },
-      withCredentials:   true,
-      transports:        ['websocket', 'polling'],
-      reconnectionDelay: 1000,
-      reconnectionAttempts: 5,
-    })
+    // No token needed — cookie is sent automatically with withCredentials
+    socketInstance = io(
+      import.meta.env.VITE_SERVER_URL || 'http://localhost:5000',
+      {
+        withCredentials: true,   // sends the HTTP-only cookie automatically
+        transports: ['websocket', 'polling'],
+        reconnectionDelay: 1000,
+        reconnectionAttempts: 5,
+      }
+    )
 
     socketRef.current = socketInstance
 
@@ -36,9 +34,7 @@ export const useSocket = () => {
     socketInstance.on('connect_error', (err) =>
       console.error('Socket error:', err.message))
 
-    return () => {
-      // Don't disconnect on component unmount — keep singleton alive
-    }
+    return () => {}
   }, [user])
 
   const emit = useCallback((event, data) => {
