@@ -24,6 +24,22 @@ import User from "./models/user.model.js";
 import Message from "./models/message.model.js";
 import Conversation from "./models/conversation.model.js";
 
+import { validateEnv } from "./config/validateEnv.js";
+validateEnv();
+
+import {
+  helmetConfig,
+  sanitizeConfig,
+  hppConfig,
+} from "./middleware/security.middleware.js";
+import {
+  globalLimiter,
+  authLimiter,
+  registerLimiter,
+  applyLimiter,
+  uploadLimiter,
+} from "./middleware/rateLimit.middleware.js";
+
 globalThis.fetch = fetch;
 
 const app = express();
@@ -33,10 +49,20 @@ const io = new Server(server, {
   cors: { origin: process.env.CLIENT_URL, credentials: true },
 });
 
+app.use(helmetConfig);
+app.set("trust proxy", 1);
+
+app.use("/api", globalLimiter);
+
 app.use(cors({ origin: process.env.CLIENT_URL, credentials: true }));
-app.use(express.json());
-app.use(cookieParser());
-app.use("/uploads", express.static("uploads"));
+app.use(express.json({ limit: '10kb' }))   // prevent huge JSON payloads
+app.use(express.urlencoded({ extended: true, limit: '10kb' }))
+app.use(cookieParser())
+
+app.use(sanitizeConfig)
+app.use(hppConfig)
+
+app.use('/uploads', express.static('uploads'))
 
 // Routes
 app.use("/api/auth", authRoutes);

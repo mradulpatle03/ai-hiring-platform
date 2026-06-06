@@ -3,8 +3,8 @@ import { useNavigate } from "react-router-dom";
 import {
   searchApplicants,
   updateAppStatus,
-  fetchOrCreateConversation,
 } from "../../api/applications";
+import { fetchOrCreateConversation } from "../../api/conversations";
 import { useFilters } from '../../hooks/useFilters';
 import Layout from "../../components/Layout";
 import FilterSidebar from "../../components/search/FilterSidebar";
@@ -18,7 +18,7 @@ import StatusBadge from "../../components/StatusBadge";
 import SlotPicker from "../../components/interviews/SlotPicker";
 import toast from "react-hot-toast";
 import { useState } from "react";
-import { Github } from "lucide-react";
+import { GitFork as Github } from "lucide-react";
 
 const s = {
   page: {

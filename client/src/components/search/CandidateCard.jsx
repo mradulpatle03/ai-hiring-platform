@@ -1,6 +1,6 @@
 import ScoreBadge from "../ScoreBadge";
 import StatusBadge from "../StatusBadge";
-import { Github, ChevronDown, ChevronUp } from "lucide-react";
+import { GitFork as Github, ChevronDown, ChevronUp } from "lucide-react";
 import { useState } from "react";
 import XAIPanel from "../xai/XAIPanel";
 

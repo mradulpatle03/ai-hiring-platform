@@ -1,3 +1,5 @@
+import mongoose from 'mongoose'
+
 const applicationSchema = new mongoose.Schema({
   job:       { type: mongoose.Schema.Types.ObjectId, ref: 'Job',    required: true },
   candidate: { type: mongoose.Schema.Types.ObjectId, ref: 'User',   required: true },
@@ -32,3 +34,8 @@ const applicationSchema = new mongoose.Schema({
     interviewFocus: [{ type: String }],
   },
 }, { timestamps: true })
+
+// Ensure a candidate can only apply once per job
+applicationSchema.index({ job: 1, candidate: 1 }, { unique: true })
+
+export default mongoose.model('Application', applicationSchema)
