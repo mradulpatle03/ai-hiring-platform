@@ -13,6 +13,7 @@ import { fetchOrCreateConversation } from "../../api/conversations";
 import { useNavigate } from "react-router-dom";
 import XAIPanel from "../../components/xai/XAIPanel";
 import { fetchXAIBreakdown } from "../../api/applications";
+import { ApplicantRowSkeleton } from "../../components/Skeleton";
 
 const s = {
   h1: { fontSize: "20px", fontWeight: "600", marginBottom: "4px" },
@@ -132,7 +133,22 @@ export default function Applicants() {
       </div>
 
       {isLoading ? (
-        <p style={{ color: "#aaa" }}>Loading applicants...</p>
+        <table style={s.table}>
+          <thead>
+            <tr>
+              <th style={s.th}>Candidate</th>
+              <th style={s.th}>AI Score</th>
+              <th style={s.th}>Status</th>
+              <th style={s.th}>Applied</th>
+              <th style={s.th}>Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            {Array.from({ length: 5 }).map((_, i) => (
+              <ApplicantRowSkeleton key={i} />
+            ))}
+          </tbody>
+        </table>
       ) : apps.length === 0 ? (
         <p style={{ color: "#aaa", fontSize: "14px" }}>No applicants yet.</p>
       ) : (

@@ -23,6 +23,7 @@ import SearchCandidates from "./pages/recruiter/SearchCandidates";
 
 import ErrorBoundary         from './components/ErrorBoundary'
 import RouteErrorBoundary    from './components/RouteErrorBoundary'
+import NotFound from './pages/NotFound'
 
 const R = ({ children, role }) => (
   <ProtectedRoute role={role}>
@@ -170,7 +171,7 @@ export default function App() {
               </R>
             }
           />
-          <Route path="*" element={<Navigate to="/login" replace />} />
+          <Route path="*" element={<NotFound />} />
         </Routes>
       </BrowserRouter>
     </AuthProvider>

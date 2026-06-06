@@ -1,13 +1,13 @@
-import { Navigate } from 'react-router-dom'
-import { useAuth } from '../context/AuthContext'
+import { Navigate }  from 'react-router-dom'
+import { useAuth }   from '../context/AuthContext'
+import PageLoader    from './PageLoader'
 
-// role = 'recruiter' | 'candidate' | undefined (any logged-in user)
 const ProtectedRoute = ({ children, role }) => {
   const { user, loading } = useAuth()
 
-  if (loading) return <div className="loading-screen">Loading...</div>
-  if (!user) return <Navigate to="/login" replace />
-  if (role && user.role !== role) return <Navigate to="/unauthorized" replace />
+  if (loading) return <PageLoader message="Checking session..."/>
+  if (!user)   return <Navigate to="/login" replace/>
+  if (role && user.role !== role) return <Navigate to="/unauthorized" replace/>
 
   return children
 }

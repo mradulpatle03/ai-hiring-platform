@@ -4,6 +4,7 @@ import { Link } from "react-router-dom";
 import Layout from "../../components/Layout";
 import StatusBadge from "../../components/StatusBadge";
 import toast from "react-hot-toast";
+import { ListSkeleton } from "../../components/Skeleton";
 
 const s = {
   header: {
@@ -93,7 +94,7 @@ export default function MyJobs() {
       </div>
 
       {isLoading ? (
-        <p style={{ color: "#aaa" }}>Loading...</p>
+        <ListSkeleton rows={4} />
       ) : jobs.length === 0 ? (
         <p style={{ color: "#aaa", fontSize: "14px" }}>No jobs posted yet.</p>
       ) : (

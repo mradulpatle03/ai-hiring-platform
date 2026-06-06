@@ -4,6 +4,7 @@ import { useNavigate } from "react-router-dom";
 import { fetchAllJobs } from "../../api/jobs";
 import Layout from "../../components/Layout";
 import JobCard from "../../components/JobCard";
+import { JobCardSkeleton } from "../../components/Skeleton";
 
 const s = {
   h1: { fontSize: "20px", fontWeight: "600", marginBottom: "1rem" },
@@ -70,7 +71,11 @@ export default function BrowseJobs() {
       </div>
 
       {isLoading ? (
-        <p style={{ color: "#aaa" }}>Loading jobs...</p>
+        <div style={s.grid}>
+          {Array.from({ length: 6 }).map((_, i) => (
+            <JobCardSkeleton key={i} />
+          ))}
+        </div>
       ) : jobs.length === 0 ? (
         <p style={{ color: "#aaa", fontSize: "14px" }}>No jobs found.</p>
       ) : (
