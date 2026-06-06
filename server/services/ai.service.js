@@ -1,443 +1,232 @@
-const EMBEDDING_DIMENSION = 3072;
+import axios from 'axios'
 
-const SKILL_KEYWORDS = [
-  "javascript",
-  "typescript",
-  "node.js",
-  "node",
-  "express",
-  "nestjs",
-  "react",
-  "next.js",
-  "next",
-  "vue",
-  "angular",
-  "html",
-  "css",
-  "tailwind",
-  "bootstrap",
-  "mongodb",
-  "mongoose",
-  "mysql",
-  "postgresql",
-  "postgres",
-  "sql",
-  "redis",
-  "graphql",
-  "rest api",
-  "api",
-  "java",
-  "spring boot",
-  "python",
-  "django",
-  "flask",
-  "fastapi",
-  "c++",
-  "c#",
-  ".net",
-  "php",
-  "laravel",
-  "go",
-  "rust",
-  "docker",
-  "kubernetes",
-  "aws",
-  "azure",
-  "gcp",
-  "firebase",
-  "linux",
-  "git",
-  "github",
-  "gitlab",
-  "ci/cd",
-  "jenkins",
-  "terraform",
-  "ansible",
-  "microservices",
-  "system design",
-  "machine learning",
-  "deep learning",
-  "data analysis",
-  "pandas",
-  "numpy",
-  "scikit-learn",
-  "tensorflow",
-  "pytorch",
-  "power bi",
-  "tableau",
-  "figma",
-  "ui/ux",
-  "testing",
-  "jest",
-  "mocha",
-  "selenium",
-  "playwright",
-  "cypress",
-];
+const GROQ_URL   = 'https://api.groq.com/openai/v1/chat/completions'
+const GROQ_MODEL = process.env.GROQ_MODEL || 'llama-3.3-70b-versatile'
 
-const ROLE_RULES = [
-  {
-    role: "backend",
-    keywords: [
-      "node",
-      "express",
-      "api",
-      "server",
-      "database",
-      "microservices",
-      "backend",
-    ],
-  },
-  {
-    role: "frontend",
-    keywords: [
-      "react",
-      "vue",
-      "angular",
-      "frontend",
-      "ui",
-      "css",
-      "html",
-      "figma",
-    ],
-  },
-  {
-    role: "fullstack",
-    keywords: [
-      "full stack",
-      "fullstack",
-      "frontend",
-      "backend",
-      "react",
-      "node",
-    ],
-  },
-  {
-    role: "data",
-    keywords: [
-      "machine learning",
-      "data",
-      "analytics",
-      "python",
-      "pandas",
-      "sql",
-      "tableau",
-    ],
-  },
-  {
-    role: "devops",
-    keywords: [
-      "docker",
-      "kubernetes",
-      "terraform",
-      "aws",
-      "azure",
-      "gcp",
-      "devops",
-      "ci/cd",
-    ],
-  },
-];
-
-const normalizeText = (text = "") =>
-  text
-    .toLowerCase()
-    .replace(/[^a-z0-9+#./\s-]/g, " ")
-    .replace(/\s+/g, " ")
-    .trim();
-
-const escapeRegex = (value) => value.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
-
-const unique = (items) => [...new Set(items)];
-
-const SKILL_ALIASES = {
-  "node.js": "Node.js",
-  node: "Node.js",
-  mongodb: "MongoDB",
-  mongoose: "Mongoose",
-  express: "Express",
-  react: "React",
-  "next.js": "Next.js",
-  next: "Next.js",
-  postgresql: "PostgreSQL",
-  postgres: "PostgreSQL",
-  mysql: "MySQL",
-  sql: "SQL",
-  api: "API",
-  "rest api": "REST API",
-  aws: "AWS",
-  gcp: "GCP",
-  azure: "Azure",
-  docker: "Docker",
-  kubernetes: "Kubernetes",
-  javascript: "JavaScript",
-  typescript: "TypeScript",
-  html: "HTML",
-  css: "CSS",
-  github: "GitHub",
-  gitlab: "GitLab",
-  "ci/cd": "CI/CD",
-  "ui/ux": "UI/UX",
-};
-
-const containsPhrase = (text, phrase) => {
-  const pattern = new RegExp(`(^|\\s)${escapeRegex(phrase)}(?=\\s|$)`, "i");
-  return pattern.test(text);
-};
-
-const extractSkills = (text) => {
-  const normalized = normalizeText(text);
-  const found = SKILL_KEYWORDS.filter((skill) => containsPhrase(normalized, skill)).map(
-    formatSkill,
-  );
-
-  const withoutGenericApi =
-    found.includes("REST API") && found.includes("API")
-      ? found.filter((skill) => skill !== "API")
-      : found;
-
-  return unique(withoutGenericApi);
-};
-
-const formatSkill = (skill) =>
-  SKILL_ALIASES[skill] ||
-  skill
-    .split(" ")
-    .map((word) => {
-      if (word === "c++" || word === "c#") return word.toUpperCase();
-      return word.charAt(0).toUpperCase() + word.slice(1);
-    })
-    .join(" ");
-
-const extractExperienceYears = (text) => {
-  const normalized = normalizeText(text);
-  const matches = [...normalized.matchAll(/(\d+)\+?\s*(?:years|year|yrs|yr)/g)];
-  const years = matches.map((match) => Number(match[1])).filter(Boolean);
-
-  return years.length ? Math.max(...years) : 0;
-};
-
-const inferRoleType = (text) => {
-  const normalized = normalizeText(text);
-
-  let bestRole = "other";
-  let bestScore = 0;
-
-  for (const rule of ROLE_RULES) {
-    const score = rule.keywords.reduce(
-      (count, keyword) => count + (normalized.includes(keyword) ? 1 : 0),
-      0,
-    );
-
-    if (score > bestScore) {
-      bestScore = score;
-      bestRole = rule.role;
+// ─── Core Groq call ───────────────────────────────────────────────────
+const callGroq = async (systemPrompt, userPrompt, maxTokens = 1000) => {
+  const response = await axios.post(
+    GROQ_URL,
+    {
+      model:    GROQ_MODEL,
+      messages: [
+        { role: 'system', content: systemPrompt },
+        { role: 'user',   content: userPrompt   },
+      ],
+      max_tokens:  maxTokens,
+      temperature: 0.3,   // lower = more consistent JSON output
+    },
+    {
+      headers: {
+        Authorization:  `Bearer ${process.env.GROQ_API_KEY}`,
+        'Content-Type': 'application/json',
+      },
     }
-  }
+  )
+  return response.data.choices[0].message.content
+}
 
-  return bestRole;
-};
+// ─── Safe JSON parser — strips markdown fences if model adds them ─────
+const parseJSON = (raw) => {
+  const cleaned = raw
+    .replace(/```json\n?/gi, '')
+    .replace(/```\n?/gi, '')
+    .trim()
+  return JSON.parse(cleaned)
+}
 
-const inferSeniorityLevel = (text) => {
-  const normalized = normalizeText(text);
-
-  if (/(lead|principal|staff)/.test(normalized)) return "lead";
-  if (/(senior|sr\.?)/.test(normalized)) return "senior";
-  if (/(junior|jr\.?|fresher|entry level|entry-level|intern)/.test(normalized))
-    return "junior";
-
-  const years = extractExperienceYears(normalized);
-  if (years >= 7) return "lead";
-  if (years >= 4) return "senior";
-  if (years >= 2) return "mid";
-  return "junior";
-};
-
-const tokenizeWords = (text) =>
-  unique(
-    normalizeText(text)
-      .split(" ")
-      .filter((word) => word.length > 2 && !/^\d+$/.test(word)),
-  );
-
-const buildReasoning = ({
-  matchedSkills,
-  missingSkills,
-  skillCoverage,
-  candidateYears,
-  requiredYears,
-}) => {
-  const matched =
-    matchedSkills.length > 0
-      ? `Matched skills include ${matchedSkills.slice(0, 4).join(", ")}.`
-      : "The resume has limited direct keyword overlap with the job requirements.";
-
-  const gaps =
-    missingSkills.length > 0
-      ? `Missing or weak areas include ${missingSkills.slice(0, 4).join(", ")}.`
-      : "The resume covers nearly all listed skills from the role.";
-
-  const experience =
-    requiredYears > 0
-      ? `Estimated experience fit is ${candidateYears}/${requiredYears} years with skill coverage around ${skillCoverage}%.`
-      : `Skill coverage is around ${skillCoverage}% based on the job description and resume text.`;
-
-  return `${matched} ${gaps} ${experience}`;
-};
-
-const buildQuestionTemplates = ({
-  matchedSkills,
-  missingSkills,
-  roleType,
-  candidateYears,
-}) => {
-  const primaryMatched = matchedSkills[0] || "your strongest technical project";
-  const secondaryMatched =
-    matchedSkills[1] || (roleType === "frontend" ? "frontend architecture" : "backend design");
-  const primaryGap = missingSkills[0] || "a technology in this role that is newer to you";
-  const roleFocus =
-    roleType === "frontend"
-      ? "user experience and component design"
-      : roleType === "data"
-        ? "data quality and model decisions"
-        : roleType === "devops"
-          ? "deployment reliability and observability"
-          : "system design and implementation tradeoffs";
-
-  return [
-    `Walk me through a project where you used ${primaryMatched} and explain the impact of your work.`,
-    `How would you approach ${roleFocus} for this role, and what tradeoffs would you consider first?`,
-    `This role appears to value ${primaryGap}. How would you get productive quickly if you had to use it on day one?`,
-    `Tell me about a time you had to debug a difficult production or project issue. What was your process?`,
-    `With roughly ${candidateYears || "your current"} years of experience, what kind of ownership do you usually take from problem definition to delivery?`,
-    `If you were asked to improve an existing solution built with ${secondaryMatched}, what would you review before making changes?`,
-  ].slice(0, 5);
-};
-
-const getRecommendation = (score) => {
-  if (score >= 75) return "shortlist";
-  if (score >= 50) return "maybe";
-  return "reject";
-};
-
+// ─── 1. Parse job description ─────────────────────────────────────────
 export const parseJobDescription = async (description) => {
-  const skillsRequired = extractSkills(description);
-  const experienceYears = extractExperienceYears(description);
-  const roleType = inferRoleType(description);
-  const seniorityLevel = inferSeniorityLevel(description);
+  const system = `You are an expert technical recruiter.
+Extract structured information from job descriptions.
+Always respond with valid JSON only. No explanation, no markdown fences.`
 
-  return {
-    skillsRequired,
-    experienceYears,
-    roleType,
-    seniorityLevel,
-  };
-};
+  const user = `Extract from this job description and return as JSON:
+{
+  "skillsRequired": ["skill1", "skill2"],
+  "experienceYears": 2,
+  "roleType": "backend | frontend | fullstack | data | devops | other",
+  "seniorityLevel": "junior | mid | senior | lead"
+}
 
-export const scoreResume = async (resumeText, jobDescription, jobSkills = []) => {
-  const resumeSkills = extractSkills(resumeText);
-  const requiredSkills = unique([
-    ...jobSkills.map((skill) => formatSkill(normalizeText(skill))),
-    ...extractSkills(jobDescription),
-  ]).filter(Boolean);
+Job Description:
+${description}`
 
-  const matchedSkills = requiredSkills.filter((skill) =>
-    resumeSkills.includes(skill),
-  );
-  const missingSkills = requiredSkills.filter(
-    (skill) => !matchedSkills.includes(skill),
-  );
+  const raw = await callGroq(system, user)
+  return parseJSON(raw)
+}
 
-  const candidateYears = extractExperienceYears(resumeText);
-  const requiredYears = extractExperienceYears(jobDescription);
+// ─── 2. Standard resume scoring ───────────────────────────────────────
+export const scoreResume = async (resumeText, jobDescription, jobSkills) => {
+  const system = `You are an expert technical recruiter who evaluates resumes fairly.
+Always respond with valid JSON only. No explanation, no markdown fences.`
 
-  const resumeTokens = new Set(tokenizeWords(resumeText));
-  const jdTokens = tokenizeWords(jobDescription);
-  const overlappingWords = jdTokens.filter((word) => resumeTokens.has(word));
+  const user = `Score this resume against the job description.
 
-  const skillCoverage = requiredSkills.length
-    ? Math.round((matchedSkills.length / requiredSkills.length) * 100)
-    : Math.min(100, overlappingWords.length * 4);
+JOB DESCRIPTION:
+${jobDescription}
 
-  const experienceScore =
-    requiredYears > 0
-      ? Math.min(100, Math.round((candidateYears / requiredYears) * 100))
-      : candidateYears > 0
-        ? 75
-        : 50;
+REQUIRED SKILLS: ${jobSkills.join(', ')}
 
-  const keywordScore = jdTokens.length
-    ? Math.min(100, Math.round((overlappingWords.length / jdTokens.length) * 200))
-    : 50;
+CANDIDATE RESUME:
+${resumeText.slice(0, 3000)}
 
-  const score = Math.max(
-    0,
-    Math.min(
-      100,
-      Math.round(skillCoverage * 0.6 + experienceScore * 0.25 + keywordScore * 0.15),
-    ),
-  );
+Return JSON in exactly this format:
+{
+  "score": 78,
+  "reasoning": "2-3 sentence explanation of the score",
+  "missingSkills": ["skill1", "skill2"],
+  "matchedSkills": ["skill3", "skill4"],
+  "strengths": "one sentence about candidate strengths",
+  "recommendation": "shortlist | reject | maybe"
+}`
 
-  return {
-    score,
-    reasoning: buildReasoning({
-      matchedSkills,
-      missingSkills,
-      skillCoverage,
-      candidateYears,
-      requiredYears,
-    }),
-    missingSkills,
-    matchedSkills,
-    strengths:
-      matchedSkills.length > 0
-        ? `Strongest alignment is around ${matchedSkills.slice(0, 3).join(", ")}.`
-        : "Resume shows some general relevance but limited direct skill alignment.",
-    recommendation: getRecommendation(score),
-  };
-};
+  const raw = await callGroq(system, user)
+  return parseJSON(raw)
+}
 
-export const generateInterviewQuestions = async (
-  resumeText,
-  jobDescription,
-) => {
-  const roleType = inferRoleType(jobDescription);
-  const scoreResult = await scoreResume(resumeText, jobDescription, []);
-  const candidateYears = extractExperienceYears(resumeText);
+// ─── 3. Resume scoring WITH GitHub ───────────────────────────────────
+export const scoreResumeWithGitHub = async (resumeText, jobDescription, jobSkills, githubSummary) => {
+  const system = `You are an expert technical recruiter who evaluates candidates holistically.
+Always respond with valid JSON only. No explanation, no markdown fences.`
 
-  return buildQuestionTemplates({
-    matchedSkills: scoreResult.matchedSkills,
-    missingSkills: scoreResult.missingSkills,
-    roleType,
-    candidateYears,
-  });
-};
+  const user = `Score this candidate using BOTH their resume and GitHub profile.
 
-export const generateEmbedding = async (text) => {
-  const normalized = normalizeText(text);
-  const embedding = new Array(EMBEDDING_DIMENSION).fill(0);
+JOB DESCRIPTION:
+${jobDescription}
 
-  for (const token of normalized.split(" ")) {
-    if (!token) continue;
+REQUIRED SKILLS: ${jobSkills.join(', ')}
 
-    let hash = 2166136261;
-    for (let i = 0; i < token.length; i++) {
-      hash ^= token.charCodeAt(i);
-      hash = Math.imul(hash, 16777619);
+CANDIDATE RESUME:
+${resumeText.slice(0, 2500)}
+
+CANDIDATE GITHUB:
+${githubSummary}
+
+Return JSON in exactly this format:
+{
+  "score": 84,
+  "reasoning": "2-3 sentences using both resume and GitHub evidence",
+  "missingSkills": ["skill1"],
+  "matchedSkills": ["skill2", "skill3"],
+  "githubInsights": "1-2 sentences about what GitHub shows",
+  "strengths": "one sentence about the candidate's key strengths",
+  "recommendation": "shortlist | reject | maybe"
+}`
+
+  const raw = await callGroq(system, user)
+  return parseJSON(raw)
+}
+
+// ─── 4. XAI — multi-dimensional scoring ──────────────────────────────
+export const scoreResumeXAI = async (resumeText, jobDescription, jobSkills, githubSummary = '') => {
+  const system = `You are a senior technical recruiter and talent evaluation expert.
+You evaluate candidates across multiple dimensions to give fair, explainable scores.
+Always respond with valid JSON only. No explanation, no markdown fences.`
+
+  const user = `Evaluate this candidate across 5 dimensions for the given role.
+
+JOB DESCRIPTION:
+${jobDescription}
+
+REQUIRED SKILLS: ${jobSkills.join(', ')}
+
+CANDIDATE RESUME:
+${resumeText.slice(0, 2500)}
+
+${githubSummary ? `GITHUB PROFILE:\n${githubSummary}` : ''}
+
+Return JSON in exactly this format (scores must be 0-10 integers):
+{
+  "overallScore": 78,
+  "recommendation": "shortlist | reject | maybe",
+  "dimensions": {
+    "technicalSkills": {
+      "score": 8,
+      "reasoning": "Specific evidence from resume/GitHub for this score",
+      "highlights": ["highlight 1", "highlight 2"],
+      "gaps": ["gap 1"]
+    },
+    "experienceDepth": {
+      "score": 7,
+      "reasoning": "Evidence of relevant work experience and project depth",
+      "highlights": ["highlight 1"],
+      "gaps": ["gap 1"]
+    },
+    "projectImpact": {
+      "score": 6,
+      "reasoning": "Quality and scale of projects — real-world impact shown",
+      "highlights": ["highlight 1"],
+      "gaps": ["gap 1"]
+    },
+    "communicationClarity": {
+      "score": 7,
+      "reasoning": "How clearly they communicate skills and achievements in resume",
+      "highlights": ["highlight 1"],
+      "gaps": ["gap 1"]
+    },
+    "growthPotential": {
+      "score": 8,
+      "reasoning": "Signs of learning, progression, and adaptability",
+      "highlights": ["highlight 1"],
+      "gaps": ["gap 1"]
     }
+  },
+  "summary": "2-3 sentence overall assessment of this candidate",
+  "topStrengths": ["strength 1", "strength 2", "strength 3"],
+  "criticalGaps": ["gap 1", "gap 2"],
+  "interviewFocus": ["area to probe 1", "area to probe 2"]
+}`
 
-    const index = Math.abs(hash) % EMBEDDING_DIMENSION;
-    embedding[index] += 1;
-  }
+  const raw = await callGroq(system, user, 1500)
+  return parseJSON(raw)
+}
 
-  const magnitude = Math.sqrt(
-    embedding.reduce((sum, value) => sum + value * value, 0),
-  );
+// ─── 5. Generate interview questions ─────────────────────────────────
+export const generateInterviewQuestions = async (resumeText, jobDescription) => {
+  const system = `You are a senior technical interviewer.
+Generate targeted interview questions based on the candidate's resume and job.
+Always respond with valid JSON only. No explanation, no markdown fences.`
 
-  if (!magnitude) {
-    embedding[0] = 1;
-    return embedding;
-  }
+  const user = `Generate 5 interview questions for this candidate.
+Mix technical and behavioral. Make them specific to their background.
 
-  return embedding.map((value) => Number((value / magnitude).toFixed(6)));
-};
+JOB: ${jobDescription.slice(0, 500)}
+RESUME: ${resumeText.slice(0, 2000)}
+
+Return JSON:
+{
+  "questions": [
+    { "question": "...", "type": "technical | behavioral", "topic": "..." }
+  ]
+}`
+
+  const raw = await callGroq(system, user)
+  const parsed = parseJSON(raw)
+  return parsed.questions.map(q => q.question)
+}
+
+// ─── 6. Generate embeddings (Groq doesn't support embeddings) ─────────
+// We use a lightweight local approach: TF-IDF-inspired keyword overlap
+// This replaces Pinecone for similarity — good enough for portfolio project
+export const generateEmbedding = async (text) => {
+  // Simple bag-of-words vector (256 dimensions) using char codes
+  // In production you'd use OpenAI embeddings or a free HuggingFace model
+  const words    = text.toLowerCase().match(/\b\w{3,}\b/g) || []
+  const freq     = {}
+  words.forEach(w => { freq[w] = (freq[w] || 0) + 1 })
+
+  // Create a deterministic 256-dim vector from top words
+  const topWords = Object.entries(freq).sort((a,b) => b[1]-a[1]).slice(0, 256)
+  const vector   = new Array(256).fill(0)
+  topWords.forEach(([word, count], i) => {
+    // Hash word to a position
+    let hash = 0
+    for (const c of word) hash = (hash * 31 + c.charCodeAt(0)) % 256
+    vector[hash] += count
+  })
+
+  // Normalize
+  const magnitude = Math.sqrt(vector.reduce((s, v) => s + v * v, 0)) || 1
+  return vector.map(v => v / magnitude)
+}

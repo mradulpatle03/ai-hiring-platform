@@ -15,3 +15,7 @@ export const fetchRecommendedJobs = () =>
   api.get("/applications/recommended").then((r) => r.data);
 export const updateAppStatus = (id, status) =>
   api.patch(`/applications/${id}/status`, { status }).then((r) => r.data);
+export const searchApplicants = (params) =>
+  api.get('/applications/search', { params }).then(r => r.data)
+export const fetchXAIBreakdown = (id) =>
+  api.get(`/applications/${id}/xai`).then(r => r.data)

@@ -4,6 +4,7 @@ import Layout from "../../components/Layout";
 import ScoreBadge from "../../components/ScoreBadge";
 import StatusBadge from "../../components/StatusBadge";
 import { useState } from "react";
+import XAIPanel from "../../components/xai/XAIPanel";
 
 const s = {
   h1: { fontSize: "20px", fontWeight: "600", marginBottom: "1.5rem" },
@@ -153,6 +154,12 @@ export default function MyApplications() {
                           </div>
                         ))}
                       </>
+                    )}
+                    {app.xai?.dimensions && (
+                      <div style={{ marginTop: "12px" }}>
+                        <div style={s.label}>Your detailed AI analysis</div>
+                        <XAIPanel xai={app.xai} overallScore={app.aiScore} />
+                      </div>
                     )}
                   </>
                 )}

@@ -6,10 +6,13 @@ import { fetchJobById } from "../../api/jobs";
 import Layout from "../../components/Layout";
 import ScoreBadge from "../../components/ScoreBadge";
 import StatusBadge from "../../components/StatusBadge";
+import SlotPicker from "../../components/interviews/SlotPicker";
 import toast from "react-hot-toast";
 import { ChevronDown, ChevronUp, User } from "lucide-react";
 import { fetchOrCreateConversation } from "../../api/conversations";
 import { useNavigate } from "react-router-dom";
+import XAIPanel from "../../components/xai/XAIPanel";
+import { fetchXAIBreakdown } from "../../api/applications";
 
 const s = {
   h1: { fontSize: "20px", fontWeight: "600", marginBottom: "4px" },
@@ -87,6 +90,7 @@ export default function Applicants() {
   const { jobId } = useParams();
   const queryClient = useQueryClient();
   const [expanded, setExpanded] = useState(null);
+  const [xaiApp, setXaiApp] = useState(null);
 
   const { data: jobData } = useQuery({
     queryKey: ["job", jobId],
@@ -115,6 +119,7 @@ export default function Applicants() {
       toast.error(err.response?.data?.message || "Cannot open chat");
     }
   };
+  const [scheduling, setScheduling] = useState(null);
 
   const apps = data?.applications || [];
 
@@ -179,6 +184,20 @@ export default function Applicants() {
                         <div style={{ fontSize: "12px", color: "#888" }}>
                           {app.candidate?.email}
                         </div>
+                        {app.candidate?.github?.connected && (
+                          <div
+                            style={{
+                              fontSize: "11px",
+                              color: "#0d1117",
+                              display: "flex",
+                              alignItems: "center",
+                              gap: "3px",
+                              marginTop: "2px",
+                            }}
+                          >
+                            <span>⚡</span> GitHub connected
+                          </div>
+                        )}
                       </div>
                     </div>
                   </td>
@@ -246,6 +265,63 @@ export default function Applicants() {
                             </p>
                           </div>
                         )}
+                        {app.githubInsights && (
+                          <div style={{ marginBottom: "12px" }}>
+                            <div
+                              style={{
+                                fontSize: "12px",
+                                fontWeight: "600",
+                                color: "#555",
+                                marginBottom: "5px",
+                                display: "flex",
+                                alignItems: "center",
+                                gap: "5px",
+                              }}
+                            >
+                              <span>⚡</span> GITHUB INSIGHTS
+                            </div>
+                            <p
+                              style={{
+                                fontSize: "13px",
+                                color: "#444",
+                                lineHeight: 1.6,
+                                background: "#f9f8ff",
+                                padding: "10px 12px",
+                                borderRadius: "8px",
+                                border: "1px solid #e8e5fc",
+                              }}
+                            >
+                              {app.githubInsights}
+                            </p>
+                          </div>
+                        )}
+                        {app.xai?.dimensions && (
+                          <button
+                            style={{
+                              ...s.btnSm,
+                              background: "#f0effc",
+                              color: "#5a52c0",
+                              marginTop: "8px",
+                              marginBottom: "8px",
+                            }}
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              setXaiApp(xaiApp === app._id ? null : app._id);
+                            }}
+                          >
+                            ⚡ {xaiApp === app._id ? "Hide" : "Show"} XAI report
+                          </button>
+                        )}
+
+                        {xaiApp === app._id && (
+                          <div style={{ marginTop: "10px" }}>
+                            <XAIPanel
+                              xai={app.xai}
+                              overallScore={app.aiScore}
+                              candidateName={app.candidate?.name}
+                            />
+                          </div>
+                        )}
                         {app.aiMissingSkills?.length > 0 && (
                           <div style={{ marginBottom: "12px" }}>
                             <div
@@ -309,6 +385,22 @@ export default function Applicants() {
                             Open chat
                           </button>
                         )}
+                        {app.status === "shortlisted" && (
+                          <button
+                            style={{
+                              ...s.btnSm,
+                              background: "#e8f8f0",
+                              color: "#1a7a4a",
+                              marginTop: "8px",
+                            }}
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              setScheduling(app._id);
+                            }}
+                          >
+                            Schedule interview
+                          </button>
+                        )}
                         {app.status === "pending" ||
                         app.status === "screening" ? (
                           <p
@@ -329,6 +421,33 @@ export default function Applicants() {
             ))}
           </tbody>
         </table>
+      )}
+      {scheduling && (
+        <div
+          style={{
+            position: "fixed",
+            inset: 0,
+            background: "rgba(0,0,0,0.3)",
+            zIndex: 200,
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            padding: "1rem",
+          }}
+        >
+          <div style={{ width: "100%", maxWidth: "560px" }}>
+            <SlotPicker
+              applicationId={scheduling}
+              onSuccess={() => {
+                setScheduling(null);
+                toast.success(
+                  "Interview invitation sent! Candidate will receive an email.",
+                );
+              }}
+              onCancel={() => setScheduling(null)}
+            />
+          </div>
+        </div>
       )}
     </Layout>
   );

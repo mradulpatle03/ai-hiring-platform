@@ -17,6 +17,9 @@ import JobDetail from "./pages/candidate/JobDetail";
 import MyApplications from "./pages/candidate/MyApplications";
 import Messages from "./pages/shared/Messages";
 import Analytics from "./pages/recruiter/Analytics";
+import Interviews from "./pages/shared/Interviews";
+import CandidateProfile from "./pages/candidate/Profile";
+import SearchCandidates from "./pages/recruiter/SearchCandidates";
 
 const R = ({ children, role }) => (
   <ProtectedRoute role={role}>{children}</ProtectedRoute>
@@ -79,6 +82,22 @@ export default function App() {
               </R>
             }
           />
+          <Route
+            path="/recruiter/interviews"
+            element={
+              <R role="recruiter">
+                <Interviews />
+              </R>
+            }
+          />
+          <Route
+            path="/recruiter/search"
+            element={
+              <R role="recruiter">
+                <SearchCandidates />
+              </R>
+            }
+          />
 
           <Route
             path="/candidate"
@@ -120,7 +139,30 @@ export default function App() {
               </R>
             }
           />
-
+          <Route
+            path="/candidate/interviews"
+            element={
+              <R role="candidate">
+                <Interviews />
+              </R>
+            }
+          />
+          <Route
+            path="/candidate/interviews/:interviewId"
+            element={
+              <R role="candidate">
+                <Interviews />
+              </R>
+            }
+          />
+          <Route
+            path="/candidate/profile"
+            element={
+              <R role="candidate">
+                <CandidateProfile />
+              </R>
+            }
+          />
           <Route path="*" element={<Navigate to="/login" replace />} />
         </Routes>
       </BrowserRouter>

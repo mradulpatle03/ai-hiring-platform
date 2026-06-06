@@ -7,7 +7,10 @@ import {
   LayoutDashboard,
   Star,
   MessageSquare,
+  UserCircle,
   BarChart2,
+  CalendarCheck,
+  Search,
 } from "lucide-react";
 
 const s = {
@@ -81,6 +84,12 @@ export default function Layout({ children }) {
       label: "Dashboard",
     },
     { to: "/recruiter/jobs", icon: <Briefcase size={14} />, label: "My Jobs" },
+    { to: "/recruiter/search", icon: <Search size={14} />, label: "Search" },
+    {
+      to: "/recruiter/interviews",
+      icon: <CalendarCheck size={14} />,
+      label: "Interviews",
+    },
     {
       to: "/recruiter/messages",
       icon: <MessageSquare size={14} />,
@@ -109,9 +118,19 @@ export default function Layout({ children }) {
       label: "My Applications",
     },
     {
+      to: "/candidate/interviews",
+      icon: <CalendarCheck size={14} />,
+      label: "Interviews",
+    },
+    {
       to: "/candidate/messages",
       icon: <MessageSquare size={14} />,
       label: "Messages",
+    },
+    {
+      to: "/candidate/profile",
+      icon: <UserCircle size={14} />,
+      label: "Profile",
     },
   ];
 
