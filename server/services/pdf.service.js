@@ -1,4 +1,4 @@
-import pdfParse from "pdf-parse/lib/pdf-parse.js";
+import pdfParseFork from "pdf-parse-fork";
 import axios from "axios";
 import fs from "fs";
 
@@ -16,7 +16,7 @@ export const extractTextFromPDF = async (filePath) => {
       buffer = fs.readFileSync(filePath);
     }
 
-    const data = await pdfParse(buffer);
+    const data = await pdfParseFork(buffer);
     return data.text?.trim() || "";
   } catch (err) {
     console.error("PDF parse error:", err.message);
