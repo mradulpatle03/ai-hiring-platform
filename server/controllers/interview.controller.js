@@ -60,7 +60,7 @@ export const proposeSlots = async (req, res) => {
     candidate,
     recruiter: req.user,
     job,
-    slots: validSlots,
+    slots: validSlots.map((s) => new Date(s).toISOString()),
     meetLink,
     notes,
     interviewId: interview._id.toString(),

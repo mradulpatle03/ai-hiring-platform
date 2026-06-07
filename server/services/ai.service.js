@@ -1,45 +1,45 @@
-import axios from 'axios'
+import axios from "axios";
 
-const GROQ_URL   = 'https://api.groq.com/openai/v1/chat/completions'
-const GROQ_MODEL = process.env.GROQ_MODEL || 'llama-3.3-70b-versatile'
+const GROQ_URL = "https://api.groq.com/openai/v1/chat/completions";
+const GROQ_MODEL = process.env.GROQ_MODEL || "llama-3.3-70b-versatile";
 
 // ─── Core Groq call ───────────────────────────────────────────────────
 const callGroq = async (systemPrompt, userPrompt, maxTokens = 1000) => {
   const response = await axios.post(
     GROQ_URL,
     {
-      model:    GROQ_MODEL,
+      model: GROQ_MODEL,
       messages: [
-        { role: 'system', content: systemPrompt },
-        { role: 'user',   content: userPrompt   },
+        { role: "system", content: systemPrompt },
+        { role: "user", content: userPrompt },
       ],
-      max_tokens:  maxTokens,
-      temperature: 0.3,   // lower = more consistent JSON output
+      max_tokens: maxTokens,
+      temperature: 0.3, // lower = more consistent JSON output
     },
     {
       headers: {
-        Authorization:  `Bearer ${process.env.GROQ_API_KEY}`,
-        'Content-Type': 'application/json',
+        Authorization: `Bearer ${process.env.GROQ_API_KEY}`,
+        "Content-Type": "application/json",
       },
-    }
-  )
-  return response.data.choices[0].message.content
-}
+    },
+  );
+  return response.data.choices[0].message.content;
+};
 
 // ─── Safe JSON parser — strips markdown fences if model adds them ─────
 const parseJSON = (raw) => {
   const cleaned = raw
-    .replace(/```json\n?/gi, '')
-    .replace(/```\n?/gi, '')
-    .trim()
-  return JSON.parse(cleaned)
-}
+    .replace(/```json\n?/gi, "")
+    .replace(/```\n?/gi, "")
+    .trim();
+  return JSON.parse(cleaned);
+};
 
 // ─── 1. Parse job description ─────────────────────────────────────────
 export const parseJobDescription = async (description) => {
   const system = `You are an expert technical recruiter.
 Extract structured information from job descriptions.
-Always respond with valid JSON only. No explanation, no markdown fences.`
+Always respond with valid JSON only. No explanation, no markdown fences.`;
 
   const user = `Extract from this job description and return as JSON:
 {
@@ -50,23 +50,23 @@ Always respond with valid JSON only. No explanation, no markdown fences.`
 }
 
 Job Description:
-${description}`
+${description}`;
 
-  const raw = await callGroq(system, user)
-  return parseJSON(raw)
-}
+  const raw = await callGroq(system, user);
+  return parseJSON(raw);
+};
 
 // ─── 2. Standard resume scoring ───────────────────────────────────────
 export const scoreResume = async (resumeText, jobDescription, jobSkills) => {
   const system = `You are an expert technical recruiter who evaluates resumes fairly.
-Always respond with valid JSON only. No explanation, no markdown fences.`
+Always respond with valid JSON only. No explanation, no markdown fences.`;
 
   const user = `Score this resume against the job description.
 
 JOB DESCRIPTION:
 ${jobDescription}
 
-REQUIRED SKILLS: ${jobSkills.join(', ')}
+REQUIRED SKILLS: ${jobSkills.join(", ")}
 
 CANDIDATE RESUME:
 ${resumeText.slice(0, 3000)}
@@ -79,23 +79,28 @@ Return JSON in exactly this format:
   "matchedSkills": ["skill3", "skill4"],
   "strengths": "one sentence about candidate strengths",
   "recommendation": "shortlist | reject | maybe"
-}`
+}`;
 
-  const raw = await callGroq(system, user)
-  return parseJSON(raw)
-}
+  const raw = await callGroq(system, user);
+  return parseJSON(raw);
+};
 
 // ─── 3. Resume scoring WITH GitHub ───────────────────────────────────
-export const scoreResumeWithGitHub = async (resumeText, jobDescription, jobSkills, githubSummary) => {
+export const scoreResumeWithGitHub = async (
+  resumeText,
+  jobDescription,
+  jobSkills,
+  githubSummary,
+) => {
   const system = `You are an expert technical recruiter who evaluates candidates holistically.
-Always respond with valid JSON only. No explanation, no markdown fences.`
+Always respond with valid JSON only. No explanation, no markdown fences.`;
 
   const user = `Score this candidate using BOTH their resume and GitHub profile.
 
 JOB DESCRIPTION:
 ${jobDescription}
 
-REQUIRED SKILLS: ${jobSkills.join(', ')}
+REQUIRED SKILLS: ${jobSkills.join(", ")}
 
 CANDIDATE RESUME:
 ${resumeText.slice(0, 2500)}
@@ -112,33 +117,39 @@ Return JSON in exactly this format:
   "githubInsights": "1-2 sentences about what GitHub shows",
   "strengths": "one sentence about the candidate's key strengths",
   "recommendation": "shortlist | reject | maybe"
-}`
+}`;
 
-  const raw = await callGroq(system, user)
-  return parseJSON(raw)
-}
+  const raw = await callGroq(system, user);
+  return parseJSON(raw);
+};
 
 // ─── 4. XAI — multi-dimensional scoring ──────────────────────────────
-export const scoreResumeXAI = async (resumeText, jobDescription, jobSkills, githubSummary = '') => {
+export const scoreResumeXAI = async (
+  resumeText,
+  jobDescription,
+  jobSkills,
+  githubSummary = "",
+) => {
   const system = `You are a senior technical recruiter and talent evaluation expert.
 You evaluate candidates across multiple dimensions to give fair, explainable scores.
-Always respond with valid JSON only. No explanation, no markdown fences.`
+IMPORTANT: overallScore must be 0-100. Dimension scores must be 0-10.
+Always respond with valid JSON only. No explanation, no markdown fences.`;
 
   const user = `Evaluate this candidate across 5 dimensions for the given role.
 
 JOB DESCRIPTION:
 ${jobDescription}
 
-REQUIRED SKILLS: ${jobSkills.join(', ')}
+REQUIRED SKILLS: ${jobSkills.join(", ")}
 
 CANDIDATE RESUME:
 ${resumeText.slice(0, 2500)}
 
-${githubSummary ? `GITHUB PROFILE:\n${githubSummary}` : ''}
+${githubSummary ? `GITHUB PROFILE:\n${githubSummary}` : ""}
 
 Return JSON in exactly this format (scores must be 0-10 integers):
 {
-  "overallScore": 78,
+  "overallScore": 78, // must be 0-100 integer, weighted average of all 5 dimensions
   "recommendation": "shortlist | reject | maybe",
   "dimensions": {
     "technicalSkills": {
@@ -176,17 +187,20 @@ Return JSON in exactly this format (scores must be 0-10 integers):
   "topStrengths": ["strength 1", "strength 2", "strength 3"],
   "criticalGaps": ["gap 1", "gap 2"],
   "interviewFocus": ["area to probe 1", "area to probe 2"]
-}`
+}`;
 
-  const raw = await callGroq(system, user, 1500)
-  return parseJSON(raw)
-}
+  const raw = await callGroq(system, user, 1500);
+  return parseJSON(raw);
+};
 
 // ─── 5. Generate interview questions ─────────────────────────────────
-export const generateInterviewQuestions = async (resumeText, jobDescription) => {
+export const generateInterviewQuestions = async (
+  resumeText,
+  jobDescription,
+) => {
   const system = `You are a senior technical interviewer.
 Generate targeted interview questions based on the candidate's resume and job.
-Always respond with valid JSON only. No explanation, no markdown fences.`
+Always respond with valid JSON only. No explanation, no markdown fences.`;
 
   const user = `Generate 5 interview questions for this candidate.
 Mix technical and behavioral. Make them specific to their background.
@@ -199,12 +213,12 @@ Return JSON:
   "questions": [
     { "question": "...", "type": "technical | behavioral", "topic": "..." }
   ]
-}`
+}`;
 
-  const raw = await callGroq(system, user)
-  const parsed = parseJSON(raw)
-  return parsed.questions.map(q => q.question)
-}
+  const raw = await callGroq(system, user);
+  const parsed = parseJSON(raw);
+  return parsed.questions.map((q) => q.question);
+};
 
 // ─── 6. Generate embeddings (Groq doesn't support embeddings) ─────────
 // We use a lightweight local approach: TF-IDF-inspired keyword overlap
@@ -212,21 +226,25 @@ Return JSON:
 export const generateEmbedding = async (text) => {
   // Simple bag-of-words vector (256 dimensions) using char codes
   // In production you'd use OpenAI embeddings or a free HuggingFace model
-  const words    = text.toLowerCase().match(/\b\w{3,}\b/g) || []
-  const freq     = {}
-  words.forEach(w => { freq[w] = (freq[w] || 0) + 1 })
+  const words = text.toLowerCase().match(/\b\w{3,}\b/g) || [];
+  const freq = {};
+  words.forEach((w) => {
+    freq[w] = (freq[w] || 0) + 1;
+  });
 
   // Create a deterministic 256-dim vector from top words
-  const topWords = Object.entries(freq).sort((a,b) => b[1]-a[1]).slice(0, 256)
-  const vector   = new Array(256).fill(0)
+  const topWords = Object.entries(freq)
+    .sort((a, b) => b[1] - a[1])
+    .slice(0, 256);
+  const vector = new Array(256).fill(0);
   topWords.forEach(([word, count], i) => {
     // Hash word to a position
-    let hash = 0
-    for (const c of word) hash = (hash * 31 + c.charCodeAt(0)) % 256
-    vector[hash] += count
-  })
+    let hash = 0;
+    for (const c of word) hash = (hash * 31 + c.charCodeAt(0)) % 256;
+    vector[hash] += count;
+  });
 
   // Normalize
-  const magnitude = Math.sqrt(vector.reduce((s, v) => s + v * v, 0)) || 1
-  return vector.map(v => v / magnitude)
-}
+  const magnitude = Math.sqrt(vector.reduce((s, v) => s + v * v, 0)) || 1;
+  return vector.map((v) => v / magnitude);
+};

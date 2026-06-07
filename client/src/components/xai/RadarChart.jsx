@@ -22,7 +22,7 @@ const point = (angle, r) => ({
 // Max radius for the chart
 const MAX_R = SIZE / 2 - 36;
 
-export default function RadarChart({ dimensions: scores, size = SIZE }) {
+export default function RadarChart({ dimensions: scores, size = SIZE, overallScore }) {
   const scale = size / SIZE;
   const cx = size / 2;
   const mr = size / 2 - 36 * scale;
@@ -146,7 +146,7 @@ export default function RadarChart({ dimensions: scores, size = SIZE }) {
         </g>
       ))}
 
-      {/* Center score */}
+      {/* Center score — shows actual final score */}
       <text
         x={cx}
         y={cx - 6}
@@ -156,11 +156,25 @@ export default function RadarChart({ dimensions: scores, size = SIZE }) {
         fontFamily="sans-serif"
         fontWeight="700"
       >
-        {Math.round(
-          (Object.values(scores || {}).reduce((s, d) => s + (d.score || 0), 0) /
-            Math.max(1, Object.keys(scores || {}).length)) *
-            10,
-        )}
+        {overallScore ??
+          Math.round(
+            (Object.values(scores || {}).reduce(
+              (s, d) => s + (d.score || 0),
+              0,
+            ) /
+              Math.max(1, Object.keys(scores || {}).length)) *
+              10,
+          )}
+      </text>
+      <text
+        x={cx}
+        y={cx + 12}
+        textAnchor="middle"
+        fontSize={10 * scale}
+        fill="#aaa"
+        fontFamily="sans-serif"
+      >
+        out of 100
       </text>
       <text
         x={cx}

@@ -5,9 +5,16 @@ import { format } from "date-fns";
 // Transporter
 // For dev: uses Ethereal (fake SMTP, see emails at ethereal.email)
 // For prod: swap with SendGrid / Gmail / SES creds from .env
+// ─── Transporter ─────────────────────────────────────────────────────
+let cachedTransporter = null;
+let fromAddress = "noreply@hireai.com";
+
 const createTransporter = async () => {
+  if (cachedTransporter) return cachedTransporter;
+
   if (process.env.NODE_ENV === "production") {
-    return nodemailer.createTransport({
+    fromAddress = process.env.SMTP_USER;
+    cachedTransporter = nodemailer.createTransport({
       host: process.env.SMTP_HOST,
       port: Number(process.env.SMTP_PORT) || 587,
       secure: false,
@@ -16,21 +23,23 @@ const createTransporter = async () => {
         pass: process.env.SMTP_PASS,
       },
     });
+  } else {
+    // Dev — auto-create Ethereal test account
+    const testAccount = await nodemailer.createTestAccount();
+    fromAddress = testAccount.user; // use actual Ethereal address as sender
+    cachedTransporter = nodemailer.createTransport({
+      host: "smtp.ethereal.email",
+      port: 587,
+      secure: false,
+      auth: {
+        user: testAccount.user,
+        pass: testAccount.pass,
+      },
+    });
+    console.log("Ethereal test account:", testAccount.user);
   }
 
-  // Dev: auto-create Ethereal test account
-  const testAccount = await nodemailer.createTestAccount();
-  const transporter = nodemailer.createTransport({
-    host: "smtp.ethereal.email",
-    port: 587,
-    secure: false,
-    auth: {
-      user: testAccount.user,
-      pass: testAccount.pass,
-    },
-  });
-  console.log("Ethereal test account:", testAccount.user);
-  return transporter;
+  return cachedTransporter;
 };
 
 // Generate .ics calendar attachment
@@ -71,14 +80,24 @@ export const sendSlotProposalEmail = async ({
   const transporter = await createTransporter();
 
   const slotList = slots
-    .map(
-      (s, i) =>
-        `<li style="margin-bottom:8px;">
-      <strong>Option ${i + 1}:</strong>
-      ${format(new Date(s.dateTime), "EEEE, MMMM d yyyy")} at
-      ${format(new Date(s.dateTime), "h:mm a")}
-    </li>`,
-    )
+    .map((s, i) => {
+      // Handle both raw ISO string and object with dateTime property
+      const rawDate = s?.dateTime || s;
+      const date = new Date(rawDate);
+
+      // Safety check — skip invalid dates
+      if (isNaN(date.getTime())) {
+        console.error("Invalid slot date:", s);
+        return "";
+      }
+
+      return `<li style="margin-bottom:8px;">
+    <strong>Option ${i + 1}:</strong>
+    ${format(date, "EEEE, MMMM d yyyy")} at
+    ${format(date, "h:mm a")}
+  </li>`;
+    })
+    .filter(Boolean)
     .join("");
 
   const selectUrl = `${process.env.CLIENT_URL}/candidate/interviews/${interviewId}`;
@@ -117,7 +136,7 @@ export const sendSlotProposalEmail = async ({
   `;
 
   const info = await transporter.sendMail({
-    from: `"HireAI" <${process.env.SMTP_USER || "noreply@hireai.com"}>`,
+    from: `"HireAI" <${fromAddress}>`, // ← use fromAddress
     to: candidate.email,
     subject: `Interview invitation: ${job.title} at ${job.company}`,
     html,
@@ -192,7 +211,7 @@ export const sendConfirmationEmails = async ({
 
   // Send to candidate
   await transporter.sendMail({
-    from: `"HireAI" <${process.env.SMTP_USER || "noreply@hireai.com"}>`,
+    from: `"HireAI" <${fromAddress}>`,
     to: candidate.email,
     subject: `Interview confirmed: ${job.title} at ${job.company} — ${dateStr}`,
     html: makeHtml(candidate.name, recruiter.name, false),
@@ -201,7 +220,7 @@ export const sendConfirmationEmails = async ({
 
   // Send to recruiter
   const recruiterInfo = await transporter.sendMail({
-    from: `"HireAI" <${process.env.SMTP_USER || "noreply@hireai.com"}>`,
+    from: `"HireAI" <${fromAddress}>`,
     to: recruiter.email,
     subject: `Interview confirmed: ${candidate.name} — ${dateStr}`,
     html: makeHtml(recruiter.name, candidate.name, true),
@@ -240,13 +259,13 @@ export const sendCancellationEmail = async ({
 
   await Promise.all([
     transporter.sendMail({
-      from: '"HireAI" <noreply@hireai.com>',
+      from: `"HireAI" <${fromAddress}>`,
       to: candidate.email,
       subject: `Interview cancelled: ${job.title}`,
       html: html(candidate.name),
     }),
     transporter.sendMail({
-      from: '"HireAI" <noreply@hireai.com>',
+      from: `"HireAI" <${fromAddress}>`,
       to: recruiter.email,
       subject: `Interview cancelled: ${job.title} — ${candidate.name}`,
       html: html(recruiter.name),

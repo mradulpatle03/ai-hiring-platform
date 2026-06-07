@@ -28,7 +28,6 @@ export const fetchGitHubProfile = async (accessToken) => {
   const { data: repos } = await octokit.rest.repos.listForAuthenticatedUser({
     sort:      'updated',
     per_page:  100,
-    type:      'owner',
     visibility:'public',
   })
 

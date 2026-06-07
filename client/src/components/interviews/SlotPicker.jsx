@@ -118,11 +118,13 @@ export default function SlotPicker({ applicationId, onSuccess, onCancel }) {
 
   const addSlot = () => slots.length < 5 && setSlots((p) => [...p, ""]);
   const removeSlot = (i) => setSlots((p) => p.filter((_, j) => j !== i));
-  const updateSlot = (i, val) =>
-    setSlots((p) => p.map((s, j) => (j === i ? val : s)));
+  const updateSlot = (i, val) => {
+    const iso = val ? new Date(val).toISOString() : "";
+    setSlots((p) => p.map((s, j) => (j === i ? iso : s)));
+  };
 
   const addQuickSlot = (date) => {
-    const iso = format(date, "yyyy-MM-dd'T'HH:mm");
+    const iso = date.toISOString(); // full ISO string with timezone: 2024-01-15T04:30:00.000Z
     if (slots.includes(iso)) return;
     if (slots.length >= 5) return;
     const empty = slots.findIndex((s) => !s);
@@ -173,7 +175,8 @@ export default function SlotPicker({ applicationId, onSuccess, onCancel }) {
           <input
             style={s.input}
             type="datetime-local"
-            value={slot}
+            // Convert stored ISO back to datetime-local format for display
+            value={slot ? format(new Date(slot), "yyyy-MM-dd'T'HH:mm") : ""}
             min={format(new Date(), "yyyy-MM-dd'T'HH:mm")}
             onChange={(e) => updateSlot(i, e.target.value)}
           />

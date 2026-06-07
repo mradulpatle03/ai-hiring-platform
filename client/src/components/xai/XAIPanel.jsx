@@ -68,7 +68,7 @@ export default function XAIPanel({ xai, overallScore, candidateName }) {
       <div style={s.topRow}>
         {/* Radar chart */}
         <div style={s.radarSide}>
-          <RadarChart dimensions={xai.dimensions} size={220}/>
+          <RadarChart dimensions={xai.dimensions} size={220} overallScore={overallScore}/>
           <div style={{ fontSize: '11px', color: '#aaa', marginTop: '6px', textAlign: 'center' }}>
             5-dimension analysis
           </div>

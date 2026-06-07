@@ -1,39 +1,45 @@
-import { ZodError } from 'zod'
+import { ZodError } from "zod";
 
-// Validates req.body against a Zod schema
 export const validate = (schema) => (req, res, next) => {
   try {
-    req.body = schema.parse(req.body)  // parse also strips unknown fields
-    next()
+    req.body = schema.parse(req.body);
+    next();
   } catch (err) {
     if (err instanceof ZodError) {
-      const errors = err.errors.map(e => ({
-        field:   e.path.join('.'),
+      const errors = err.issues.map((e) => ({
+        field: e.path.join("."),
         message: e.message,
-      }))
+      }));
+
       return res.status(400).json({
         success: false,
-        message: errors[0].message,  // first error as main message
-        errors,                      // all errors for the frontend
-      })
+        message: errors[0]?.message || "Validation failed",
+        errors,
+      });
     }
-    next(err)
-  }
-}
 
-// Validates req.query against a Zod schema
+    next(err);
+  }
+};
+
 export const validateQuery = (schema) => (req, res, next) => {
   try {
-    req.query = schema.parse(req.query)
-    next()
+    req.query = schema.parse(req.query);
+    next();
   } catch (err) {
     if (err instanceof ZodError) {
+      const errors = err.issues.map((e) => ({
+        field: e.path.join("."),
+        message: e.message,
+      }));
+
       return res.status(400).json({
         success: false,
-        message: err.errors[0].message,
-        errors:  err.errors.map(e => ({ field: e.path.join('.'), message: e.message })),
-      })
+        message: errors[0]?.message || "Validation failed",
+        errors,
+      });
     }
-    next(err)
+
+    next(err);
   }
-}
+};

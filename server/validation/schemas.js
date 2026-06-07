@@ -24,12 +24,21 @@ export const registerSchema = z.object({
       errorMap: () => ({ message: 'Role must be recruiter or candidate' })
     }),
 
-  company: z
-    .string()
+  // company: z
+  //   .string()
+  //   .trim()
+  //   .min(2,  'Company name must be at least 2 characters')
+  //   .max(100,'Company name is too long')
+  //   .optional(),
+  
+  company: z.preprocess(
+  (val) => val === "" ? undefined : val,
+  z.string()
     .trim()
-    .min(2,  'Company name must be at least 2 characters')
-    .max(100,'Company name is too long')
-    .optional(),
+    .min(2, "Company name must be at least 2 characters")
+    .max(100, "Company name is too long")
+    .optional()
+)
 }).refine(
   data => data.role !== 'recruiter' || !!data.company,
   { message: 'Company name is required for recruiters', path: ['company'] }
@@ -72,7 +81,7 @@ export const createJobSchema = z.object({
     .max(50, 'Salary field is too long')
     .optional(),
 
-  experienceYears: z
+  experienceYears: z.coerce
     .number()
     .int('Experience years must be a whole number')
     .min(0,  'Experience years cannot be negative')
@@ -104,7 +113,14 @@ export const proposeSlotsSchema = z.object({
     .regex(/^[a-f\d]{24}$/i, 'Invalid application ID'),
 
   slots: z
-    .array(z.string().datetime({ message: 'Each slot must be a valid date-time' }))
+    .array(
+      z.string()
+        .refine(
+          val => !isNaN(new Date(val).getTime()),
+          { message: 'Each slot must be a valid date and time' }
+        )
+        .transform(val => new Date(val).toISOString())  // normalize to ISO on server
+    )
     .min(1, 'Provide at least one time slot')
     .max(5, 'Maximum 5 slots allowed'),
 

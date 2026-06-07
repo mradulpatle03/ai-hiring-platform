@@ -36,11 +36,19 @@ export default function Login() {
       setLoading(false);
     }
   };
-  const fieldErr = (field) => fieldErrors[field]
-  ? <div style={{ fontSize: '12px', color: '#e74c3c', marginTop: '-8px', marginBottom: '8px' }}>
-      {fieldErrors[field]}
-    </div>
-  : null
+  const fieldErr = (field) =>
+    fieldErrors[field] ? (
+      <div
+        style={{
+          fontSize: "12px",
+          color: "#e74c3c",
+          marginTop: "-8px",
+          marginBottom: "8px",
+        }}
+      >
+        {fieldErrors[field]}
+      </div>
+    ) : null;
 
   return (
     <div style={styles.page}>

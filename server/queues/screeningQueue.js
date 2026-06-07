@@ -81,13 +81,15 @@ screeningQueue.process(async (job) => {
     }
 
     const finalScore = Math.round(
-      (xaiResult.overallScore / 10) * 70 + // XAI score (0-10 → 0-70)
-        scoreResult.score * 0.2 + // Standard LLM score (0-100 → 0-20)
+      xaiResult.overallScore * 0.6 + // XAI score (0-100)
+        scoreResult.score * 0.3 + // Standard LLM score (0-100)
         embeddingScore * 10, // Semantic similarity (0-1 → 0-10)
     );
 
+    application.aiScore = Math.min(100, Math.max(0, finalScore));
+
     // Save everything
-    application.aiScore = Math.min(100, finalScore);
+    application.aiScore = Math.min(100, Math.max(0, finalScore));
     application.aiReasoning = scoreResult.reasoning;
     application.aiMissingSkills = scoreResult.missingSkills || [];
     application.aiInterviewQuestions = questions;

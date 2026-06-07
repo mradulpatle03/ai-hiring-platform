@@ -1,139 +1,52 @@
-import { Pinecone } from '@pinecone-database/pinecone'
-import dotenv from 'dotenv'
-dotenv.config()
-const INDEX = process.env.PINECONE_INDEX || 'hiring-platform'
-const PINECONE_API_KEY = process.env.PINECONE_API_KEY
+// In-memory vector store — replaces Pinecone
+// Stored in a Map: id → { vector, metadata }
+const vectorStore = new Map()
 
-let pc = null
-
-const isPineconeEnabled = () => Boolean(PINECONE_API_KEY)
-
-const getClient = () => {
-  if (!isPineconeEnabled()) return null
-
-  if (!pc) {
-    pc = new Pinecone({ apiKey: PINECONE_API_KEY })
+// Cosine similarity between two vectors
+const cosineSimilarity = (a, b) => {
+  if (a.length !== b.length) return 0
+  let dot = 0, magA = 0, magB = 0
+  for (let i = 0; i < a.length; i++) {
+    dot  += a[i] * b[i]
+    magA += a[i] * a[i]
+    magB += b[i] * b[i]
   }
-
-  return pc
+  const mag = Math.sqrt(magA) * Math.sqrt(magB)
+  return mag === 0 ? 0 : dot / mag
 }
 
-// ===== INIT INDEX =====
 export const initPinecone = async () => {
-  if (!isPineconeEnabled()) {
-    console.warn('PINECONE_API_KEY not set. Vector search is disabled.')
-    return
-  }
-
-  const client = getClient()
-  const existing = await client.listIndexes()
-  const names = existing.indexes?.map(i => i.name) || []
-
-  if (!names.includes(INDEX)) {
-    await pc.createIndex({
-      name: INDEX,
-      dimension: 3072, // ✅ Gemini embedding
-      metric: 'cosine',
-      spec: { serverless: { cloud: 'aws', region: 'us-east-1' } }
-    })
-    console.log('Pinecone index created:', INDEX)
-  } else {
-    console.log('Pinecone index ready:', INDEX)
-  }
+  console.log('Vector store ready (in-memory mode)')
 }
 
-const getIndex = () => {
-  const client = getClient()
-  return client ? client.index(INDEX) : null
+export const upsertJobEmbedding = async (jobId, embedding, metadata = {}) => {
+  vectorStore.set(`job_${jobId}`, { vector: embedding, metadata: { type: 'job', ...metadata } })
 }
 
-// ===== UPSERT JOB =====
-export const upsertJobEmbedding = async (id, embedding, metadata) => {
-  try {
-    const index = getIndex()
-    if (!index) return false
-
-    if (!embedding || embedding.length !== 3072) {
-      throw new Error("Invalid embedding");
-    }
-
-    await index.upsert({
-      records: [
-        {
-          id,
-          values: embedding,
-          metadata: {
-            type: 'job', // ✅ important for filtering
-            ...metadata,
-          },
-        },
-      ],
-    });
-
-    console.log(`✅ Job stored in Pinecone: ${id}`);
-    return true
-  } catch (err) {
-    console.error("❌ Pinecone upsert failed:", err.message);
-    throw err;
-  }
-};
-
-// ===== UPSERT RESUME =====
 export const upsertResumeEmbedding = async (resumeId, embedding, metadata = {}) => {
-  const index = getIndex()
-  if (!index) return false
+  vectorStore.set(`resume_${resumeId}`, { vector: embedding, metadata: { type: 'resume', ...metadata } })
+}
 
-  await index.upsert({
-    records: [
-      {
-        id: `resume_${resumeId}`,
-        values: embedding,
-        metadata: {
-          type: 'resume',
-          ...metadata,
-        },
-      },
-    ],
-  });
+export const findSimilarResumes = async (queryEmbedding, topK = 10) => {
+  const results = []
+  for (const [id, entry] of vectorStore.entries()) {
+    if (entry.metadata.type !== 'resume') continue
+    const score = cosineSimilarity(queryEmbedding, entry.vector)
+    results.push({ id, score, metadata: entry.metadata })
+  }
+  return results.sort((a, b) => b.score - a.score).slice(0, topK)
+}
 
-  return true
-};
+export const findSimilarJobs = async (queryEmbedding, topK = 5) => {
+  const results = []
+  for (const [id, entry] of vectorStore.entries()) {
+    if (entry.metadata.type !== 'job') continue
+    const score = cosineSimilarity(queryEmbedding, entry.vector)
+    results.push({ id, score, metadata: entry.metadata })
+  }
+  return results.sort((a, b) => b.score - a.score).slice(0, topK)
+}
 
-// ===== QUERY RESUMES =====
-export const findSimilarResumes = async (jobEmbedding, topK = 10) => {
-  const index = getIndex()
-  if (!index) return []
-
-  const results = await index.query({
-    vector: jobEmbedding,
-    topK,
-    filter: { type: { $eq: 'resume' } },
-    includeMetadata: true,
-  });
-
-  return results.matches;
-};
-
-// ===== QUERY JOBS =====
-export const findSimilarJobs = async (resumeEmbedding, topK = 5) => {
-  const index = getIndex()
-  if (!index) return []
-
-  const results = await index.query({
-    vector: resumeEmbedding,
-    topK,
-    filter: { type: { $eq: 'job' } },
-    includeMetadata: true,
-  });
-
-  return results.matches;
-};
-
-// ===== DELETE =====
 export const deleteVector = async (id) => {
-  const index = getIndex()
-  if (!index) return false
-
-  await index.deleteOne(id);
-  return true
-};
+  vectorStore.delete(id)
+}

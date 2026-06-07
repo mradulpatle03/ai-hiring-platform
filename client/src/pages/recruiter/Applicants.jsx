@@ -203,15 +203,18 @@ export default function Applicants() {
                         {app.candidate?.github?.connected && (
                           <div
                             style={{
-                              fontSize: "11px",
-                              color: "#0d1117",
-                              display: "flex",
+                              display: "inline-flex",
                               alignItems: "center",
                               gap: "3px",
-                              marginTop: "2px",
+                              fontSize: "10px",
+                              color: "#fff",
+                              background: "#0d1117",
+                              padding: "2px 7px",
+                              borderRadius: "999px",
+                              marginTop: "3px",
                             }}
                           >
-                            <span>⚡</span> GitHub connected
+                            GitHub connected
                           </div>
                         )}
                       </div>

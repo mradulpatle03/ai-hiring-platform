@@ -42,15 +42,17 @@ export default function SearchBar({
 }) {
   const [local, setLocal] = useState(value || "");
 
-  useEffect(() => setLocal(value || ""), [value]);
-
-  // Debounce — wait 400ms after typing before firing onChange
+  // Sync when parent clears filters
   useEffect(() => {
-    const t = setTimeout(() => {
-      if (local !== value) onChange(local);
-    }, 400);
+    setLocal(value || "");
+  }, [value]);
+
+  // Debounce — fire onChange 500ms after user stops typing
+  useEffect(() => {
+    if (local === (value || "")) return; // no change, skip
+    const t = setTimeout(() => onChange(local), 500);
     return () => clearTimeout(t);
-  }, [local]);
+  }, [local]); // only depend on local
 
   return (
     <div style={s.wrap}>
