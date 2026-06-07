@@ -297,7 +297,7 @@ export default function Applicants() {
                                 gap: "5px",
                               }}
                             >
-                              <span>⚡</span> GITHUB INSIGHTS
+                              <span></span> GITHUB INSIGHTS
                             </div>
                             <p
                               style={{
@@ -328,7 +328,7 @@ export default function Applicants() {
                               setXaiApp(xaiApp === app._id ? null : app._id);
                             }}
                           >
-                            ⚡ {xaiApp === app._id ? "Hide" : "Show"} XAI report
+                            {xaiApp === app._id ? "Hide" : "Show"} XAI report
                           </button>
                         )}
 
@@ -353,9 +353,16 @@ export default function Applicants() {
                             >
                               MISSING SKILLS
                             </div>
-                            {app.aiMissingSkills.map((s) => (
-                              <span key={s} style={s.skillPill}>
-                                {s}
+                            {app.aiMissingSkills.map((skill) => (
+                              <span
+                                key={skill}
+                                style={{
+                                  ...s.skillPill,
+                                  marginRight: 6,
+                                  marginBottom: 6,
+                                }}
+                              >
+                                {skill}
                               </span>
                             ))}
                           </div>

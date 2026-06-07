@@ -2,7 +2,7 @@ export const chartTheme = {
   axis: {
     style: {
       tickLabels: {
-        fontSize: 11,
+        fontSize: 8,
         fontFamily: "-apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif",
         fill: "#888",
         padding: 6,
@@ -14,7 +14,7 @@ export const chartTheme = {
   },
   tooltip: {
     style: {
-      fontSize: 12,
+      fontSize: 8,
       fontFamily: "-apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif",
       fill: "#1a1a1a",
     },

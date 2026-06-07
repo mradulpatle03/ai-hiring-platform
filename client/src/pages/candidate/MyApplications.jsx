@@ -107,7 +107,7 @@ export default function MyApplications() {
                       paddingTop: "12px",
                     }}
                   >
-                    ⏳ AI is still screening your application. Check back in a
+                    AI is still screening your application. Check back in a
                     moment.
                   </p>
                 ) : (
