@@ -146,17 +146,6 @@ const buildRedisConfig = () => {
   };
 };
 
-
-
-export const screeningQueue = new Bull("resume-screening", {
-  ...buildRedisConfig(),
-  defaultJobOptions: {
-    attempts: 3,
-    backoff: { type: "exponential", delay: 5000 },
-    removeOnComplete: true,
-    removeOnFail: false,
-  },
-});
 // ─── Test connection on startup ───────────────────────────────────────
 screeningQueue
   .isReady()
@@ -170,6 +159,16 @@ screeningQueue
 // ─── Handle stalled jobs (Render free tier spins down) ───────────────
 screeningQueue.on("stalled", (job) => {
   console.log(`⚠️  Job ${job.id} stalled — reprocessing`);
+});
+
+export const screeningQueue = new Bull("resume-screening", {
+  ...buildRedisConfig(),
+  defaultJobOptions: {
+    attempts: 3,
+    backoff: { type: "exponential", delay: 5000 },
+    removeOnComplete: true,
+    removeOnFail: false,
+  },
 });
 
 // ─── Worker ───────────────────────────────────────────────────────────
