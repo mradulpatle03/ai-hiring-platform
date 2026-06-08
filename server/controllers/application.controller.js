@@ -9,63 +9,67 @@ import { findSimilarJobs } from "../services/pinecone.service.js";
 
 // Candidate: apply to a job
 export const applyToJob = async (req, res) => {
-  const { jobId } = req.body;
+  const { jobId } = req.body
 
-  // Check job exists and is open
-  const job = await Job.findById(jobId);
-  if (!job) return res.status(404).json({ message: "Job not found" });
-  if (job.status !== "open")
-    return res.status(400).json({ message: "This job is closed" });
+  const job = await Job.findById(jobId)
+  if (!job)              return res.status(404).json({ message: 'Job not found' })
+  if (job.status !== 'open') return res.status(400).json({ message: 'This job is closed' })
 
-  // Check not already applied
-  const existing = await Application.findOne({
-    job: jobId,
-    candidate: req.user._id,
-  });
-  if (existing)
-    return res.status(400).json({ message: "You already applied to this job" });
+  const existing = await Application.findOne({ job: jobId, candidate: req.user._id })
+  if (existing) return res.status(400).json({ message: 'You already applied to this job' })
 
-  // Must have uploaded a file
-  if (!req.file)
-    return res.status(400).json({ message: "Resume PDF is required" });
+  if (!req.file) return res.status(400).json({ message: 'Resume PDF is required' })
+
+  // Get file URL — Cloudinary gives secure_url, local gives path
+  const fileUrl  = req.file.path || req.file.secure_url || req.file.filename
+  const fileName = req.file.originalname
+
+  console.log(`📄 File uploaded: ${fileName}`)
+  console.log(`📄 File URL: ${fileUrl}`)
 
   // Parse PDF text
-  const parsedText = await extractTextFromPDF(req.file.path);
+  let parsedText = ''
+  try {
+    parsedText = await extractTextFromPDF(fileUrl)
+    console.log(`📄 Parsed text length: ${parsedText.length} chars`)
+  } catch (err) {
+    console.error(`❌ PDF parse error: ${err.message}`)
+  }
 
-  // Save resume
+  if (!parsedText || parsedText.trim().length < 50) {
+    console.warn(`⚠️ PDF text too short (${parsedText.length} chars) — may affect AI scoring`)
+  }
+
   const resume = await Resume.create({
     candidate: req.user._id,
-    fileUrl: req.file.path,
-    fileName: req.file.originalname,
+    fileUrl,
+    fileName,
     parsedText,
-  });
+  })
 
-  // Create application
   const application = await Application.create({
-    job: jobId,
+    job:       jobId,
     candidate: req.user._id,
-    resume: resume._id,
-    status: "pending",
-  });
+    resume:    resume._id,
+    status:    'pending',
+  })
 
-  // add to Bull Queue for AI screening here
   try {
     await screeningQueue.add(
       { applicationId: application._id.toString() },
       {
-        attempts: 3,
-        backoff: { type: "exponential", delay: 5000 },
+        attempts:         3,
+        backoff:          { type: 'exponential', delay: 5000 },
         removeOnComplete: true,
-      },
-    );
-    console.log(`✅ Application ${application._id} added to queue`);
+      }
+    )
+    console.log(`✅ Application ${application._id} added to queue`)
   } catch (queueErr) {
-    // Queue failed but application was saved — log and continue
-    // The application will show as pending until manually re-queued
-    console.error("Queue add failed:", queueErr.message);
+    console.error('Queue add failed:', queueErr.message)
   }
-  res.status(201).json({ success: true, application });
-};
+
+  res.status(201).json({ success: true, application })
+}
 
 // Candidate: get their own applications
 export const getMyApplications = async (req, res) => {
