@@ -8,24 +8,23 @@ const callGroq = async (systemPrompt, userPrompt, maxTokens = 1000) => {
   const response = await axios.post(
     GROQ_URL,
     {
-      model:       GROQ_MODEL,
+      model: GROQ_MODEL,
       messages: [
-        { role: 'system', content: systemPrompt },
-        { role: 'user',   content: userPrompt   },
+        { role: "system", content: systemPrompt },
+        { role: "user", content: userPrompt },
       ],
-      max_tokens:  maxTokens,
-      temperature: 0.3,
+      max_tokens: maxTokens,
+      temperature: 0.3, // lower = more consistent JSON output
     },
     {
       headers: {
-        Authorization:  `Bearer ${process.env.GROQ_API_KEY}`,
-        'Content-Type': 'application/json',
+        Authorization: `Bearer ${process.env.GROQ_API_KEY}`,
+        "Content-Type": "application/json",
       },
-      timeout: 30000,   // 30 second timeout
-    }
-  )
-  return response.data.choices[0].message.content
-}
+    },
+  );
+  return response.data.choices[0].message.content;
+};
 
 // ─── Safe JSON parser — strips markdown fences if model adds them ─────
 const parseJSON = (raw) => {

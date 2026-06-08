@@ -62,144 +62,104 @@ export const screeningQueue = new Bull('resume-screening', {
 })
 
 screeningQueue.process(async (job) => {
-  const { applicationId } = job.data
-  console.log(`\n🔄 Starting screening for application: ${applicationId}`)
+  const { applicationId } = job.data;
 
-  let application
+  const application = await Application.findById(applicationId);
+  if (!application) throw new Error("Application not found");
+
+  const resume = await Resume.findById(application.resume);
+  const jobDoc = await Job.findById(application.job);
+  const candidate = await User.findById(application.candidate);
+
+  if (!resume || !jobDoc) throw new Error("Resume or job not found");
+
   try {
-    application = await Application.findById(applicationId)
-    if (!application) {
-      console.error(`❌ Application not found: ${applicationId}`)
-      throw new Error('Application not found')
-    }
+    application.status = "screening";
+    await application.save();
 
-    const resume    = await Resume.findById(application.resume)
-    const jobDoc    = await Job.findById(application.job)
-    const candidate = await User.findById(application.candidate)
+    const githubSummary = buildGitHubSummary(candidate?.github);
 
-    if (!resume) {
-      console.error(`❌ Resume not found for application: ${applicationId}`)
-      throw new Error('Resume not found')
-    }
-    if (!jobDoc) {
-      console.error(`❌ Job not found for application: ${applicationId}`)
-      throw new Error('Job not found')
-    }
-
-    console.log(`📄 Resume text length: ${resume.parsedText?.length || 0} chars`)
-    console.log(`💼 Job: ${jobDoc.title}`)
-    console.log(`👤 Candidate: ${candidate?.name}`)
-
-    application.status = 'screening'
-    await application.save()
-    console.log(`✅ Status set to screening`)
-
-    const githubSummary = buildGitHubSummary(candidate?.github)
-    console.log(`🐙 GitHub connected: ${!!githubSummary}`)
-
-    // Step 1 — Standard scoring
-    console.log(`🤖 Step 1: Running standard AI scoring...`)
-    let scoreResult
-    try {
-      scoreResult = githubSummary
-        ? await scoreResumeWithGitHub(resume.parsedText, jobDoc.description, jobDoc.skillsRequired, githubSummary)
-        : await scoreResume(resume.parsedText, jobDoc.description, jobDoc.skillsRequired)
-      console.log(`✅ Standard score: ${scoreResult.score}`)
-    } catch (err) {
-      console.error(`❌ Standard scoring failed: ${err.message}`)
-      throw err
-    }
-
-    // Step 2 — XAI scoring
-    console.log(`🤖 Step 2: Running XAI scoring...`)
-    let xaiResult
-    try {
-      xaiResult = await scoreResumeXAI(
+    // Run standard scoring + XAI scoring in parallel
+    const [scoreResult, xaiResult, questions] = await Promise.all([
+      githubSummary
+        ? scoreResumeWithGitHub(
+            resume.parsedText,
+            jobDoc.description,
+            jobDoc.skillsRequired,
+            githubSummary,
+          )
+        : scoreResume(
+            resume.parsedText,
+            jobDoc.description,
+            jobDoc.skillsRequired,
+          ),
+      scoreResumeXAI(
         resume.parsedText,
         jobDoc.description,
         jobDoc.skillsRequired,
-        githubSummary
-      )
-      console.log(`✅ XAI overall score: ${xaiResult.overallScore}`)
-    } catch (err) {
-      console.error(`❌ XAI scoring failed: ${err.message}`)
-      // XAI failure is non-fatal — use standard score only
-      xaiResult = null
-    }
+        githubSummary,
+      ),
+      generateInterviewQuestions(resume.parsedText, jobDoc.description),
+    ]);
 
-    // Step 3 — Interview questions
-    console.log(`🤖 Step 3: Generating interview questions...`)
-    let questions = []
-    try {
-      questions = await generateInterviewQuestions(resume.parsedText, jobDoc.description)
-      console.log(`✅ Generated ${questions.length} questions`)
-    } catch (err) {
-      console.error(`❌ Interview questions failed: ${err.message}`)
-      // Non-fatal — continue without questions
-    }
+    // Embedding for similarity
+    const resumeEmbedding = await generateEmbedding(resume.parsedText);
 
-    // Step 4 — Embeddings
-    console.log(`🔢 Step 4: Generating embeddings...`)
-    let embeddingScore = 0
+    let embeddingScore = 0;
     try {
-      const resumeEmbedding = await generateEmbedding(resume.parsedText)
       await upsertResumeEmbedding(resume._id.toString(), resumeEmbedding, {
         candidateId: application.candidate.toString(),
-        jobId:       application.job.toString(),
-      })
-      const similar  = await findSimilarResumes(resumeEmbedding, 1)
-      embeddingScore = similar.find(r => r.id === `resume_${resume._id}`)?.score || 0
-      console.log(`✅ Embedding score: ${embeddingScore}`)
-    } catch (err) {
-      console.error(`❌ Embedding failed (non-fatal): ${err.message}`)
-      // Non-fatal — continue with 0 embedding score
+        jobId: application.job.toString(),
+      });
+      const similar = await findSimilarResumes(resumeEmbedding, 1);
+      embeddingScore =
+        similar.find((r) => r.id === `resume_${resume._id}`)?.score || 0;
+    } catch (e) {
+      console.warn(
+        "Pinecone unavailable, skipping embedding score:",
+        e.message,
+      );
     }
 
-    // Step 5 — Calculate final score
-    const xaiScore   = xaiResult?.overallScore || scoreResult.score
-    const finalScore = Math.min(100, Math.max(0, Math.round(
-      xaiScore       * 0.60 +
-      scoreResult.score * 0.30 +
-      embeddingScore    * 10
-    )))
-    console.log(`📊 Final score: ${finalScore} (xai:${xaiScore} standard:${scoreResult.score} embedding:${embeddingScore})`)
+    const finalScore = Math.round(
+      xaiResult.overallScore * 0.6 + // XAI score (0-100)
+        scoreResult.score * 0.3 + // Standard LLM score (0-100)
+        embeddingScore * 10, // Semantic similarity (0-1 → 0-10)
+    );
 
-    // Step 6 — Save results
-    application.aiScore              = finalScore
-    application.aiReasoning          = scoreResult.reasoning
-    application.aiMissingSkills      = scoreResult.missingSkills  || []
-    application.aiInterviewQuestions = questions
-    application.embeddingScore       = embeddingScore
-    application.githubInsights       = scoreResult.githubInsights || null
+    application.aiScore = Math.min(100, Math.max(0, finalScore));
 
-    if (xaiResult?.dimensions) {
-      application.xai = {
-        dimensions:    xaiResult.dimensions,
-        summary:       xaiResult.summary,
-        topStrengths:  xaiResult.topStrengths   || [],
-        criticalGaps:  xaiResult.criticalGaps   || [],
-        interviewFocus:xaiResult.interviewFocus || [],
-      }
-    }
+    // Save everything
+    application.aiScore = Math.min(100, Math.max(0, finalScore));
+    application.aiReasoning = scoreResult.reasoning;
+    application.aiMissingSkills = scoreResult.missingSkills || [];
+    application.aiInterviewQuestions = questions;
+    application.embeddingScore = embeddingScore;
+    application.githubInsights = scoreResult.githubInsights || null;
 
-    application.status = 'screened'
-    await application.save()
+    // Save XAI data
+    application.xai = {
+      dimensions: xaiResult.dimensions,
+      summary: xaiResult.summary,
+      topStrengths: xaiResult.topStrengths || [],
+      criticalGaps: xaiResult.criticalGaps || [],
+      interviewFocus: xaiResult.interviewFocus || [],
+    };
 
-    console.log(`\n✅ Screening complete for ${applicationId} — score: ${finalScore}\n`)
-    return { applicationId, score: finalScore }
+    application.status = "screened";
+    await application.save();
 
+    console.log(
+      `✅ XAI screened ${applicationId} — score: ${application.aiScore}`,
+    );
+    return { applicationId, score: application.aiScore };
   } catch (err) {
-    console.error(`\n❌ Screening FAILED for ${applicationId}: ${err.message}`)
-    console.error(err.stack)
-
-    // Reset status so it can be retried
-    if (application) {
-      application.status = 'pending'
-      await application.save().catch(e => console.error('Failed to reset status:', e.message))
-    }
-    throw err
+    application.status = "pending";
+    await application.save();
+    console.error("Screening failed:", err.message);
+    throw err;
   }
-})
+});
 
 screeningQueue.on("failed", (job, err) =>
   console.error(`Queue failed ${job.id}:`, err.message),
