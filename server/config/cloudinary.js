@@ -1,4 +1,6 @@
-import { v2 as cloudinary } from 'cloudinary'
+import { v2 as cloudinary }        from 'cloudinary'
+import { CloudinaryStorage }        from 'multer-storage-cloudinary'
+import multer                       from 'multer'
 
 cloudinary.config({
   cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
@@ -6,23 +8,21 @@ cloudinary.config({
   api_secret: process.env.CLOUDINARY_API_SECRET,
 })
 
-// Upload a buffer directly to Cloudinary
-export const uploadToCloudinary = (buffer, publicId) => {
-  return new Promise((resolve, reject) => {
-    const stream = cloudinary.uploader.upload_stream(
-      {
-        folder:        'hireai-resumes',
-        resource_type: 'raw',
-        type:          'upload',
-        access_mode:   'public',
-        public_id:     publicId,
-        format:        'pdf',
-      },
-      (error, result) => {
-        if (error) reject(error)
-        else resolve(result)
-      }
-    )
-    stream.end(buffer)
-  })
-}
+const storage = new CloudinaryStorage({
+  cloudinary,
+  params: async (req, file) => ({
+    folder:        'hireai-resumes',
+    resource_type: 'raw',
+    format:        'pdf',
+    public_id:     `resume_${Date.now()}_${req.user?._id || 'unknown'}`,
+  }),
+})
+
+export const upload = multer({
+  storage,
+  limits:     { fileSize: 5 * 1024 * 1024 },
+  fileFilter: (req, file, cb) => {
+    if (file.mimetype === 'application/pdf') cb(null, true)
+    else cb(new Error('Only PDF files are allowed'), false)
+  },
+})
