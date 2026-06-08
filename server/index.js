@@ -25,6 +25,7 @@ import Message from "./models/message.model.js";
 import Conversation from "./models/conversation.model.js";
 
 import { protect } from "./middleware/auth.middleware.js";
+import { screeningQueue } from "./queues/screeningQueue.js";
 
 import { validateEnv } from "./config/validateEnv.js";
 validateEnv();
