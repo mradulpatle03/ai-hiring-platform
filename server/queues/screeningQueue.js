@@ -3,7 +3,6 @@ import Application from "../models/application.model.js";
 import Resume from "../models/resume.model.js";
 import Job from "../models/job.model.js";
 import User from "../models/user.model.js";
-import Redis from "ioredis";
 import {
   scoreResume,
   scoreResumeWithGitHub,
@@ -18,11 +17,7 @@ import {
 } from "../services/pinecone.service.js";
 
 export const screeningQueue = new Bull("resume-screening", {
-  createClient: () => new Redis(process.env.REDIS_URL, {
-    tls: { rejectUnauthorized: false },
-    maxRetriesPerRequest: null,
-    enableReadyCheck: false,
-  }),
+  redis: process.env.REDIS_URL || "redis://localhost:6379",
 });
 
 screeningQueue.process(async (job) => {

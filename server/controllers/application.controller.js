@@ -49,19 +49,14 @@ export const applyToJob = async (req, res) => {
   });
 
   // add to Bull Queue for AI screening here
-  try {
-    await screeningQueue.add(
-      { applicationId: application._id.toString() },
-      {
-        attempts: 3,
-        backoff: { type: "exponential", delay: 5000 },
-        removeOnComplete: true,
-      },
-    );
-  } catch (queueErr) {
-    console.error("Failed to queue screening job:", queueErr.message);
-    // Don't fail the request — application is saved, screening will need retry
-  }
+  await screeningQueue.add(
+    { applicationId: application._id.toString() },
+    {
+      attempts: 3, // retry up to 3 times on failure
+      backoff: { type: "exponential", delay: 5000 },
+      removeOnComplete: true,
+    },
+  );
   res.status(201).json({ success: true, application });
 };
 
@@ -142,21 +137,21 @@ export const searchApplicants = async (req, res) => {
     skills,
     status,
     hasGitHub,
-    sortBy = "score",
-    sortOrder = "desc",
-    page = 1,
-    limit = 20,
-  } = req.query;
+    sortBy    = 'score',
+    sortOrder = 'desc',
+    page      = 1,
+    limit     = 20,
+  } = req.query
 
   // Get recruiter's job IDs
-  let jobIds;
+  let jobIds
   if (jobId) {
-    const job = await Job.findOne({ _id: jobId, recruiter: req.user._id });
-    if (!job) return res.status(403).json({ message: "Not your job" });
-    jobIds = [new mongoose.Types.ObjectId(jobId)];
+    const job = await Job.findOne({ _id: jobId, recruiter: req.user._id })
+    if (!job) return res.status(403).json({ message: 'Not your job' })
+    jobIds = [new mongoose.Types.ObjectId(jobId)]
   } else {
-    const jobs = await Job.find({ recruiter: req.user._id }).select("_id");
-    jobIds = jobs.map((j) => j._id);
+    const jobs = await Job.find({ recruiter: req.user._id }).select('_id')
+    jobIds     = jobs.map(j => j._id)
   }
 
   if (jobIds.length === 0) {
@@ -165,40 +160,34 @@ export const searchApplicants = async (req, res) => {
       applications: [],
       pagination: { total: 0, page: 1, limit: 20, totalPages: 0 },
       facets: {},
-    });
+    })
   }
 
   // ── Build application-level match ──────────────────────────────────
   const appMatch = {
-    job: { $in: jobIds },
-  };
-
-  if (minScore || maxScore) {
-    appMatch.aiScore = {};
-    if (minScore) appMatch.aiScore.$gte = Number(minScore);
-    if (maxScore) appMatch.aiScore.$lte = Number(maxScore);
+    job: { $in: jobIds }
   }
 
-  if (status) appMatch.status = status;
+  if (minScore || maxScore) {
+    appMatch.aiScore = {}
+    if (minScore) appMatch.aiScore.$gte = Number(minScore)
+    if (maxScore) appMatch.aiScore.$lte = Number(maxScore)
+  }
+
+  if (status) appMatch.status = status
 
   if (skills) {
-    const skillList = skills
-      .split(",")
-      .map((s) => s.trim())
-      .filter(Boolean);
+    const skillList = skills.split(',').map(s => s.trim()).filter(Boolean)
     if (skillList.length > 0) {
-      appMatch.aiMissingSkills = { $nin: skillList };
+      appMatch.aiMissingSkills = { $nin: skillList }
     }
   }
 
   // ── Sort config ─────────────────────────────────────────────────────
-  const sortField =
-    sortBy === "score"
-      ? "aiScore"
-      : sortBy === "date"
-        ? "createdAt"
-        : "createdAt";
-  const sortDir = sortOrder === "asc" ? 1 : -1;
+  const sortField = sortBy === 'score' ? 'aiScore'
+    : sortBy === 'date'  ? 'createdAt'
+    : 'createdAt'
+  const sortDir  = sortOrder === 'asc' ? 1 : -1
 
   // ── Main aggregation pipeline ───────────────────────────────────────
   const pipeline = [
@@ -207,151 +196,148 @@ export const searchApplicants = async (req, res) => {
     // Join candidate user
     {
       $lookup: {
-        from: "users",
-        localField: "candidate",
-        foreignField: "_id",
-        as: "candidateData",
-      },
+        from:         'users',
+        localField:   'candidate',
+        foreignField: '_id',
+        as:           'candidateData',
+      }
     },
-    { $unwind: "$candidateData" },
+    { $unwind: '$candidateData' },
 
     // Join job
     {
       $lookup: {
-        from: "jobs",
-        localField: "job",
-        foreignField: "_id",
-        as: "jobData",
-      },
+        from:         'jobs',
+        localField:   'job',
+        foreignField: '_id',
+        as:           'jobData',
+      }
     },
-    { $unwind: "$jobData" },
+    { $unwind: '$jobData' },
 
     // Join resume
     {
       $lookup: {
-        from: "resumes",
-        localField: "resume",
-        foreignField: "_id",
-        as: "resumeData",
-      },
+        from:         'resumes',
+        localField:   'resume',
+        foreignField: '_id',
+        as:           'resumeData',
+      }
     },
-    { $unwind: { path: "$resumeData", preserveNullAndEmptyArrays: true } },
-  ];
+    { $unwind: { path: '$resumeData', preserveNullAndEmptyArrays: true } },
+  ]
 
   // ── Apply candidate-level filters AFTER lookup ──────────────────────
-  const postLookupMatch = {};
+  const postLookupMatch = {}
 
   if (search && search.trim()) {
-    const regex = { $regex: search.trim(), $options: "i" };
+    const regex = { $regex: search.trim(), $options: 'i' }
     postLookupMatch.$or = [
-      { "candidateData.name": regex },
-      { "candidateData.email": regex },
-    ];
+      { 'candidateData.name':  regex },
+      { 'candidateData.email': regex },
+    ]
   }
 
-  if (hasGitHub === "true") {
-    postLookupMatch["candidateData.github.connected"] = true;
+  if (hasGitHub === 'true') {
+    postLookupMatch['candidateData.github.connected'] = true
   }
 
   if (Object.keys(postLookupMatch).length > 0) {
-    pipeline.push({ $match: postLookupMatch });
+    pipeline.push({ $match: postLookupMatch })
   }
 
   // ── Shape output ────────────────────────────────────────────────────
   pipeline.push({
     $project: {
-      _id: 1,
-      status: 1,
-      aiScore: 1,
-      aiReasoning: 1,
-      aiMissingSkills: 1,
+      _id:                  1,
+      status:               1,
+      aiScore:              1,
+      aiReasoning:          1,
+      aiMissingSkills:      1,
       aiInterviewQuestions: 1,
-      githubInsights: 1,
-      embeddingScore: 1,
-      createdAt: 1,
-      xai: 1,
+      githubInsights:       1,
+      embeddingScore:       1,
+      createdAt:            1,
+      xai:                  1,
       candidate: {
-        _id: "$candidateData._id",
-        name: "$candidateData.name",
-        email: "$candidateData.email",
+        _id:   '$candidateData._id',
+        name:  '$candidateData.name',
+        email: '$candidateData.email',
         github: {
-          connected: "$candidateData.github.connected",
-          username: "$candidateData.github.username",
-          topLanguages: "$candidateData.github.topLanguages",
-          contributionScore: "$candidateData.github.contributionScore",
-          totalStars: "$candidateData.github.totalStars",
+          connected:         '$candidateData.github.connected',
+          username:          '$candidateData.github.username',
+          topLanguages:      '$candidateData.github.topLanguages',
+          contributionScore: '$candidateData.github.contributionScore',
+          totalStars:        '$candidateData.github.totalStars',
         },
       },
       job: {
-        _id: "$jobData._id",
-        title: "$jobData.title",
-        company: "$jobData.company",
+        _id:     '$jobData._id',
+        title:   '$jobData.title',
+        company: '$jobData.company',
       },
       resume: {
-        fileName: "$resumeData.fileName",
+        fileName: '$resumeData.fileName',
       },
-    },
-  });
+    }
+  })
 
   // ── Sort ─────────────────────────────────────────────────────────────
-  pipeline.push({ $sort: { [sortField]: sortDir } });
+  pipeline.push({ $sort: { [sortField]: sortDir } })
 
   // ── Count total before pagination ─────────────────────────────────
-  const countPipeline = [...pipeline, { $count: "total" }];
-  const countResult = await Application.aggregate(countPipeline);
-  const total = countResult[0]?.total || 0;
+  const countPipeline = [...pipeline, { $count: 'total' }]
+  const countResult   = await Application.aggregate(countPipeline)
+  const total         = countResult[0]?.total || 0
 
   // ── Pagination ────────────────────────────────────────────────────
-  pipeline.push({ $skip: (Number(page) - 1) * Number(limit) });
-  pipeline.push({ $limit: Number(limit) });
+  pipeline.push({ $skip:  (Number(page) - 1) * Number(limit) })
+  pipeline.push({ $limit: Number(limit) })
 
-  const applications = await Application.aggregate(pipeline);
+  const applications = await Application.aggregate(pipeline)
 
   // ── Facets for sidebar counts ─────────────────────────────────────
   const facetPipeline = [
     { $match: appMatch },
     {
       $facet: {
-        statusCounts: [{ $group: { _id: "$status", count: { $sum: 1 } } }],
+        statusCounts: [
+          { $group: { _id: '$status', count: { $sum: 1 } } }
+        ],
         scoreRanges: [
           {
             $bucket: {
-              groupBy: "$aiScore",
+              groupBy:    '$aiScore',
               boundaries: [0, 25, 50, 75, 101],
-              default: "unscored",
-              output: { count: { $sum: 1 } },
-            },
-          },
+              default:    'unscored',
+              output:     { count: { $sum: 1 } }
+            }
+          }
         ],
         topMissingSkills: [
-          { $unwind: "$aiMissingSkills" },
-          {
-            $group: {
-              _id: { $toLower: "$aiMissingSkills" },
-              count: { $sum: 1 },
-            },
-          },
-          { $sort: { count: -1 } },
+          { $unwind: '$aiMissingSkills' },
+          { $group: { _id: { $toLower: '$aiMissingSkills' }, count: { $sum: 1 } } },
+          { $sort:  { count: -1 } },
           { $limit: 15 },
         ],
-      },
-    },
-  ];
+      }
+    }
+  ]
 
-  const [facets] = await Application.aggregate(facetPipeline);
+  const [facets] = await Application.aggregate(facetPipeline)
 
   res.json({
     success: true,
     applications,
     pagination: {
       total,
-      page: Number(page),
-      limit: Number(limit),
+      page:       Number(page),
+      limit:      Number(limit),
       totalPages: Math.ceil(total / Number(limit)),
     },
     facets: facets || {},
-  });
-};
+  })
+}
 
 // Get full XAI breakdown for one application
 export const getXAIBreakdown = async (req, res) => {
