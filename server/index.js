@@ -92,26 +92,6 @@ app.use("/api/analytics", analyticsRoutes);
 app.use("/api/interviews", interviewRoutes);
 app.use("/api/github", githubRoutes);
 
-// Temporary debug route — remove after fixing
-app.get("/api/debug/queue", protect, async (req, res) => {
-  const waiting = await screeningQueue.getWaiting();
-  const active = await screeningQueue.getActive();
-  const failed = await screeningQueue.getFailed();
-  const completed = await screeningQueue.getCompleted();
-  res.json({
-    waiting: waiting.length,
-    active: active.length,
-    failed: failed.length,
-    completed: completed.length,
-    waitingJobs: waiting.map((j) => ({ id: j.id, data: j.data })),
-    failedJobs: failed.map((j) => ({
-      id: j.id,
-      data: j.data,
-      reason: j.failedReason,
-    })),
-  });
-});
-
 // Health check — Render pings this to keep service alive
 app.get("/health", (req, res) => {
   res.json({
@@ -246,15 +226,6 @@ io.on("connection", (socket) => {
 
 connectDB().then(async () => {
   await initPinecone();
-
-  // Process any jobs that were stuck before restart
-  const waiting = await screeningQueue.getWaiting().catch(() => []);
-  if (waiting.length > 0) {
-    console.log(
-      `⚠️  Found ${waiting.length} waiting jobs — they will be processed by the worker`,
-    );
-  }
-
   server.listen(process.env.PORT || 5000, () => {
     console.log(`Server running on port ${process.env.PORT || 5000}`);
   });
