@@ -126,10 +126,3 @@ screeningQueue.on("failed", (job, err) =>
 screeningQueue.on("completed", (job, result) =>
   console.log(`Queue completed ${job.id}:`, result),
 );
-screeningQueue.on('error', (err) => {
-  console.error('Queue error:', err.message)
-})
-
-screeningQueue.on('waiting', (jobId) => {
-  console.log(`Job ${jobId} waiting in queue`)
-})
