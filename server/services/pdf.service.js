@@ -1,25 +1,16 @@
-import pdfParseFork from "pdf-parse-fork";
-import axios from "axios";
-import fs from "fs";
+import pdfParseFork from 'pdf-parse-fork'
 
-export const extractTextFromPDF = async (filePath) => {
+// Parse PDF from a Buffer — used when Multer gives us the file in memory
+export const extractTextFromBuffer = async (buffer) => {
   try {
-    let buffer;
-
-    // Cloudinary returns a URL, local dev returns a file path
-    if (filePath.startsWith("http")) {
-      const response = await axios.get(filePath, {
-        responseType: "arraybuffer",
-      });
-      buffer = Buffer.from(response.data);
-    } else {
-      buffer = fs.readFileSync(filePath);
+    if (!buffer || buffer.length === 0) {
+      console.error('PDF parse error: empty buffer')
+      return ''
     }
-
-    const data = await pdfParseFork(buffer);
-    return data.text?.trim() || "";
+    const data = await pdfParseFork(buffer)
+    return data.text?.trim() || ''
   } catch (err) {
-    console.error("PDF parse error:", err.message);
-    return "";
+    console.error('PDF parse error (buffer):', err.message)
+    return ''
   }
-};
+}
