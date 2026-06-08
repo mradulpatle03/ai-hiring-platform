@@ -16,50 +16,9 @@ import {
   findSimilarResumes,
 } from "../services/pinecone.service.js";
 
-// ─── Parse Redis URL for Upstash TLS support ─────────────────────────
-const buildRedisConfig = () => {
-  const redisUrl = process.env.REDIS_URL || 'redis://localhost:6379'
-
-  // Upstash uses rediss:// (with double s) for TLS
-  if (redisUrl.startsWith('rediss://')) {
-    const url = new URL(redisUrl)
-    return {
-      redis: {
-        host:               url.hostname,
-        port:               Number(url.port) || 6380,
-        username:           url.username || 'default',
-        password:           decodeURIComponent(url.password),
-        tls:                {},             // enable TLS for Upstash
-        maxRetriesPerRequest: 3,
-        enableReadyCheck:   false,
-        connectTimeout:     30000,
-        lazyConnect:        true,
-      }
-    }
-  }
-
-  // Local Redis — plain connection
-  return {
-    redis: {
-      host:               'localhost',
-      port:               6379,
-      maxRetriesPerRequest: 3,
-      enableReadyCheck:   false,
-      lazyConnect:        true,
-    }
-  }
-}
-
-
-export const screeningQueue = new Bull('resume-screening', {
-  ...buildRedisConfig(),
-  defaultJobOptions: {
-    attempts:    3,
-    backoff:     { type: 'exponential', delay: 5000 },
-    removeOnComplete: true,
-    removeOnFail:     false,
-  },
-})
+export const screeningQueue = new Bull("resume-screening", {
+  redis: process.env.REDIS_URL || "redis://localhost:6379",
+});
 
 screeningQueue.process(async (job) => {
   const { applicationId } = job.data;
