@@ -4,7 +4,6 @@ import { useAuth } from "../context/AuthContext";
 import {
   LogOut,
   Briefcase,
-  User,
   LayoutDashboard,
   Star,
   MessageSquare,
@@ -15,6 +14,7 @@ import {
   Menu,
   X,
 } from "lucide-react";
+import { color, font } from "../styles/theme";
 
 export default function Layout({ children }) {
   const { user, logout } = useAuth();
@@ -25,21 +25,61 @@ export default function Layout({ children }) {
   const isActive = (path) => location.pathname.startsWith(path);
 
   const recruiterLinks = [
-    { to: "/recruiter",            icon: <LayoutDashboard size={15} />, label: "Dashboard"  },
-    { to: "/recruiter/jobs",       icon: <Briefcase size={15} />,       label: "My Jobs"    },
-    { to: "/recruiter/search",     icon: <Search size={15} />,          label: "Search"     },
-    { to: "/recruiter/interviews", icon: <CalendarCheck size={15} />,   label: "Interviews" },
-    { to: "/recruiter/messages",   icon: <MessageSquare size={15} />,   label: "Messages"   },
-    { to: "/recruiter/analytics",  icon: <BarChart2 size={15} />,       label: "Analytics"  },
+    {
+      to: "/recruiter",
+      icon: <LayoutDashboard size={15} />,
+      label: "Dashboard",
+    },
+    { to: "/recruiter/jobs", icon: <Briefcase size={15} />, label: "My Jobs" },
+    { to: "/recruiter/search", icon: <Search size={15} />, label: "Search" },
+    {
+      to: "/recruiter/interviews",
+      icon: <CalendarCheck size={15} />,
+      label: "Interviews",
+    },
+    {
+      to: "/recruiter/messages",
+      icon: <MessageSquare size={15} />,
+      label: "Messages",
+    },
+    {
+      to: "/recruiter/analytics",
+      icon: <BarChart2 size={15} />,
+      label: "Analytics",
+    },
   ];
 
   const candidateLinks = [
-    { to: "/candidate",             icon: <LayoutDashboard size={15} />, label: "Dashboard"       },
-    { to: "/candidate/jobs",        icon: <Briefcase size={15} />,       label: "Browse Jobs"     },
-    { to: "/candidate/applied",     icon: <Star size={15} />,            label: "My Applications" },
-    { to: "/candidate/interviews",  icon: <CalendarCheck size={15} />,   label: "Interviews"      },
-    { to: "/candidate/messages",    icon: <MessageSquare size={15} />,   label: "Messages"        },
-    { to: "/candidate/profile",     icon: <UserCircle size={15} />,      label: "Profile"         },
+    {
+      to: "/candidate",
+      icon: <LayoutDashboard size={15} />,
+      label: "Dashboard",
+    },
+    {
+      to: "/candidate/jobs",
+      icon: <Briefcase size={15} />,
+      label: "Browse Jobs",
+    },
+    {
+      to: "/candidate/applied",
+      icon: <Star size={15} />,
+      label: "My Applications",
+    },
+    {
+      to: "/candidate/interviews",
+      icon: <CalendarCheck size={15} />,
+      label: "Interviews",
+    },
+    {
+      to: "/candidate/messages",
+      icon: <MessageSquare size={15} />,
+      label: "Messages",
+    },
+    {
+      to: "/candidate/profile",
+      icon: <UserCircle size={15} />,
+      label: "Profile",
+    },
   ];
 
   const links = user?.role === "recruiter" ? recruiterLinks : candidateLinks;
@@ -50,7 +90,12 @@ export default function Layout({ children }) {
   };
 
   const initials = user?.name
-    ? user.name.split(" ").map((w) => w[0]).slice(0, 2).join("").toUpperCase()
+    ? user.name
+        .split(" ")
+        .map((w) => w[0])
+        .slice(0, 2)
+        .join("")
+        .toUpperCase()
     : "?";
 
   return (
@@ -61,105 +106,85 @@ export default function Layout({ children }) {
         .hf-nav-link {
           display: flex;
           align-items: center;
-          gap: 7px;
-          padding: 7px 11px;
-          border-radius: 8px;
-          font-size: 13.5px;
-          color: #666;
-          font-weight: 400;
+          gap: 8px;
+          padding: 8px 13px;
+          font-size: 13px;
+          font-weight: 500;
+          color: rgba(255,255,255,0.55);
           text-decoration: none;
-          transition: background 0.15s, color 0.15s;
+          transition: color 0.15s;
           white-space: nowrap;
+          position: relative;
         }
-        .hf-nav-link:hover { background: #f5f4fd; color: #534AB7; }
-        .hf-nav-link.active { background: #f0effc; color: #7F77DD; font-weight: 500; }
+        .hf-nav-link:hover { color: rgba(255,255,255,0.85); }
+        .hf-nav-link.active { color: #fff; }
+        .hf-nav-link.active::after {
+          content: '';
+          position: absolute;
+          left: 13px; right: 13px; bottom: -1px;
+          height: 2px;
+          background: ${color.signal};
+        }
 
         .hf-logout-btn {
           display: flex;
           align-items: center;
           gap: 6px;
-          padding: 7px 11px;
-          border-radius: 8px;
-          font-size: 13.5px;
-          color: #e74c3c;
-          border: none;
+          padding: 8px 13px;
+          font-size: 12px;
+          font-weight: 600;
+          font-family: ${font.mono};
+          letter-spacing: 0.04em;
+          text-transform: uppercase;
+          color: rgba(255,255,255,0.5);
+          border: 1px solid rgba(255,255,255,0.12);
           background: none;
           cursor: pointer;
-          font-weight: 500;
-          transition: background 0.15s;
+          transition: border-color 0.15s, color 0.15s;
           white-space: nowrap;
         }
-        .hf-logout-btn:hover { background: #fff0f0; }
+        .hf-logout-btn:hover { border-color: ${color.signal}; color: #fff; }
 
         .hf-hamburger {
           display: none;
           background: none;
           border: none;
           cursor: pointer;
-          color: #555;
+          color: rgba(255,255,255,0.7);
           padding: 6px;
-          border-radius: 8px;
           align-items: center;
           justify-content: center;
         }
-        .hf-hamburger:hover { background: #f5f4fd; }
+        .hf-hamburger:hover { color: #fff; }
 
-        .hf-mobile-drawer {
-          display: none;
-          position: fixed;
-          inset: 0;
-          z-index: 200;
-        }
-        .hf-drawer-overlay {
-          position: absolute;
-          inset: 0;
-          background: rgba(30,20,80,0.18);
-        }
+        .hf-mobile-drawer { display: none; position: fixed; inset: 0; z-index: 200; }
+        .hf-drawer-overlay { position: absolute; inset: 0; background: rgba(0,0,0,0.5); }
         .hf-drawer-panel {
-          position: absolute;
-          top: 0; left: 0; bottom: 0;
-          width: 260px;
-          background: #fff;
-          display: flex;
-          flex-direction: column;
-          padding: 0;
-          box-shadow: 4px 0 24px rgba(83,74,183,0.12);
+          position: absolute; top: 0; left: 0; bottom: 0; width: 270px;
+          background: ${color.ink};
+          color: #fff;
+          display: flex; flex-direction: column; padding: 0;
+          border-right: 1px solid ${color.line};
         }
         .hf-drawer-header {
-          display: flex;
-          align-items: center;
-          justify-content: space-between;
-          padding: 1rem 1.25rem;
-          border-bottom: 1px solid #f0f0f0;
+          display: flex; align-items: center; justify-content: space-between;
+          padding: 1rem 1.25rem; border-bottom: 1px solid ${color.line};
         }
         .hf-drawer-links {
-          flex: 1;
-          overflow-y: auto;
-          padding: 0.75rem 0.75rem;
-          display: flex;
-          flex-direction: column;
-          gap: 2px;
+          flex: 1; overflow-y: auto; padding: 0.75rem;
+          display: flex; flex-direction: column; gap: 2px;
         }
         .hf-drawer-link {
-          display: flex;
-          align-items: center;
-          gap: 10px;
-          padding: 10px 12px;
-          border-radius: 9px;
-          font-size: 14px;
-          color: #555;
-          text-decoration: none;
-          font-weight: 400;
-          transition: background 0.15s, color 0.15s;
+          display: flex; align-items: center; gap: 10px;
+          padding: 11px 12px; font-size: 14px; font-weight: 500;
+          color: rgba(255,255,255,0.6); text-decoration: none;
+          border-left: 2px solid transparent;
+          transition: color 0.15s, border-color 0.15s, background 0.15s;
         }
-        .hf-drawer-link:hover { background: #f5f4fd; color: #534AB7; }
-        .hf-drawer-link.active { background: #f0effc; color: #7F77DD; font-weight: 500; }
-        .hf-drawer-footer {
-          padding: 1rem 1.25rem;
-          border-top: 1px solid #f0f0f0;
-        }
+        .hf-drawer-link:hover { background: ${color.ink2}; color: #fff; }
+        .hf-drawer-link.active { background: ${color.ink2}; color: #fff; border-left-color: ${color.signal}; }
+        .hf-drawer-footer { padding: 1rem 1.25rem; border-top: 1px solid ${color.line}; }
 
-        /* Responsive */
         @media (max-width: 1100px) {
           .hf-nav-links-desktop { display: none !important; }
           .hf-hamburger { display: flex !important; }
@@ -177,21 +202,15 @@ export default function Layout({ children }) {
         }
       `}</style>
 
-      {/* Top nav */}
+      {/* Top nav — dark control room bar */}
       <nav style={styles.nav} className="hf-nav">
-
-        {/* Brand */}
         <div style={styles.brandWrap}>
           <div style={styles.brandIcon}>
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2">
-              <rect x="2" y="7" width="20" height="14" rx="2" />
-              <path d="M16 7V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v2" />
-            </svg>
+            <span style={styles.brandIconText}>HF</span>
           </div>
           <span style={styles.brand}>HireFlow</span>
         </div>
 
-        {/* Desktop nav links */}
         <div style={styles.linksDesktop} className="hf-nav-links-desktop">
           {links.map((l) => (
             <Link
@@ -204,20 +223,22 @@ export default function Layout({ children }) {
           ))}
         </div>
 
-        {/* Right side */}
         <div style={styles.navRight}>
-          {/* Avatar + name */}
           <div style={styles.userPill}>
             <div style={styles.avatar}>{initials}</div>
-            <span style={styles.userName} className="hf-user-name">{user?.name}</span>
+            <span style={styles.userName} className="hf-user-name">
+              {user?.name}
+            </span>
           </div>
 
-          {/* Desktop logout */}
-          <button className="hf-logout-btn" style={{ display: "flex" }} onClick={handleLogout}>
-            <LogOut size={15} /> Logout
+          <button
+            className="hf-logout-btn"
+            style={{ display: "flex" }}
+            onClick={handleLogout}
+          >
+            <LogOut size={13} /> Logout
           </button>
 
-          {/* Hamburger */}
           <button
             className="hf-hamburger"
             onClick={() => setMobileOpen(true)}
@@ -230,20 +251,26 @@ export default function Layout({ children }) {
 
       {/* Mobile drawer */}
       <div className={`hf-mobile-drawer${mobileOpen ? " open" : ""}`}>
-        <div className="hf-drawer-overlay" onClick={() => setMobileOpen(false)} />
+        <div
+          className="hf-drawer-overlay"
+          onClick={() => setMobileOpen(false)}
+        />
         <div className="hf-drawer-panel">
           <div className="hf-drawer-header">
             <div style={styles.brandWrap}>
               <div style={styles.brandIcon}>
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2">
-                  <rect x="2" y="7" width="20" height="14" rx="2" />
-                  <path d="M16 7V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v2" />
-                </svg>
+                <span style={styles.brandIconText}>HF</span>
               </div>
               <span style={styles.brand}>HireFlow</span>
             </div>
             <button
-              style={{ background: "none", border: "none", cursor: "pointer", color: "#999", padding: 4, borderRadius: 6 }}
+              style={{
+                background: "none",
+                border: "none",
+                cursor: "pointer",
+                color: "rgba(255,255,255,0.5)",
+                padding: 4,
+              }}
               onClick={() => setMobileOpen(false)}
               aria-label="Close menu"
             >
@@ -251,12 +278,32 @@ export default function Layout({ children }) {
             </button>
           </div>
 
-          {/* User info in drawer */}
-          <div style={{ padding: "0.875rem 1.25rem", display: "flex", alignItems: "center", gap: 10, borderBottom: "1px solid #f5f5f5" }}>
+          <div
+            style={{
+              padding: "0.875rem 1.25rem",
+              display: "flex",
+              alignItems: "center",
+              gap: 10,
+              borderBottom: `1px solid ${color.line}`,
+            }}
+          >
             <div style={styles.avatar}>{initials}</div>
             <div>
-              <div style={{ fontSize: 14, fontWeight: 600, color: "#1a1a2e" }}>{user?.name}</div>
-              <div style={{ fontSize: 12, color: "#999", textTransform: "capitalize" }}>{user?.role}</div>
+              <div style={{ fontSize: 14, fontWeight: 600, color: "#fff" }}>
+                {user?.name}
+              </div>
+              <div
+                style={{
+                  fontSize: 11,
+                  fontFamily: font.mono,
+                  color: "rgba(255,255,255,0.4)",
+                  textTransform: "uppercase",
+                  letterSpacing: "0.05em",
+                  marginTop: 2,
+                }}
+              >
+                {user?.role}
+              </div>
             </div>
           </div>
 
@@ -276,10 +323,17 @@ export default function Layout({ children }) {
           <div className="hf-drawer-footer">
             <button
               className="hf-logout-btn"
-              style={{ width: "100%", justifyContent: "center", padding: "10px" }}
-              onClick={() => { setMobileOpen(false); handleLogout(); }}
+              style={{
+                width: "100%",
+                justifyContent: "center",
+                padding: "10px",
+              }}
+              onClick={() => {
+                setMobileOpen(false);
+                handleLogout();
+              }}
             >
-              <LogOut size={15} /> Logout
+              <LogOut size={14} /> Logout
             </button>
           </div>
         </div>
@@ -298,16 +352,16 @@ const styles = {
     display: "flex",
     flexDirection: "column",
     minHeight: "100vh",
-    background: "#f7f6fb",
+    background: color.paper,
   },
   nav: {
-    background: "#fff",
-    borderBottom: "1px solid #eeecf9",
-    padding: "0 2rem",
+    background: color.ink,
+    borderBottom: `1px solid ${color.line}`,
+    padding: "0 28px",
     display: "flex",
     alignItems: "center",
     justifyContent: "space-between",
-    height: "62px",
+    height: "60px",
     position: "sticky",
     top: 0,
     zIndex: 100,
@@ -316,24 +370,31 @@ const styles = {
   brandWrap: {
     display: "flex",
     alignItems: "center",
-    gap: "9px",
+    gap: "10px",
     flexShrink: 0,
   },
   brandIcon: {
-    width: "30px",
-    height: "30px",
-    background: "#7F77DD",
-    borderRadius: "8px",
+    width: "28px",
+    height: "28px",
+    background: color.signal,
+    clipPath: "polygon(0 0, 100% 0, 100% 70%, 70% 100%, 0 100%)",
     display: "flex",
     alignItems: "center",
     justifyContent: "center",
     flexShrink: 0,
   },
-  brand: {
+  brandIconText: {
+    fontFamily: font.mono,
     fontWeight: 700,
-    fontSize: "15px",
-    color: "#534AB7",
-    letterSpacing: "-0.4px",
+    fontSize: 12,
+    color: color.ink,
+  },
+  brand: {
+    fontFamily: font.display,
+    fontWeight: 700,
+    fontSize: "17px",
+    color: "#fff",
+    letterSpacing: "-0.02em",
   },
   linksDesktop: {
     display: "flex",
@@ -347,37 +408,33 @@ const styles = {
   navRight: {
     display: "flex",
     alignItems: "center",
-    gap: "4px",
+    gap: "8px",
     flexShrink: 0,
   },
   userPill: {
     display: "flex",
     alignItems: "center",
     gap: "8px",
-    padding: "4px 10px 4px 4px",
-    borderRadius: "999px",
-    background: "#f5f4fd",
-    border: "0.5px solid rgba(127,119,221,0.15)",
-    marginRight: "4px",
+    paddingRight: "4px",
   },
   avatar: {
     width: "28px",
     height: "28px",
-    borderRadius: "50%",
-    background: "#7F77DD",
-    color: "#fff",
-    fontSize: "11px",
+    background: color.ink3,
+    border: `1px solid ${color.line}`,
+    color: color.volt,
+    fontFamily: font.mono,
+    fontSize: "10px",
     fontWeight: 700,
     display: "flex",
     alignItems: "center",
     justifyContent: "center",
     flexShrink: 0,
-    letterSpacing: "0.02em",
   },
   userName: {
-    fontSize: "13px",
+    fontSize: "12px",
     fontWeight: 500,
-    color: "#534AB7",
+    color: "rgba(255,255,255,0.65)",
     maxWidth: "120px",
     overflow: "hidden",
     textOverflow: "ellipsis",
@@ -386,7 +443,7 @@ const styles = {
   main: {
     flex: 1,
     padding: "2rem",
-    maxWidth: "1140px",
+    maxWidth: "1180px",
     margin: "0 auto",
     width: "100%",
   },

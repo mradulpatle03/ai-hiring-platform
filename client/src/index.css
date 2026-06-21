@@ -1,35 +1,104 @@
+@import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@500;600;700&display=swap');
+
+:root {
+  /* ===== Signal design system tokens ===== */
+  --ink: #0B0E14;
+  --ink-2: #12161F;
+  --ink-3: #1B202C;
+  --paper: #F7F5EF;
+  --paper-2: #EFECE3;
+  --paper-3: #E5E1D4;
+
+  --signal: #FF4D2E;
+  --signal-dim: #E0431F;
+  --volt: #C8FF4D;
+  --wire: #4D7CFF;
+  --graphite: #5C5F6B;
+  --graphite-dim: #8A8D98;
+
+  --line: rgba(255, 255, 255, 0.08);
+  --line-light: rgba(11, 14, 20, 0.10);
+  --line-light-strong: rgba(11, 14, 20, 0.20);
+
+  --success: #1D8A4E;
+  --warning: #B07A0E;
+  --danger: #FF4D2E;
+
+  --font-display: 'Space Grotesk', sans-serif;
+  --font-body: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+  --font-mono: 'JetBrains Mono', monospace;
+
+  --radius-sm: 2px;
+  --radius-md: 4px;
+}
+
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
 body {
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-  background: #f8f8f8;
-  color: #1a1a1a;
+  font-family: var(--font-body);
+  background: var(--paper);
+  color: var(--ink);
   font-size: 15px;
   line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
 }
 
 a { color: inherit; text-decoration: none; }
-
 button { font-family: inherit; cursor: pointer; }
 
 input, textarea, select {
   font-family: inherit;
   font-size: 14px;
   outline: none;
-  border: 1px solid #e0e0e0;
-  border-radius: 8px;
-  padding: 9px 12px;
+  border: 1px solid var(--line-light-strong);
+  border-radius: var(--radius-sm);
+  padding: 10px 13px;
   width: 100%;
   background: #fff;
+  color: var(--ink);
   transition: border-color 0.15s;
 }
-input:focus, textarea:focus, select:focus { border-color: #7F77DD; }
+input:focus, textarea:focus, select:focus {
+  border-color: var(--ink);
+}
+input:focus-visible, textarea:focus-visible, select:focus-visible, button:focus-visible, a:focus-visible {
+  outline: 2px solid var(--signal);
+  outline-offset: 2px;
+}
 
-::-webkit-scrollbar { width: 6px; }
-::-webkit-scrollbar-thumb { background: #ddd; border-radius: 3px; }
+::-webkit-scrollbar { width: 8px; height: 8px; }
+::-webkit-scrollbar-thumb { background: var(--paper-3); }
+::-webkit-scrollbar-track { background: transparent; }
 
 .VictoryContainer svg text {
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif !important;
-  font-size: 11px !important;
-  fill: #888 !important;
+  font-family: var(--font-mono) !important;
+  font-size: 10px !important;
+  fill: var(--graphite) !important;
+}
+
+/* Utility classes used across rebuilt components */
+.hf-label {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--graphite);
+}
+
+.hf-mono {
+  font-family: var(--font-mono);
+}
+
+.hf-display {
+  font-family: var(--font-display);
+  letter-spacing: -0.02em;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
 }
