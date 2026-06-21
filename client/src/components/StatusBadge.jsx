@@ -1,9 +1,11 @@
+import { color, font } from "../styles/theme";
+
 const map = {
-  pending: { bg: "#f5f5f5", color: "#888" },
-  screening: { bg: "#e8f0ff", color: "#3a5bbf" },
-  screened: { bg: "#e8f8f0", color: "#1a7a4a" },
-  shortlisted: { bg: "#f0effc", color: "#5a52c0" },
-  rejected: { bg: "#fdf0f0", color: "#c0392b" },
+  pending: { dot: color.graphiteDim, text: color.graphite },
+  screening: { dot: color.wire, text: color.wire },
+  screened: { dot: "#1D8A4E", text: "#1D8A4E" },
+  shortlisted: { dot: color.volt, text: "#5C7A1A" },
+  rejected: { dot: color.signal, text: color.signal },
 };
 
 export default function StatusBadge({ status }) {
@@ -11,15 +13,29 @@ export default function StatusBadge({ status }) {
   return (
     <span
       style={{
-        background: c.bg,
-        color: c.color,
-        padding: "3px 10px",
-        borderRadius: "999px",
-        fontSize: "12px",
-        fontWeight: "500",
-        textTransform: "capitalize",
+        display: "inline-flex",
+        alignItems: "center",
+        gap: "6px",
+        fontFamily: font.mono,
+        fontSize: "10px",
+        fontWeight: 700,
+        textTransform: "uppercase",
+        letterSpacing: "0.04em",
+        color: c.text,
+        border: `1px solid ${color.lineLight}`,
+        padding: "4px 9px",
+        whiteSpace: "nowrap",
       }}
     >
+      <span
+        style={{
+          width: "6px",
+          height: "6px",
+          borderRadius: "50%",
+          background: c.dot,
+          flexShrink: 0,
+        }}
+      />
       {status}
     </span>
   );

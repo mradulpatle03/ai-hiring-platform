@@ -6,91 +6,7 @@ import { applyToJob } from "../../api/applications";
 import Layout from "../../components/Layout";
 import toast from "react-hot-toast";
 import { MapPin, Clock, Building, Upload } from "lucide-react";
-
-const s = {
-  layout: {
-    display: "grid",
-    gridTemplateColumns: "1fr 340px",
-    gap: "1.5rem",
-    alignItems: "start",
-  },
-  card: {
-    background: "#fff",
-    border: "1px solid #eee",
-    borderRadius: "12px",
-    padding: "1.5rem",
-  },
-  title: { fontSize: "22px", fontWeight: "600", marginBottom: "6px" },
-  company: {
-    fontSize: "15px",
-    color: "#555",
-    marginBottom: "12px",
-    display: "flex",
-    alignItems: "center",
-    gap: "6px",
-  },
-  meta: {
-    display: "flex",
-    flexWrap: "wrap",
-    gap: "12px",
-    fontSize: "13px",
-    color: "#777",
-    marginBottom: "1.5rem",
-  },
-  section: { marginBottom: "1.5rem" },
-  sh: {
-    fontSize: "13px",
-    fontWeight: "600",
-    color: "#444",
-    marginBottom: "8px",
-    textTransform: "uppercase",
-    letterSpacing: "0.04em",
-  },
-  desc: {
-    fontSize: "14px",
-    color: "#444",
-    lineHeight: 1.7,
-    whiteSpace: "pre-wrap",
-  },
-  skill: {
-    background: "#f0effc",
-    color: "#5a52c0",
-    fontSize: "12px",
-    padding: "4px 11px",
-    borderRadius: "999px",
-    display: "inline-block",
-    marginRight: "6px",
-    marginBottom: "6px",
-  },
-  applyCard: {
-    background: "#fff",
-    border: "1px solid #eee",
-    borderRadius: "12px",
-    padding: "1.5rem",
-    position: "sticky",
-    top: "80px",
-  },
-  dropzone: {
-    border: "2px dashed #ddd",
-    borderRadius: "10px",
-    padding: "2rem 1rem",
-    textAlign: "center",
-    cursor: "pointer",
-    transition: "border-color 0.15s",
-  },
-  btn: {
-    width: "100%",
-    padding: "12px",
-    background: "#7F77DD",
-    color: "#fff",
-    border: "none",
-    borderRadius: "8px",
-    fontSize: "14px",
-    fontWeight: "500",
-    cursor: "pointer",
-    marginTop: "12px",
-  },
-};
+import { color, font } from "../../styles/theme";
 
 export default function JobDetail() {
   const { id } = useParams();
@@ -123,7 +39,7 @@ export default function JobDetail() {
   if (isLoading)
     return (
       <Layout>
-        <p style={{ color: "#aaa" }}>Loading...</p>
+        <p style={{ color: color.graphiteDim }}>Loading...</p>
       </Layout>
     );
   const job = data?.job;
@@ -134,19 +50,19 @@ export default function JobDetail() {
         <div style={s.card}>
           <div style={s.title}>{job.title}</div>
           <div style={s.company}>
-            <Building size={15} />
+            <Building size={14} />
             {job.company}
           </div>
           <div style={s.meta}>
-            <span style={{ display: "flex", alignItems: "center", gap: "4px" }}>
-              <MapPin size={13} />
+            <span style={s.metaItem}>
+              <MapPin size={12} />
               {job.location}
             </span>
-            <span style={{ display: "flex", alignItems: "center", gap: "4px" }}>
-              <Clock size={13} />
+            <span style={s.metaItem}>
+              <Clock size={12} />
               {job.experienceYears}+ years
             </span>
-            {job.salary && <span>${job.salary}</span>}
+            {job.salary && <span style={s.metaItem}>${job.salary}</span>}
           </div>
           {job.skillsRequired?.length > 0 && (
             <div style={s.section}>
@@ -165,18 +81,15 @@ export default function JobDetail() {
         </div>
 
         <div style={s.applyCard}>
-          <div
-            style={{ fontWeight: "600", fontSize: "15px", marginBottom: "4px" }}
-          >
-            Apply for this role
-          </div>
-          <div
-            style={{ fontSize: "13px", color: "#888", marginBottom: "1.25rem" }}
-          >
+          <div style={s.applyTitle}>Apply for this role</div>
+          <div style={s.applySub}>
             Upload your resume — AI will score your fit instantly.
           </div>
           <div
-            style={{ ...s.dropzone, borderColor: file ? "#7F77DD" : "#ddd" }}
+            style={{
+              ...s.dropzone,
+              borderColor: file ? color.signal : color.lineLightStrong,
+            }}
             onClick={() => fileRef.current.click()}
             onDragOver={(e) => e.preventDefault()}
             onDrop={(e) => {
@@ -185,30 +98,18 @@ export default function JobDetail() {
             }}
           >
             <Upload
-              size={22}
-              color={file ? "#7F77DD" : "#bbb"}
+              size={20}
+              color={file ? color.signal : color.graphiteDim}
               style={{ marginBottom: "8px" }}
             />
             {file ? (
-              <div
-                style={{
-                  fontSize: "13px",
-                  color: "#7F77DD",
-                  fontWeight: "500",
-                }}
-              >
-                {file.name}
-              </div>
+              <div style={s.fileName}>{file.name}</div>
             ) : (
               <>
-                <div style={{ fontSize: "13px", color: "#888" }}>
+                <div style={s.dzText}>
                   Drop your PDF here or click to browse
                 </div>
-                <div
-                  style={{ fontSize: "11px", color: "#bbb", marginTop: "4px" }}
-                >
-                  PDF only · Max 5MB
-                </div>
+                <div style={s.dzSub}>PDF only · Max 5MB</div>
               </>
             )}
             <input
@@ -224,10 +125,124 @@ export default function JobDetail() {
             onClick={handleApply}
             disabled={mutation.isPending}
           >
-            {mutation.isPending ? "Submitting..." : "Submit application"}
+            {mutation.isPending ? "Submitting…" : "Submit application →"}
           </button>
         </div>
       </div>
     </Layout>
   );
 }
+
+const s = {
+  layout: {
+    display: "grid",
+    gridTemplateColumns: "1fr 340px",
+    gap: "1.5rem",
+    alignItems: "start",
+  },
+  card: {
+    background: "#fff",
+    border: `1px solid ${color.lineLight}`,
+    padding: "1.75rem",
+  },
+  title: {
+    fontFamily: font.display,
+    fontSize: "24px",
+    fontWeight: 700,
+    marginBottom: "8px",
+    letterSpacing: "-0.02em",
+  },
+  company: {
+    fontSize: "15px",
+    color: color.graphite,
+    marginBottom: "14px",
+    display: "flex",
+    alignItems: "center",
+    gap: "6px",
+  },
+  meta: {
+    display: "flex",
+    flexWrap: "wrap",
+    gap: "16px",
+    fontFamily: font.mono,
+    fontSize: "12px",
+    color: color.graphiteDim,
+    marginBottom: "1.5rem",
+  },
+  metaItem: { display: "flex", alignItems: "center", gap: "5px" },
+  section: { marginBottom: "1.5rem" },
+  sh: {
+    fontFamily: font.mono,
+    fontSize: "11px",
+    fontWeight: 700,
+    color: color.graphite,
+    marginBottom: "10px",
+    textTransform: "uppercase",
+    letterSpacing: "0.06em",
+  },
+  desc: {
+    fontSize: "14px",
+    color: color.ink,
+    lineHeight: 1.7,
+    whiteSpace: "pre-wrap",
+  },
+  skill: {
+    fontFamily: font.mono,
+    color: color.graphite,
+    border: `1px solid ${color.lineLight}`,
+    fontSize: "11px",
+    padding: "4px 11px",
+    display: "inline-block",
+    marginRight: "6px",
+    marginBottom: "6px",
+  },
+  applyCard: {
+    background: "#fff",
+    border: `1px solid ${color.lineLight}`,
+    padding: "1.5rem",
+    position: "sticky",
+    top: "80px",
+  },
+  applyTitle: {
+    fontFamily: font.display,
+    fontWeight: 700,
+    fontSize: "16px",
+    marginBottom: "4px",
+  },
+  applySub: {
+    fontSize: "13px",
+    color: color.graphite,
+    marginBottom: "1.25rem",
+  },
+  dropzone: {
+    border: "2px dashed",
+    padding: "2rem 1rem",
+    textAlign: "center",
+    cursor: "pointer",
+    transition: "border-color 0.15s",
+  },
+  fileName: { fontSize: "13px", color: color.signal, fontWeight: "600" },
+  dzText: { fontSize: "13px", color: color.graphite },
+  dzSub: {
+    fontFamily: font.mono,
+    fontSize: "10px",
+    color: color.graphiteDim,
+    marginTop: "5px",
+    textTransform: "uppercase",
+    letterSpacing: "0.03em",
+  },
+  btn: {
+    width: "100%",
+    padding: "13px",
+    background: color.ink,
+    color: "#fff",
+    border: "none",
+    fontFamily: font.mono,
+    fontSize: "12px",
+    fontWeight: 700,
+    textTransform: "uppercase",
+    letterSpacing: "0.04em",
+    cursor: "pointer",
+    marginTop: "14px",
+  },
+};

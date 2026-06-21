@@ -8,84 +8,12 @@ import ScoreBadge from "../../components/ScoreBadge";
 import StatusBadge from "../../components/StatusBadge";
 import SlotPicker from "../../components/interviews/SlotPicker";
 import toast from "react-hot-toast";
-import { ChevronDown, ChevronUp, User } from "lucide-react";
+import { User } from "lucide-react";
 import { fetchOrCreateConversation } from "../../api/conversations";
 import { useNavigate } from "react-router-dom";
 import XAIPanel from "../../components/xai/XAIPanel";
-import { fetchXAIBreakdown } from "../../api/applications";
 import { ApplicantRowSkeleton } from "../../components/Skeleton";
-
-const s = {
-  h1: { fontSize: "20px", fontWeight: "600", marginBottom: "4px" },
-  sub: { fontSize: "13px", color: "#888", marginBottom: "1.5rem" },
-  table: {
-    width: "100%",
-    borderCollapse: "collapse",
-    background: "#fff",
-    borderRadius: "12px",
-    overflow: "hidden",
-    border: "1px solid #eee",
-  },
-  th: {
-    padding: "12px 16px",
-    fontSize: "12px",
-    fontWeight: "600",
-    color: "#888",
-    textAlign: "left",
-    borderBottom: "1px solid #eee",
-    background: "#fafafa",
-  },
-  td: {
-    padding: "14px 16px",
-    fontSize: "13px",
-    borderBottom: "1px solid #f5f5f5",
-    verticalAlign: "top",
-  },
-  drawer: {
-    background: "#f9f8ff",
-    border: "1px solid #e8e5fc",
-    borderRadius: "10px",
-    padding: "1.25rem",
-    margin: "8px 0",
-  },
-  qBox: {
-    background: "#fff",
-    border: "1px solid #eee",
-    borderRadius: "8px",
-    padding: "10px 14px",
-    marginBottom: "8px",
-    fontSize: "13px",
-  },
-  skillPill: {
-    background: "#fdf0f0",
-    color: "#c0392b",
-    fontSize: "11px",
-    padding: "3px 9px",
-    borderRadius: "999px",
-    marginRight: "5px",
-    marginBottom: "4px",
-    display: "inline-block",
-  },
-  matchPill: {
-    background: "#e8f8f0",
-    color: "#1a7a4a",
-    fontSize: "11px",
-    padding: "3px 9px",
-    borderRadius: "999px",
-    marginRight: "5px",
-    marginBottom: "4px",
-    display: "inline-block",
-  },
-  btnSm: {
-    padding: "5px 12px",
-    borderRadius: "6px",
-    fontSize: "12px",
-    fontWeight: "500",
-    border: "none",
-    cursor: "pointer",
-    marginRight: "6px",
-  },
-};
+import { color, font } from "../../styles/theme";
 
 export default function Applicants() {
   const { jobId } = useParams();
@@ -126,6 +54,7 @@ export default function Applicants() {
 
   return (
     <Layout>
+      <div style={s.eyebrow}>// applicant pool</div>
       <div style={s.h1}>{jobData?.job?.title || "Applicants"}</div>
       <div style={s.sub}>
         {apps.length} applicant{apps.length !== 1 ? "s" : ""} · sorted by AI
@@ -150,7 +79,7 @@ export default function Applicants() {
           </tbody>
         </table>
       ) : apps.length === 0 ? (
-        <p style={{ color: "#aaa", fontSize: "14px" }}>No applicants yet.</p>
+        <p style={s.empty}>No applicants yet.</p>
       ) : (
         <table style={s.table}>
           <thead>
@@ -167,7 +96,7 @@ export default function Applicants() {
               <>
                 <tr
                   key={app._id}
-                  style={{ cursor: "pointer" }}
+                  style={s.tr}
                   onClick={() =>
                     setExpanded(expanded === app._id ? null : app._id)
                   }
@@ -180,42 +109,14 @@ export default function Applicants() {
                         gap: "10px",
                       }}
                     >
-                      <div
-                        style={{
-                          width: "32px",
-                          height: "32px",
-                          borderRadius: "50%",
-                          background: "#f0effc",
-                          display: "flex",
-                          alignItems: "center",
-                          justifyContent: "center",
-                        }}
-                      >
-                        <User size={15} color="#7F77DD" />
+                      <div style={s.avatar}>
+                        <User size={14} color={color.signal} />
                       </div>
                       <div>
-                        <div style={{ fontWeight: "500" }}>
-                          {app.candidate?.name}
-                        </div>
-                        <div style={{ fontSize: "12px", color: "#888" }}>
-                          {app.candidate?.email}
-                        </div>
+                        <div style={s.name}>{app.candidate?.name}</div>
+                        <div style={s.email}>{app.candidate?.email}</div>
                         {app.candidate?.github?.connected && (
-                          <div
-                            style={{
-                              display: "inline-flex",
-                              alignItems: "center",
-                              gap: "3px",
-                              fontSize: "10px",
-                              color: "#fff",
-                              background: "#0d1117",
-                              padding: "2px 7px",
-                              borderRadius: "999px",
-                              marginTop: "3px",
-                            }}
-                          >
-                            GitHub connected
-                          </div>
+                          <div style={s.ghTag}>github connected</div>
                         )}
                       </div>
                     </div>
@@ -227,15 +128,13 @@ export default function Applicants() {
                     <StatusBadge status={app.status} />
                   </td>
                   <td style={s.td}>
-                    {new Date(app.createdAt).toLocaleDateString()}
+                    <span style={s.dateText}>
+                      {new Date(app.createdAt).toLocaleDateString()}
+                    </span>
                   </td>
                   <td style={s.td} onClick={(e) => e.stopPropagation()}>
                     <button
-                      style={{
-                        ...s.btnSm,
-                        background: "#e8f8f0",
-                        color: "#1a7a4a",
-                      }}
+                      style={s.btnShortlist}
                       onClick={() =>
                         mutation.mutate({ id: app._id, status: "shortlisted" })
                       }
@@ -243,11 +142,7 @@ export default function Applicants() {
                       Shortlist
                     </button>
                     <button
-                      style={{
-                        ...s.btnSm,
-                        background: "#fdf0f0",
-                        color: "#c0392b",
-                      }}
+                      style={s.btnReject}
                       onClick={() =>
                         mutation.mutate({ id: app._id, status: "rejected" })
                       }
@@ -259,70 +154,23 @@ export default function Applicants() {
 
                 {expanded === app._id && (
                   <tr key={`${app._id}-expanded`}>
-                    <td colSpan={5} style={{ padding: "0 16px 12px" }}>
+                    <td colSpan={5} style={{ padding: "0 16px 14px" }}>
                       <div style={s.drawer}>
                         {app.aiReasoning && (
-                          <div style={{ marginBottom: "12px" }}>
-                            <div
-                              style={{
-                                fontSize: "12px",
-                                fontWeight: "600",
-                                color: "#555",
-                                marginBottom: "5px",
-                              }}
-                            >
-                              AI REASONING
-                            </div>
-                            <p
-                              style={{
-                                fontSize: "13px",
-                                color: "#444",
-                                lineHeight: 1.6,
-                              }}
-                            >
-                              {app.aiReasoning}
-                            </p>
+                          <div style={{ marginBottom: "14px" }}>
+                            <div style={s.drawerLabel}>AI reasoning</div>
+                            <p style={s.drawerText}>{app.aiReasoning}</p>
                           </div>
                         )}
                         {app.githubInsights && (
-                          <div style={{ marginBottom: "12px" }}>
-                            <div
-                              style={{
-                                fontSize: "12px",
-                                fontWeight: "600",
-                                color: "#555",
-                                marginBottom: "5px",
-                                display: "flex",
-                                alignItems: "center",
-                                gap: "5px",
-                              }}
-                            >
-                              <span></span> GITHUB INSIGHTS
-                            </div>
-                            <p
-                              style={{
-                                fontSize: "13px",
-                                color: "#444",
-                                lineHeight: 1.6,
-                                background: "#f9f8ff",
-                                padding: "10px 12px",
-                                borderRadius: "8px",
-                                border: "1px solid #e8e5fc",
-                              }}
-                            >
-                              {app.githubInsights}
-                            </p>
+                          <div style={{ marginBottom: "14px" }}>
+                            <div style={s.drawerLabel}>Github insights</div>
+                            <p style={s.ghInsightBox}>{app.githubInsights}</p>
                           </div>
                         )}
                         {app.xai?.dimensions && (
                           <button
-                            style={{
-                              ...s.btnSm,
-                              background: "#f0effc",
-                              color: "#5a52c0",
-                              marginTop: "8px",
-                              marginBottom: "8px",
-                            }}
+                            style={s.btnXai}
                             onClick={(e) => {
                               e.stopPropagation();
                               setXaiApp(xaiApp === app._id ? null : app._id);
@@ -333,7 +181,7 @@ export default function Applicants() {
                         )}
 
                         {xaiApp === app._id && (
-                          <div style={{ marginTop: "10px" }}>
+                          <div style={{ marginTop: "12px" }}>
                             <XAIPanel
                               xai={app.xai}
                               overallScore={app.aiScore}
@@ -342,26 +190,12 @@ export default function Applicants() {
                           </div>
                         )}
                         {app.aiMissingSkills?.length > 0 && (
-                          <div style={{ marginBottom: "12px" }}>
-                            <div
-                              style={{
-                                fontSize: "12px",
-                                fontWeight: "600",
-                                color: "#555",
-                                marginBottom: "5px",
-                              }}
-                            >
-                              MISSING SKILLS
-                            </div>
+                          <div
+                            style={{ marginBottom: "14px", marginTop: "14px" }}
+                          >
+                            <div style={s.drawerLabel}>Missing skills</div>
                             {app.aiMissingSkills.map((skill) => (
-                              <span
-                                key={skill}
-                                style={{
-                                  ...s.skillPill,
-                                  marginRight: 6,
-                                  marginBottom: 6,
-                                }}
-                              >
+                              <span key={skill} style={s.skillPill}>
                                 {skill}
                               </span>
                             ))}
@@ -369,27 +203,12 @@ export default function Applicants() {
                         )}
                         {app.aiInterviewQuestions?.length > 0 && (
                           <div>
-                            <div
-                              style={{
-                                fontSize: "12px",
-                                fontWeight: "600",
-                                color: "#555",
-                                marginBottom: "8px",
-                              }}
-                            >
-                              SUGGESTED INTERVIEW QUESTIONS
+                            <div style={s.drawerLabel}>
+                              Suggested interview questions
                             </div>
                             {app.aiInterviewQuestions.map((q, i) => (
                               <div key={i} style={s.qBox}>
-                                <span
-                                  style={{
-                                    color: "#7F77DD",
-                                    fontWeight: "600",
-                                    marginRight: "8px",
-                                  }}
-                                >
-                                  Q{i + 1}.
-                                </span>
+                                <span style={s.qNum}>Q{i + 1}.</span>
                                 {q}
                               </div>
                             ))}
@@ -397,12 +216,7 @@ export default function Applicants() {
                         )}
                         {app.status === "shortlisted" && (
                           <button
-                            style={{
-                              ...s.btnSm,
-                              background: "#f0effc",
-                              color: "#5a52c0",
-                              marginTop: "10px",
-                            }}
+                            style={s.btnChat}
                             onClick={(e) => {
                               e.stopPropagation();
                               openChat(app._id);
@@ -413,12 +227,7 @@ export default function Applicants() {
                         )}
                         {app.status === "shortlisted" && (
                           <button
-                            style={{
-                              ...s.btnSm,
-                              background: "#e8f8f0",
-                              color: "#1a7a4a",
-                              marginTop: "8px",
-                            }}
+                            style={s.btnSchedule}
                             onClick={(e) => {
                               e.stopPropagation();
                               setScheduling(app._id);
@@ -429,14 +238,8 @@ export default function Applicants() {
                         )}
                         {app.status === "pending" ||
                         app.status === "screening" ? (
-                          <p
-                            style={{
-                              fontSize: "12px",
-                              color: "#aaa",
-                              marginTop: "8px",
-                            }}
-                          >
-                            AI is still screening this candidate...
+                          <p style={s.screeningNote}>
+                            AI is still screening this candidate…
                           </p>
                         ) : null}
                       </div>
@@ -449,18 +252,7 @@ export default function Applicants() {
         </table>
       )}
       {scheduling && (
-        <div
-          style={{
-            position: "fixed",
-            inset: 0,
-            background: "rgba(0,0,0,0.3)",
-            zIndex: 200,
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            padding: "1rem",
-          }}
-        >
+        <div style={s.modalOverlay}>
           <div style={{ width: "100%", maxWidth: "560px" }}>
             <SlotPicker
               applicationId={scheduling}
@@ -478,3 +270,215 @@ export default function Applicants() {
     </Layout>
   );
 }
+
+const s = {
+  eyebrow: {
+    fontFamily: font.mono,
+    fontSize: "11px",
+    fontWeight: 600,
+    letterSpacing: "0.08em",
+    color: color.signal,
+    marginBottom: "6px",
+  },
+  h1: {
+    fontFamily: font.display,
+    fontSize: "23px",
+    fontWeight: 700,
+    marginBottom: "4px",
+    letterSpacing: "-0.02em",
+  },
+  sub: {
+    fontFamily: font.mono,
+    fontSize: "12px",
+    color: color.graphiteDim,
+    marginBottom: "1.5rem",
+  },
+  table: {
+    width: "100%",
+    borderCollapse: "collapse",
+    background: "#fff",
+    border: `1px solid ${color.lineLight}`,
+  },
+  th: {
+    padding: "12px 16px",
+    fontFamily: font.mono,
+    fontSize: "10px",
+    fontWeight: 700,
+    color: color.graphite,
+    textAlign: "left",
+    borderBottom: `1px solid ${color.lineLight}`,
+    background: color.paper2,
+    textTransform: "uppercase",
+    letterSpacing: "0.06em",
+  },
+  tr: { cursor: "pointer" },
+  td: {
+    padding: "14px 16px",
+    fontSize: "13px",
+    borderBottom: `1px solid ${color.lineLight}`,
+    verticalAlign: "top",
+  },
+  avatar: {
+    width: "32px",
+    height: "32px",
+    background: color.paper2,
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "center",
+    flexShrink: 0,
+  },
+  name: { fontWeight: 600, fontSize: "14px" },
+  email: { fontSize: "12px", color: color.graphiteDim, marginTop: "1px" },
+  ghTag: {
+    display: "inline-flex",
+    alignItems: "center",
+    fontFamily: font.mono,
+    fontSize: "9px",
+    color: "#fff",
+    background: color.ink,
+    padding: "2px 7px",
+    marginTop: "4px",
+    textTransform: "uppercase",
+    letterSpacing: "0.03em",
+  },
+  dateText: {
+    fontFamily: font.mono,
+    fontSize: "12px",
+    color: color.graphiteDim,
+  },
+
+  btnShortlist: {
+    fontFamily: font.mono,
+    fontSize: "10px",
+    fontWeight: 700,
+    textTransform: "uppercase",
+    letterSpacing: "0.03em",
+    padding: "6px 11px",
+    border: "none",
+    cursor: "pointer",
+    marginRight: "6px",
+    background: "rgba(29,138,78,0.10)",
+    color: "#1D8A4E",
+  },
+  btnReject: {
+    fontFamily: font.mono,
+    fontSize: "10px",
+    fontWeight: 700,
+    textTransform: "uppercase",
+    letterSpacing: "0.03em",
+    padding: "6px 11px",
+    border: "none",
+    cursor: "pointer",
+    background: "rgba(255,77,46,0.08)",
+    color: color.signal,
+  },
+
+  drawer: {
+    background: color.paper,
+    border: `1px solid ${color.lineLight}`,
+    padding: "1.25rem",
+    margin: "8px 0",
+  },
+  drawerLabel: {
+    fontFamily: font.mono,
+    fontSize: "10px",
+    fontWeight: 700,
+    color: color.graphite,
+    marginBottom: "6px",
+    textTransform: "uppercase",
+    letterSpacing: "0.05em",
+  },
+  drawerText: { fontSize: "13px", color: color.ink, lineHeight: 1.6 },
+  ghInsightBox: {
+    fontSize: "13px",
+    color: color.ink,
+    lineHeight: 1.6,
+    background: "#fff",
+    padding: "10px 13px",
+    border: `1px solid ${color.lineLight}`,
+  },
+  skillPill: {
+    fontFamily: font.mono,
+    fontSize: "10px",
+    color: color.signal,
+    border: `1px solid ${color.signal}`,
+    padding: "3px 9px",
+    marginRight: "6px",
+    marginBottom: "6px",
+    display: "inline-block",
+  },
+  qBox: {
+    background: "#fff",
+    border: `1px solid ${color.lineLight}`,
+    padding: "10px 14px",
+    marginBottom: "8px",
+    fontSize: "13px",
+  },
+  qNum: {
+    color: color.signal,
+    fontFamily: font.mono,
+    fontWeight: 700,
+    marginRight: "8px",
+  },
+
+  btnXai: {
+    fontFamily: font.mono,
+    fontSize: "10px",
+    fontWeight: 700,
+    textTransform: "uppercase",
+    letterSpacing: "0.03em",
+    background: color.ink,
+    color: "#fff",
+    border: "none",
+    padding: "8px 13px",
+    cursor: "pointer",
+    marginTop: "8px",
+    marginBottom: "8px",
+  },
+  btnChat: {
+    fontFamily: font.mono,
+    fontSize: "10px",
+    fontWeight: 700,
+    textTransform: "uppercase",
+    letterSpacing: "0.03em",
+    background: "none",
+    color: color.ink,
+    border: `1px solid ${color.lineLightStrong}`,
+    padding: "7px 12px",
+    cursor: "pointer",
+    marginTop: "10px",
+    marginRight: "8px",
+  },
+  btnSchedule: {
+    fontFamily: font.mono,
+    fontSize: "10px",
+    fontWeight: 700,
+    textTransform: "uppercase",
+    letterSpacing: "0.03em",
+    background: "rgba(29,138,78,0.10)",
+    color: "#1D8A4E",
+    border: "none",
+    padding: "7px 12px",
+    cursor: "pointer",
+    marginTop: "8px",
+  },
+  screeningNote: {
+    fontFamily: font.mono,
+    fontSize: "11px",
+    color: color.graphiteDim,
+    marginTop: "10px",
+  },
+
+  empty: { color: color.graphiteDim, fontSize: "14px" },
+
+  modalOverlay: {
+    position: "fixed",
+    inset: 0,
+    background: "rgba(11,14,20,0.6)",
+    zIndex: 200,
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "center",
+    padding: "1rem",
+  },
+};

@@ -1,3 +1,5 @@
+import { color } from "../styles/theme";
+
 const shimmer = `
   @keyframes shimmer {
     0%   { background-position: -600px 0 }
@@ -5,10 +7,10 @@ const shimmer = `
   }
 `;
 const base = {
-  background: "linear-gradient(90deg, #f5f5f5 25%, #ececec 37%, #f5f5f5 63%)",
+  background: `linear-gradient(90deg, ${color.paper2} 25%, ${color.paper3} 37%, ${color.paper2} 63%)`,
   backgroundSize: "600px 100%",
   animation: "shimmer 1.4s ease infinite",
-  borderRadius: "6px",
+  borderRadius: "0px",
   display: "block",
 };
 
@@ -28,8 +30,8 @@ export function JobCardSkeleton() {
     <div
       style={{
         background: "#fff",
-        border: "1px solid #eee",
-        borderRadius: "12px",
+        border: `1px solid ${color.lineLight}`,
+        borderLeft: `3px solid ${color.paper3}`,
         padding: "1.25rem",
       }}
     >
@@ -67,9 +69,8 @@ export function JobCardSkeleton() {
             key={i}
             style={{
               ...base,
-              height: "22px",
+              height: "20px",
               width: `${w}px`,
-              borderRadius: "999px",
               display: "block",
             }}
           />
@@ -94,7 +95,7 @@ export function ApplicantRowSkeleton() {
       ].map(([w, h], i) => (
         <td
           key={i}
-          style={{ padding: "14px 16px", borderBottom: "1px solid #f8f8f8" }}
+          style={{ padding: "14px 16px", borderBottom: `1px solid ${color.lineLight}` }}
         >
           <span style={{ ...base, height: h, width: w, display: "block" }} />
         </td>
@@ -113,8 +114,8 @@ export function ListSkeleton({ rows = 4 }) {
           key={i}
           style={{
             background: "#fff",
-            border: "1px solid #eee",
-            borderRadius: "10px",
+            border: `1px solid ${color.lineLight}`,
+            borderLeft: `3px solid ${color.paper3}`,
             padding: "1rem 1.25rem",
             marginBottom: "8px",
           }}

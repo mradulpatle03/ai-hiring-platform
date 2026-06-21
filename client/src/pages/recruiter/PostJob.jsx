@@ -4,37 +4,7 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { createJob } from "../../api/jobs";
 import Layout from "../../components/Layout";
 import toast from "react-hot-toast";
-
-const s = {
-  card: {
-    background: "#fff",
-    border: "1px solid #eee",
-    borderRadius: "12px",
-    padding: "2rem",
-    maxWidth: "680px",
-  },
-  label: {
-    display: "block",
-    fontSize: "13px",
-    fontWeight: "500",
-    marginBottom: "6px",
-    color: "#444",
-  },
-  group: { marginBottom: "1.25rem" },
-  row: { display: "grid", gridTemplateColumns: "1fr 1fr", gap: "1rem" },
-  btn: {
-    padding: "10px 24px",
-    background: "#7F77DD",
-    color: "#fff",
-    border: "none",
-    borderRadius: "8px",
-    fontSize: "14px",
-    fontWeight: "500",
-    cursor: "pointer",
-  },
-  h1: { fontSize: "20px", fontWeight: "600", marginBottom: "0.25rem" },
-  sub: { fontSize: "13px", color: "#888", marginBottom: "1.5rem" },
-};
+import { color, font } from "../../styles/theme";
 
 export default function PostJob() {
   const navigate = useNavigate();
@@ -68,6 +38,7 @@ export default function PostJob() {
 
   return (
     <Layout>
+      <div style={s.eyebrow}>// new listing</div>
       <div style={s.h1}>Post a new job</div>
       <div style={s.sub}>
         AI will automatically extract required skills from your description.
@@ -127,10 +98,59 @@ export default function PostJob() {
             />
           </div>
           <button style={s.btn} type="submit" disabled={mutation.isPending}>
-            {mutation.isPending ? "Posting..." : "Post job"}
+            {mutation.isPending ? "Posting…" : "Post job →"}
           </button>
         </form>
       </div>
     </Layout>
   );
 }
+
+const s = {
+  eyebrow: {
+    fontFamily: font.mono,
+    fontSize: "11px",
+    fontWeight: 600,
+    letterSpacing: "0.08em",
+    color: color.signal,
+    marginBottom: "6px",
+  },
+  card: {
+    background: "#fff",
+    border: `1px solid ${color.lineLight}`,
+    padding: "2rem",
+    maxWidth: "700px",
+  },
+  label: {
+    display: "block",
+    fontFamily: font.mono,
+    fontSize: "11px",
+    fontWeight: 600,
+    letterSpacing: "0.04em",
+    textTransform: "uppercase",
+    marginBottom: "7px",
+    color: color.graphite,
+  },
+  group: { marginBottom: "1.25rem" },
+  row: { display: "grid", gridTemplateColumns: "1fr 1fr", gap: "1rem" },
+  btn: {
+    padding: "12px 26px",
+    background: color.ink,
+    color: "#fff",
+    border: "none",
+    fontFamily: font.mono,
+    fontSize: "12px",
+    fontWeight: 700,
+    textTransform: "uppercase",
+    letterSpacing: "0.04em",
+    cursor: "pointer",
+  },
+  h1: {
+    fontFamily: font.display,
+    fontSize: "24px",
+    fontWeight: 700,
+    marginBottom: "0.25rem",
+    letterSpacing: "-0.02em",
+  },
+  sub: { fontSize: "13px", color: color.graphite, marginBottom: "1.75rem" },
+};

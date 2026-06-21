@@ -5,18 +5,7 @@ import { fetchAllJobs } from "../../api/jobs";
 import Layout from "../../components/Layout";
 import JobCard from "../../components/JobCard";
 import { JobCardSkeleton } from "../../components/Skeleton";
-
-const s = {
-  h1: { fontSize: "20px", fontWeight: "600", marginBottom: "1rem" },
-  filters: { display: "flex", gap: "10px", marginBottom: "1.5rem" },
-  search: { flex: 2 },
-  loc: { flex: 1 },
-  grid: {
-    display: "grid",
-    gridTemplateColumns: "repeat(auto-fill, minmax(300px,1fr))",
-    gap: "1rem",
-  },
-};
+import { color, font } from "../../styles/theme";
 
 export default function BrowseJobs() {
   const navigate = useNavigate();
@@ -35,6 +24,7 @@ export default function BrowseJobs() {
 
   return (
     <Layout>
+      <div style={s.eyebrow}>// opportunities</div>
       <div style={s.h1}>Browse jobs</div>
       <div style={s.filters}>
         <div style={s.search}>
@@ -53,19 +43,7 @@ export default function BrowseJobs() {
             onKeyDown={(e) => e.key === "Enter" && handleSearch()}
           />
         </div>
-        <button
-          onClick={handleSearch}
-          style={{
-            padding: "9px 20px",
-            background: "#7F77DD",
-            color: "#fff",
-            border: "none",
-            borderRadius: "8px",
-            fontSize: "13px",
-            cursor: "pointer",
-            whiteSpace: "nowrap",
-          }}
-        >
+        <button onClick={handleSearch} style={s.searchBtn}>
           Search
         </button>
       </div>
@@ -77,7 +55,7 @@ export default function BrowseJobs() {
           ))}
         </div>
       ) : jobs.length === 0 ? (
-        <p style={{ color: "#aaa", fontSize: "14px" }}>No jobs found.</p>
+        <p style={s.empty}>No jobs found.</p>
       ) : (
         <div style={s.grid}>
           {jobs.map((job) => (
@@ -92,3 +70,43 @@ export default function BrowseJobs() {
     </Layout>
   );
 }
+
+const s = {
+  eyebrow: {
+    fontFamily: font.mono,
+    fontSize: "11px",
+    fontWeight: 600,
+    letterSpacing: "0.08em",
+    color: color.signal,
+    marginBottom: "6px",
+  },
+  h1: {
+    fontFamily: font.display,
+    fontSize: "23px",
+    fontWeight: 700,
+    marginBottom: "1.25rem",
+    letterSpacing: "-0.02em",
+  },
+  filters: { display: "flex", gap: "10px", marginBottom: "1.5rem" },
+  search: { flex: 2 },
+  loc: { flex: 1 },
+  searchBtn: {
+    padding: "10px 22px",
+    background: color.ink,
+    color: "#fff",
+    border: "none",
+    fontFamily: font.mono,
+    fontSize: "12px",
+    fontWeight: 700,
+    textTransform: "uppercase",
+    letterSpacing: "0.04em",
+    cursor: "pointer",
+    whiteSpace: "nowrap",
+  },
+  grid: {
+    display: "grid",
+    gridTemplateColumns: "repeat(auto-fill, minmax(300px,1fr))",
+    gap: "1rem",
+  },
+  empty: { color: color.graphiteDim, fontSize: "14px" },
+};

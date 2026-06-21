@@ -5,67 +5,7 @@ import Layout from "../../components/Layout";
 import StatusBadge from "../../components/StatusBadge";
 import toast from "react-hot-toast";
 import { ListSkeleton } from "../../components/Skeleton";
-
-const s = {
-  header: {
-    display: "flex",
-    justifyContent: "space-between",
-    alignItems: "center",
-    marginBottom: "1.5rem",
-  },
-  h1: { fontSize: "20px", fontWeight: "600" },
-  btn: {
-    padding: "9px 18px",
-    background: "#7F77DD",
-    color: "#fff",
-    border: "none",
-    borderRadius: "8px",
-    fontSize: "13px",
-    fontWeight: "500",
-    textDecoration: "none",
-  },
-  card: {
-    background: "#fff",
-    border: "1px solid #eee",
-    borderRadius: "12px",
-    padding: "1.25rem",
-    marginBottom: "10px",
-  },
-  row: {
-    display: "flex",
-    justifyContent: "space-between",
-    alignItems: "flex-start",
-  },
-  title: { fontWeight: "600", fontSize: "15px", marginBottom: "4px" },
-  meta: { fontSize: "13px", color: "#888" },
-  skills: { display: "flex", flexWrap: "wrap", gap: "5px", marginTop: "10px" },
-  skill: {
-    background: "#f0effc",
-    color: "#5a52c0",
-    fontSize: "11px",
-    padding: "3px 9px",
-    borderRadius: "999px",
-  },
-  actions: { display: "flex", gap: "8px", flexShrink: 0 },
-  linkBtn: {
-    fontSize: "13px",
-    color: "#7F77DD",
-    fontWeight: "500",
-    padding: "5px 10px",
-    borderRadius: "6px",
-    background: "#f0effc",
-  },
-  closeBtn: {
-    fontSize: "13px",
-    color: "#c0392b",
-    background: "#fdf0f0",
-    border: "none",
-    borderRadius: "6px",
-    padding: "5px 10px",
-    cursor: "pointer",
-    fontWeight: "500",
-  },
-};
+import { color, font } from "../../styles/theme";
 
 export default function MyJobs() {
   const queryClient = useQueryClient();
@@ -87,7 +27,10 @@ export default function MyJobs() {
   return (
     <Layout>
       <div style={s.header}>
-        <div style={s.h1}>My jobs ({jobs.length})</div>
+        <div>
+          <div style={s.eyebrow}>// my jobs</div>
+          <div style={s.h1}>My jobs ({jobs.length})</div>
+        </div>
         <Link to="/recruiter/jobs/new" style={s.btn}>
           + Post new job
         </Link>
@@ -96,7 +39,7 @@ export default function MyJobs() {
       {isLoading ? (
         <ListSkeleton rows={4} />
       ) : jobs.length === 0 ? (
-        <p style={{ color: "#aaa", fontSize: "14px" }}>No jobs posted yet.</p>
+        <p style={s.empty}>No jobs posted yet.</p>
       ) : (
         jobs.map((job) => (
           <div key={job._id} style={s.card}>
@@ -140,3 +83,94 @@ export default function MyJobs() {
     </Layout>
   );
 }
+
+const s = {
+  header: {
+    display: "flex",
+    justifyContent: "space-between",
+    alignItems: "flex-end",
+    marginBottom: "1.75rem",
+  },
+  eyebrow: {
+    fontFamily: font.mono,
+    fontSize: "11px",
+    fontWeight: 600,
+    letterSpacing: "0.08em",
+    color: color.signal,
+    marginBottom: "6px",
+  },
+  h1: {
+    fontFamily: font.display,
+    fontSize: "24px",
+    fontWeight: 700,
+    letterSpacing: "-0.02em",
+  },
+  btn: {
+    padding: "10px 18px",
+    background: color.ink,
+    color: "#fff",
+    border: "none",
+    fontFamily: font.mono,
+    fontSize: "11px",
+    fontWeight: 700,
+    textTransform: "uppercase",
+    letterSpacing: "0.04em",
+  },
+  card: {
+    background: "#fff",
+    border: `1px solid ${color.lineLight}`,
+    borderLeft: `3px solid ${color.paper3}`,
+    padding: "1.25rem",
+    marginBottom: "10px",
+  },
+  row: {
+    display: "flex",
+    justifyContent: "space-between",
+    alignItems: "flex-start",
+  },
+  title: {
+    fontFamily: font.display,
+    fontWeight: 600,
+    fontSize: "16px",
+    marginBottom: "6px",
+  },
+  meta: {
+    fontSize: "13px",
+    color: color.graphite,
+    display: "flex",
+    alignItems: "center",
+    gap: "6px",
+  },
+  skills: { display: "flex", flexWrap: "wrap", gap: "6px", marginTop: "12px" },
+  skill: {
+    fontFamily: font.mono,
+    fontSize: "10px",
+    color: color.graphite,
+    border: `1px solid ${color.lineLight}`,
+    padding: "3px 9px",
+  },
+  actions: { display: "flex", gap: "8px", flexShrink: 0 },
+  linkBtn: {
+    fontFamily: font.mono,
+    fontSize: "11px",
+    color: color.ink,
+    fontWeight: 700,
+    padding: "7px 12px",
+    border: `1px solid ${color.lineLightStrong}`,
+    textTransform: "uppercase",
+    letterSpacing: "0.03em",
+  },
+  closeBtn: {
+    fontFamily: font.mono,
+    fontSize: "11px",
+    color: color.signal,
+    fontWeight: 700,
+    background: "none",
+    border: `1px solid ${color.signal}`,
+    padding: "7px 12px",
+    cursor: "pointer",
+    textTransform: "uppercase",
+    letterSpacing: "0.03em",
+  },
+  empty: { color: color.graphiteDim, fontSize: "14px" },
+};
