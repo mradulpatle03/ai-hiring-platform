@@ -190,7 +190,23 @@ Return JSON in exactly this format (scores must be 0-10 integers):
 }`;
 
   const raw = await callGroq(system, user, 1500);
-  return parseJSON(raw);
+  const parsed = parseJSON(raw);
+
+  // Don't trust the LLM's self-reported overallScore — recompute it as the
+  // real average of the 5 dimension scores (each 0-10, scaled to 0-100).
+  const dims = parsed.dimensions || {};
+  const scores = [
+    dims.technicalSkills?.score || 0,
+    dims.experienceDepth?.score || 0,
+    dims.projectImpact?.score || 0,
+    dims.communicationClarity?.score || 0,
+    dims.growthPotential?.score || 0,
+  ];
+  parsed.overallScore = Math.round(
+    (scores.reduce((a, b) => a + b, 0) / 5) * 10,
+  );
+
+  return parsed;
 };
 
 // ─── 5. Generate interview questions ─────────────────────────────────

@@ -42,18 +42,11 @@ import {
 
 globalThis.fetch = fetch;
 
-const allowedOrigins = [process.env.CLIENT_URL, "http://localhost:5173"].filter(
-  Boolean,
-);
-
 const app = express();
 const server = createServer(app);
 
 const io = new Server(server, {
-  cors: {
-    origin: allowedOrigins,
-    credentials: true,
-  },
+  cors: { origin: process.env.CLIENT_URL, credentials: true },
 });
 
 app.use(helmetConfig);
@@ -61,17 +54,7 @@ app.set("trust proxy", 1);
 
 app.use("/api", globalLimiter);
 
-app.use(cors({
-  origin: (origin, callback) => {
-    if (!origin || allowedOrigins.includes(origin)) {
-      callback(null, true)
-    } else {
-      callback(new Error('Not allowed by CORS'))
-    }
-  },
-  credentials: true,
-}));
-
+app.use(cors({ origin: process.env.CLIENT_URL, credentials: true }));
 app.use(express.json({ limit: "10kb" })); // prevent huge JSON payloads
 app.use(express.urlencoded({ extended: true, limit: "10kb" }));
 app.use(cookieParser());
@@ -97,28 +80,24 @@ app.use(errorHandler);
 // Reads JWT from handshake auth token
 io.use(async (socket, next) => {
   try {
-    const cookieHeader = socket.handshake.headers.cookie || ''
-    let token = cookieHeader
-      .split(';')
-      .map(c => c.trim())
-      .find(c => c.startsWith('token='))
-      ?.split('=')[1]
+    // Read token from HTTP-only cookie instead of localStorage
+    const cookieHeader = socket.handshake.headers.cookie || "";
+    const token = cookieHeader
+      .split(";")
+      .map((c) => c.trim())
+      .find((c) => c.startsWith("token="))
+      ?.split("=")[1];
 
-    // Production fallback — try auth header
-    if (!token && socket.handshake.auth?.token) {
-      token = socket.handshake.auth.token
-    }
+    if (!token) return next(new Error("Authentication required"));
 
-    if (!token) return next(new Error('Authentication required'))
+    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    const user = await User.findById(decoded.id).select("-password");
+    if (!user) return next(new Error("User not found"));
 
-    const decoded = jwt.verify(token, process.env.JWT_SECRET)
-    const user    = await User.findById(decoded.id).select('-password')
-    if (!user) return next(new Error('User not found'))
-
-    socket.user = user
-    next()
+    socket.user = user;
+    next();
   } catch (err) {
-    next(new Error('Invalid token'))
+    next(new Error("Invalid token"));
   }
 });
 

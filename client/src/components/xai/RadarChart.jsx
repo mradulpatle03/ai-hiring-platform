@@ -97,12 +97,12 @@ export default function RadarChart({ dimensions: scores, size = SIZE, overallSco
     return { ...p, label: dim.short, fullLabel: dim.label, score, key: dim.key, index: i };
   });
 
-  const avg =
-    overallScore ??
-    +(
-      Object.values(scores || {}).reduce((s, d) => s + (d.score || 0), 0) /
-      Math.max(1, Object.keys(scores || {}).length)
-    ).toFixed(1);
+  const avg = (
+  Object.values(scores || {}).reduce(
+    (sum, item) => sum + (Number(item?.score) || 0),
+    0
+  ) / Math.max(Object.keys(scores || {}).length, 1)
+).toFixed(1);
 
   const avgColor = getColor(avg);
 

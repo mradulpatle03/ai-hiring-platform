@@ -3,9 +3,6 @@ const required = [
   'JWT_SECRET',
   'CLIENT_URL',
   'GROQ_API_KEY',
-  'CLOUDINARY_CLOUD_NAME',
-  'CLOUDINARY_API_KEY',
-  'CLOUDINARY_API_SECRET',
 ]
 
 const optional = [
