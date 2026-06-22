@@ -21,23 +21,23 @@ import Interviews from "./pages/shared/Interviews";
 import CandidateProfile from "./pages/candidate/Profile";
 import SearchCandidates from "./pages/recruiter/SearchCandidates";
 
-import ErrorBoundary         from './components/ErrorBoundary'
-import RouteErrorBoundary    from './components/RouteErrorBoundary'
-import NotFound from './pages/NotFound'
+import ErrorBoundary from "./components/ErrorBoundary";
+import RouteErrorBoundary from "./components/RouteErrorBoundary";
+import NotFound from "./pages/NotFound";
+import HomePage from "./pages/Homepage";
 
 const R = ({ children, role }) => (
   <ProtectedRoute role={role}>
-    <RouteErrorBoundary>
-      {children}
-    </RouteErrorBoundary>
+    <RouteErrorBoundary>{children}</RouteErrorBoundary>
   </ProtectedRoute>
-)
+);
 
 export default function App() {
   return (
     <AuthProvider>
       <BrowserRouter>
         <Routes>
+          <Route path="/" element={<HomePage />} />
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
           <Route path="/unauthorized" element={<Unauthorized />} />

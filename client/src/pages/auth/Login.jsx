@@ -187,6 +187,24 @@ export default function Login() {
           </div>
 
           <div style={styles.formHeader}>
+            <Link
+              to="/"
+              style={{
+                display: "inline-flex",
+                alignItems: "center",
+                gap: "6px",
+                marginBottom: "1rem",
+                color: color.graphite,
+                textDecoration: "none",
+                fontFamily: font.mono,
+                fontSize: "12px",
+                fontWeight: 600,
+                textTransform: "uppercase",
+                letterSpacing: "0.04em",
+              }}
+            >
+              ← Back to Home
+            </Link>
             <p style={styles.eyebrow}>// sign in</p>
             <h1 className="hf-title" style={styles.title}>
               Access your dashboard

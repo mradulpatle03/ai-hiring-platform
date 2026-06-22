@@ -14,9 +14,10 @@ api.interceptors.response.use(
     const message = err.response?.data?.message
 
     if (status === 401) {
-      if (!window.location.pathname.includes('/login') &&
+      if (window.location.pathname !== '/' &&
+          !window.location.pathname.includes('/login') &&
           !window.location.pathname.includes('/register')) {
-        window.location.href = '/login'
+        window.location.href = '/'
       }
     }
 

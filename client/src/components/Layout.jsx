@@ -86,7 +86,7 @@ export default function Layout({ children }) {
 
   const handleLogout = async () => {
     await logout();
-    navigate("/login");
+    navigate("/");
   };
 
   const initials = user?.name

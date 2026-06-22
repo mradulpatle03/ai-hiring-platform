@@ -6,7 +6,7 @@ const ProtectedRoute = ({ children, role }) => {
   const { user, loading } = useAuth()
 
   if (loading) return <PageLoader message="Checking session..."/>
-  if (!user)   return <Navigate to="/login" replace/>
+  if (!user)   return <Navigate to="/" replace/>
   if (role && user.role !== role) return <Navigate to="/unauthorized" replace/>
 
   return children

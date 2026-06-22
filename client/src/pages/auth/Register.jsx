@@ -192,6 +192,24 @@ export default function Register() {
           </div>
 
           <div style={styles.formHeader}>
+            <Link
+              to="/"
+              style={{
+                display: "inline-flex",
+                alignItems: "center",
+                gap: "6px",
+                color: color.graphite,
+                textDecoration: "none",
+                fontFamily: font.mono,
+                fontSize: "12px",
+                fontWeight: 600,
+                textTransform: "uppercase",
+                letterSpacing: "0.04em",
+              }}
+            >
+              ← Back to Home
+            </Link>
+            <div style={styles.formHeader}></div>
             <p style={styles.eyebrow}>// get started</p>
             <h1 className="hf-title" style={styles.title}>
               Create your account
