@@ -10,86 +10,142 @@ import {
 
 const statusConfig = {
   pending_selection: {
-    icon: <AlertCircle size={14} color="#EF9F27" />,
-    label: "Awaiting slot selection",
-    color: "#EF9F27",
-    bg: "#FAEEDA",
+    icon: <AlertCircle size={12} color="#B07A0E" />,
+    label: "Awaiting slot",
+    color: "#B07A0E",
+    bg: "rgba(176,122,14,0.10)",
   },
   scheduled: {
-    icon: <CheckCircle size={14} color="#1D9E75" />,
+    icon: <CheckCircle size={12} color="#1D8A4E" />,
     label: "Scheduled",
-    color: "#1D9E75",
-    bg: "#E1F5EE",
+    color: "#1D8A4E",
+    bg: "rgba(29,138,78,0.10)",
   },
   cancelled: {
-    icon: <XCircle size={14} color="#E24B4A" />,
+    icon: <XCircle size={12} color="#FF4D2E" />,
     label: "Cancelled",
-    color: "#E24B4A",
-    bg: "#FCEBEB",
+    color: "#FF4D2E",
+    bg: "rgba(255,77,46,0.10)",
   },
   completed: {
-    icon: <CheckCircle size={14} color="#7F77DD" />,
+    icon: <CheckCircle size={12} color="#4D7CFF" />,
     label: "Completed",
-    color: "#7F77DD",
-    bg: "#EEEDFE",
+    color: "#4D7CFF",
+    bg: "rgba(77,124,255,0.10)",
   },
 };
 
 const s = {
   card: {
     background: "#fff",
-    border: "1px solid #eee",
-    borderRadius: "12px",
-    padding: "1.25rem",
+    border: "1px solid rgba(11,14,20,0.10)",
+    borderRadius: "4px",
+    padding: "18px 20px",
+    fontFamily: "'Inter', -apple-system, BlinkMacSystemFont, sans-serif",
   },
   top: {
     display: "flex",
     justifyContent: "space-between",
     alignItems: "flex-start",
-    marginBottom: "10px",
+    marginBottom: "14px",
   },
-  jobTitle: { fontWeight: "600", fontSize: "14px", marginBottom: "2px" },
-  company: { fontSize: "12px", color: "#888" },
+  jobTitle: {
+    fontFamily: "'Space Grotesk', sans-serif",
+    fontWeight: "600",
+    fontSize: "15px",
+    letterSpacing: "-0.02em",
+    color: "#0B0E14",
+    marginBottom: "2px",
+  },
+  company: {
+    fontFamily: "'JetBrains Mono', monospace",
+    fontSize: "10px",
+    fontWeight: "600",
+    letterSpacing: "0.08em",
+    textTransform: "uppercase",
+    color: "#5C5F6B",
+  },
   badge: (bg, color) => ({
     display: "inline-flex",
     alignItems: "center",
     gap: "5px",
-    padding: "4px 10px",
-    borderRadius: "999px",
+    padding: "4px 9px",
     background: bg,
     color,
-    fontSize: "12px",
-    fontWeight: "500",
+    fontFamily: "'JetBrains Mono', monospace",
+    fontSize: "10px",
+    fontWeight: "600",
+    letterSpacing: "0.04em",
+    textTransform: "uppercase",
   }),
+  divider: {
+    borderTop: "1px solid rgba(11,14,20,0.08)",
+    margin: "12px 0",
+  },
   row: {
     display: "flex",
     alignItems: "center",
-    gap: "6px",
+    gap: "7px",
     fontSize: "13px",
-    color: "#555",
-    marginBottom: "5px",
+    color: "#5C5F6B",
+    marginBottom: "6px",
+    fontFamily: "'Inter', sans-serif",
   },
-  actions: { display: "flex", gap: "8px", marginTop: "12px" },
-  btn: (variant) => ({
-    padding: "7px 14px",
-    borderRadius: "7px",
+  rowMono: {
+    display: "flex",
+    alignItems: "center",
+    gap: "7px",
+    fontFamily: "'JetBrains Mono', monospace",
     fontSize: "12px",
-    fontWeight: "500",
+    fontWeight: "600",
+    color: "#0B0E14",
+    marginBottom: "6px",
+  },
+  actions: {
+    display: "flex",
+    gap: "6px",
+    marginTop: "14px",
+  },
+  btn: (variant) => ({
+    padding: "7px 12px",
+    borderRadius: "2px",
+    fontFamily: "'JetBrains Mono', monospace",
+    fontSize: "10px",
+    fontWeight: "700",
+    letterSpacing: "0.05em",
+    textTransform: "uppercase",
     cursor: "pointer",
-    border: "none",
+    border:
+      variant === "primary"
+        ? "none"
+        : variant === "danger"
+          ? "1px solid rgba(255,77,46,0.25)"
+          : "1px solid rgba(11,14,20,0.10)",
     background:
       variant === "primary"
-        ? "#7F77DD"
+        ? "#0B0E14"
         : variant === "danger"
-          ? "#fdf0f0"
-          : "#f5f5f5",
+          ? "rgba(255,77,46,0.08)"
+          : "#fff",
     color:
       variant === "primary"
         ? "#fff"
         : variant === "danger"
-          ? "#c0392b"
-          : "#555",
+          ? "#FF4D2E"
+          : "#5C5F6B",
   }),
+  meetLink: {
+    display: "inline-flex",
+    alignItems: "center",
+    gap: "6px",
+    fontFamily: "'JetBrains Mono', monospace",
+    fontSize: "11px",
+    fontWeight: "600",
+    color: "#4D7CFF",
+    textDecoration: "none",
+    marginTop: "6px",
+    letterSpacing: "0.04em",
+  },
 };
 
 export default function InterviewCard({
@@ -118,8 +174,8 @@ export default function InterviewCard({
       </div>
 
       <div style={s.row}>
-        <Calendar size={13} color="#aaa" />
-        <span style={{ fontSize: "12px", color: "#888" }}>
+        <Calendar size={12} color="#8A8D98" />
+        <span style={{ fontSize: "12px", color: "#8A8D98" }}>
           {userRole === "recruiter"
             ? `Candidate: ${other?.name}`
             : `Recruiter: ${other?.name}`}
@@ -128,25 +184,23 @@ export default function InterviewCard({
 
       {isScheduled && interview.confirmedSlot && (
         <>
-          <div style={s.row}>
-            <Calendar size={13} color="#1D9E75" />
-            <span>
-              {format(new Date(interview.confirmedSlot), "EEEE, MMMM d yyyy")}
-            </span>
+          <div style={s.divider} />
+          <div style={s.rowMono}>
+            <Calendar size={12} color="#1D8A4E" />
+            {format(new Date(interview.confirmedSlot), "EEE, MMM d yyyy")}
           </div>
-          <div style={s.row}>
-            <Clock size={13} color="#1D9E75" />
-            <span>{format(new Date(interview.confirmedSlot), "h:mm a")}</span>
+          <div style={s.rowMono}>
+            <Clock size={12} color="#1D8A4E" />
+            {format(new Date(interview.confirmedSlot), "h:mm a")}
           </div>
         </>
       )}
 
       {interview.status === "pending_selection" && (
         <div style={s.row}>
-          <Clock size={13} color="#aaa" />
-          <span style={{ fontSize: "12px", color: "#888" }}>
-            {interview.slots?.filter((s) => s.available).length} slot(s)
-            proposed
+          <Clock size={12} color="#8A8D98" />
+          <span style={{ fontSize: "12px", color: "#8A8D98" }}>
+            {interview.slots?.filter((s) => s.available).length} slot(s) proposed
           </span>
         </div>
       )}
@@ -156,35 +210,27 @@ export default function InterviewCard({
           href={interview.meetLink}
           target="_blank"
           rel="noreferrer"
-          style={{
-            ...s.row,
-            color: "#7F77DD",
-            textDecoration: "none",
-            marginTop: "6px",
-          }}
+          style={s.meetLink}
         >
-          <Video size={13} /> Join meeting
+          <Video size={12} /> Join meeting →
         </a>
       )}
 
       <div style={s.actions}>
-        {/* Candidate: select slot */}
         {userRole === "candidate" &&
           interview.status === "pending_selection" && (
             <button style={s.btn("primary")} onClick={onSelectSlot}>
               Select a time →
             </button>
           )}
-        {/* Recruiter: mark complete */}
         {userRole === "recruiter" && isScheduled && isPastSlot && (
           <button style={s.btn("primary")} onClick={onComplete}>
-            Mark as completed
+            Mark complete
           </button>
         )}
-        {/* Cancel button */}
         {["pending_selection", "scheduled"].includes(interview.status) && (
           <button style={s.btn("danger")} onClick={onCancel}>
-            Cancel interview
+            Cancel
           </button>
         )}
       </div>

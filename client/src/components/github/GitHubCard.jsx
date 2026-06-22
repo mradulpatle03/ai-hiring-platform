@@ -22,86 +22,123 @@ import toast from "react-hot-toast";
 const s = {
   card: {
     background: "#fff",
-    border: "1px solid #eee",
-    borderRadius: "12px",
+    border: "1px solid var(--line-light)",
+    borderRadius: "var(--radius-md)",
     overflow: "hidden",
   },
   header: {
-    background: "#0d1117",
-    padding: "1.25rem",
+    background: "var(--ink)",
+    padding: "18px 20px",
     display: "flex",
     alignItems: "center",
-    gap: "12px",
+    gap: "14px",
+    borderBottom: "1px solid var(--line)",
   },
   avatar: {
-    width: "52px",
-    height: "52px",
-    borderRadius: "50%",
-    border: "2px solid #333",
+    width: "48px",
+    height: "48px",
+    border: "1px solid var(--line)",
+    flexShrink: 0,
+    display: "block",
   },
   hName: {
+    fontFamily: "var(--font-display)",
     color: "#fff",
-    fontWeight: "600",
-    fontSize: "16px",
-    marginBottom: "2px",
+    fontWeight: "700",
+    fontSize: "15px",
+    letterSpacing: "-0.01em",
+    marginBottom: "3px",
   },
-  hBio: { color: "#8b949e", fontSize: "12px", lineHeight: 1.4 },
-  body: { padding: "1.25rem" },
+  hBio: {
+    fontFamily: "var(--font-body)",
+    color: "var(--graphite-dim)",
+    fontSize: "11px",
+    lineHeight: 1.4,
+  },
+  body: { padding: "18px 20px" },
   statGrid: {
     display: "grid",
     gridTemplateColumns: "repeat(4,1fr)",
-    gap: "10px",
-    marginBottom: "1.25rem",
+    gap: "1px",
+    background: "var(--line-light)",
+    border: "1px solid var(--line-light)",
+    marginBottom: "18px",
   },
   stat: {
     textAlign: "center",
-    background: "#f9f9f9",
-    borderRadius: "8px",
-    padding: "10px 6px",
+    background: "var(--paper)",
+    padding: "12px 6px",
   },
   statNum: {
-    fontSize: "18px",
-    fontWeight: "600",
-    color: "#1a1a1a",
+    fontFamily: "var(--font-display)",
+    fontSize: "20px",
+    fontWeight: "700",
+    letterSpacing: "-0.02em",
+    color: "var(--ink)",
     lineHeight: 1,
   },
-  statLbl: { fontSize: "10px", color: "#888", marginTop: "3px" },
-  section: { marginBottom: "1.25rem" },
-  secTitle: {
-    fontSize: "12px",
+  statLbl: {
+    fontFamily: "var(--font-mono)",
+    fontSize: "9px",
     fontWeight: "600",
-    color: "#555",
+    letterSpacing: "0.08em",
     textTransform: "uppercase",
-    letterSpacing: "0.05em",
+    color: "var(--graphite)",
+    marginTop: "4px",
+  },
+  section: { marginBottom: "16px" },
+  secTitle: {
+    fontFamily: "var(--font-mono)",
+    fontSize: "10px",
+    fontWeight: "600",
+    letterSpacing: "0.1em",
+    textTransform: "uppercase",
+    color: "var(--graphite)",
     marginBottom: "8px",
+    display: "flex",
+    justifyContent: "space-between",
+    alignItems: "center",
+    cursor: "pointer",
+  },
+  secToggle: {
+    fontFamily: "var(--font-mono)",
+    fontSize: "9px",
+    color: "var(--graphite-dim)",
+    textTransform: "none",
+    letterSpacing: 0,
+    fontWeight: "400",
   },
   langPill: {
+    fontFamily: "var(--font-mono)",
     display: "inline-block",
-    padding: "4px 10px",
-    borderRadius: "999px",
-    background: "#f0effc",
-    color: "#5a52c0",
-    fontSize: "12px",
+    padding: "4px 9px",
+    border: "1px solid var(--line-light)",
+    color: "var(--graphite)",
+    fontSize: "10px",
+    fontWeight: "600",
     marginRight: "5px",
     marginBottom: "5px",
-    fontWeight: "500",
+    borderRadius: "var(--radius-sm)",
   },
   repoCard: {
-    border: "1px solid #eee",
-    borderRadius: "8px",
+    border: "1px solid var(--line-light)",
+    borderRadius: "var(--radius-sm)",
     padding: "10px 12px",
     marginBottom: "6px",
+    background: "var(--paper)",
   },
   repoName: {
+    fontFamily: "var(--font-mono)",
     fontWeight: "600",
-    fontSize: "13px",
-    color: "#7F77DD",
-    marginBottom: "3px",
+    fontSize: "11px",
+    letterSpacing: "0.02em",
+    color: "var(--wire)",
+    marginBottom: "4px",
   },
   repoDesc: {
     fontSize: "12px",
-    color: "#888",
-    marginBottom: "5px",
+    color: "var(--graphite)",
+    marginBottom: "6px",
     lineHeight: 1.4,
     display: "-webkit-box",
     WebkitLineClamp: 2,
@@ -111,46 +148,73 @@ const s = {
   repoMeta: {
     display: "flex",
     gap: "12px",
-    fontSize: "11px",
-    color: "#aaa",
+    fontFamily: "var(--font-mono)",
+    fontSize: "10px",
+    color: "var(--graphite-dim)",
     alignItems: "center",
   },
+  scoreWrap: {
+    background: "var(--paper)",
+    border: "1px solid var(--line-light)",
+    borderLeft: "3px solid var(--volt)",
+    borderRadius: "var(--radius-sm)",
+    padding: "12px 14px",
+    marginBottom: "18px",
+    display: "flex",
+    alignItems: "center",
+    gap: "12px",
+  },
   scoreBar: {
-    height: "6px",
-    background: "#f0effc",
-    borderRadius: "3px",
+    height: "4px",
+    background: "var(--paper-3)",
     overflow: "hidden",
     marginTop: "6px",
   },
   scoreFill: {
     height: "100%",
-    borderRadius: "3px",
-    background: "linear-gradient(90deg, #7F77DD, #1D9E75)",
+    background: "var(--volt)",
     transition: "width 0.6s ease",
   },
   actions: {
     display: "flex",
     gap: "8px",
-    marginTop: "1.25rem",
-    paddingTop: "1rem",
-    borderTop: "1px solid #f5f5f5",
+    marginTop: "16px",
+    paddingTop: "14px",
+    borderTop: "1px solid var(--line-light)",
   },
-  btn: (v) => ({
+  btnPrimary: {
     display: "flex",
     alignItems: "center",
     gap: "6px",
     padding: "7px 14px",
-    borderRadius: "8px",
-    fontSize: "12px",
-    fontWeight: "500",
-    border: "1px solid",
+    background: "var(--ink)",
+    color: "#fff",
+    border: "1px solid var(--ink)",
+    borderRadius: "var(--radius-sm)",
+    fontFamily: "var(--font-mono)",
+    fontSize: "10px",
+    fontWeight: "600",
+    letterSpacing: "0.05em",
+    textTransform: "uppercase",
     cursor: "pointer",
-    background:
-      v === "danger" ? "#fff0f0" : v === "primary" ? "#0d1117" : "#f5f5f5",
-    color: v === "danger" ? "#c0392b" : v === "primary" ? "#fff" : "#555",
-    borderColor:
-      v === "danger" ? "#fde0e0" : v === "primary" ? "#0d1117" : "#e0e0e0",
-  }),
+  },
+  btnDanger: {
+    display: "flex",
+    alignItems: "center",
+    gap: "6px",
+    padding: "7px 14px",
+    background: "#fff",
+    color: "var(--signal)",
+    border: "1px solid rgba(255,77,46,0.3)",
+    borderRadius: "var(--radius-sm)",
+    fontFamily: "var(--font-mono)",
+    fontSize: "10px",
+    fontWeight: "600",
+    letterSpacing: "0.05em",
+    textTransform: "uppercase",
+    cursor: "pointer",
+  },
+  // connect state
   connect: {
     display: "flex",
     flexDirection: "column",
@@ -158,60 +222,88 @@ const s = {
     padding: "2.5rem 1.5rem",
     textAlign: "center",
   },
-  conIcon: { marginBottom: "12px" },
-  conTitle: { fontSize: "16px", fontWeight: "600", marginBottom: "6px" },
-  conSub: {
-    fontSize: "13px",
-    color: "#888",
-    marginBottom: "1.5rem",
-    lineHeight: 1.6,
-    maxWidth: "300px",
-  },
-  conBtn: {
+  conIconWrap: {
+    width: "56px",
+    height: "56px",
+    background: "var(--ink)",
     display: "flex",
     alignItems: "center",
-    gap: "8px",
-    padding: "11px 24px",
-    background: "#0d1117",
-    color: "#fff",
-    border: "none",
-    borderRadius: "8px",
-    fontSize: "14px",
-    fontWeight: "500",
-    cursor: "pointer",
+    justifyContent: "center",
+    marginBottom: "16px",
+  },
+  conTitle: {
+    fontFamily: "var(--font-display)",
+    fontSize: "18px",
+    fontWeight: "700",
+    letterSpacing: "-0.02em",
+    color: "var(--ink)",
+    marginBottom: "8px",
+  },
+  conSub: {
+    fontSize: "13px",
+    color: "var(--graphite)",
+    marginBottom: "18px",
+    lineHeight: 1.6,
+    maxWidth: "280px",
   },
   perks: {
     display: "flex",
-    gap: "10px",
+    gap: "6px",
     flexWrap: "wrap",
     justifyContent: "center",
-    marginBottom: "1.5rem",
+    marginBottom: "20px",
   },
   perk: {
     display: "flex",
     alignItems: "center",
     gap: "5px",
-    fontSize: "12px",
-    color: "#555",
-    background: "#f5f5f5",
+    fontFamily: "var(--font-mono)",
+    fontSize: "10px",
+    fontWeight: "600",
+    letterSpacing: "0.04em",
+    textTransform: "uppercase",
+    color: "var(--graphite)",
+    background: "var(--paper)",
+    border: "1px solid var(--line-light)",
     padding: "5px 10px",
-    borderRadius: "999px",
+    borderRadius: "var(--radius-sm)",
+  },
+  conBtn: {
+    display: "flex",
+    alignItems: "center",
+    gap: "8px",
+    padding: "10px 22px",
+    background: "var(--ink)",
+    color: "#fff",
+    border: "none",
+    borderRadius: "var(--radius-sm)",
+    fontFamily: "var(--font-mono)",
+    fontSize: "11px",
+    fontWeight: "700",
+    letterSpacing: "0.06em",
+    textTransform: "uppercase",
+    cursor: "pointer",
+  },
+  loading: {
+    padding: "2rem",
+    fontFamily: "var(--font-mono)",
+    fontSize: "11px",
+    letterSpacing: "0.04em",
+    color: "var(--graphite)",
+    textAlign: "center",
+  },
+  lastSynced: {
+    fontFamily: "var(--font-mono)",
+    fontSize: "10px",
+    letterSpacing: "0.04em",
+    color: "var(--graphite-dim)",
+    marginBottom: "4px",
   },
 };
 
 const ScoreRing = ({ score }) => (
-  <div
-    style={{
-      display: "flex",
-      alignItems: "center",
-      gap: "10px",
-      background: "#f9f8ff",
-      borderRadius: "10px",
-      padding: "12px 14px",
-      marginBottom: "1.25rem",
-    }}
-  >
-    <Zap size={16} color="#7F77DD" />
+  <div style={s.scoreWrap}>
+    <Zap size={14} color="var(--ink)" />
     <div style={{ flex: 1 }}>
       <div
         style={{
@@ -220,10 +312,27 @@ const ScoreRing = ({ score }) => (
           marginBottom: "4px",
         }}
       >
-        <span style={{ fontSize: "12px", fontWeight: "600", color: "#555" }}>
+        <span
+          style={{
+            fontFamily: "var(--font-mono)",
+            fontSize: "10px",
+            fontWeight: "600",
+            letterSpacing: "0.08em",
+            textTransform: "uppercase",
+            color: "var(--graphite)",
+          }}
+        >
           GitHub Activity Score
         </span>
-        <span style={{ fontSize: "13px", fontWeight: "600", color: "#7F77DD" }}>
+        <span
+          style={{
+            fontFamily: "var(--font-display)",
+            fontSize: "14px",
+            fontWeight: "700",
+            color: "var(--ink)",
+            letterSpacing: "-0.01em",
+          }}
+        >
           {score}/100
         </span>
       </div>
@@ -264,26 +373,16 @@ export default function GitHubCard() {
   if (isLoading)
     return (
       <div style={s.card}>
-        <div
-          style={{
-            padding: "2rem",
-            color: "#ddd",
-            textAlign: "center",
-            fontSize: "13px",
-          }}
-        >
-          Loading GitHub profile...
-        </div>
+        <div style={s.loading}>Loading GitHub profile…</div>
       </div>
     );
 
-  // Not connected
   if (!data?.connected)
     return (
       <div style={s.card}>
         <div style={s.connect}>
-          <div style={s.conIcon}>
-            <Github size={48} color="#0d1117" />
+          <div style={s.conIconWrap}>
+            <Github size={26} color="var(--volt)" />
           </div>
           <div style={s.conTitle}>Connect your GitHub</div>
           <div style={s.conSub}>
@@ -291,19 +390,16 @@ export default function GitHubCard() {
             activity, not just what's on your resume.
           </div>
           <div style={s.perks}>
-            {[
-              "Top languages",
-              "Repo stars",
-              "Contribution activity",
-              "Pinned projects",
-            ].map((p) => (
-              <span key={p} style={s.perk}>
-                <Code2 size={11} /> {p}
-              </span>
-            ))}
+            {["Top languages", "Repo stars", "Activity", "Projects"].map(
+              (p) => (
+                <span key={p} style={s.perk}>
+                  <Code2 size={10} /> {p}
+                </span>
+              ),
+            )}
           </div>
           <button style={s.conBtn} onClick={connectGitHub}>
-            <Github size={16} /> Connect GitHub
+            <Github size={14} /> Connect GitHub
           </button>
         </div>
       </div>
@@ -321,16 +417,16 @@ export default function GitHubCard() {
           <div
             style={{
               ...s.avatar,
-              background: "#333",
+              background: "var(--ink-3)",
               display: "flex",
               alignItems: "center",
               justifyContent: "center",
             }}
           >
-            <Github size={24} color="#8b949e" />
+            <Github size={22} color="var(--graphite)" />
           </div>
         )}
-        <div style={{ flex: 1 }}>
+        <div style={{ flex: 1, minWidth: 0 }}>
           <div style={s.hName}>@{gh.username}</div>
           {gh.bio && (
             <div style={s.hBio}>
@@ -343,14 +439,17 @@ export default function GitHubCard() {
           href={gh.profileUrl}
           target="_blank"
           rel="noreferrer"
-          style={{ color: "#8b949e", display: "flex", alignItems: "center" }}
+          style={{
+            color: "var(--graphite)",
+            display: "flex",
+            alignItems: "center",
+          }}
         >
-          <Github size={18} />
+          <Github size={16} />
         </a>
       </div>
 
       <div style={s.body}>
-        {/* Activity score */}
         <ScoreRing score={gh.contributionScore || 0} />
 
         {/* Stats grid */}
@@ -359,22 +458,22 @@ export default function GitHubCard() {
             {
               num: gh.publicRepos,
               label: "Repos",
-              icon: <GitFork size={12} color="#7F77DD" />,
+              icon: <GitFork size={11} color="var(--wire)" />,
             },
             {
               num: gh.totalStars,
               label: "Stars",
-              icon: <Star size={12} color="#EF9F27" />,
+              icon: <Star size={11} color="var(--warning)" />,
             },
             {
               num: gh.followers,
               label: "Followers",
-              icon: <Users size={12} color="#1D9E75" />,
+              icon: <Users size={11} color="var(--success)" />,
             },
             {
               num: gh.topLanguages?.length || 0,
-              label: "Languages",
-              icon: <Code2 size={12} color="#378ADD" />,
+              label: "Langs",
+              icon: <Code2 size={11} color="var(--graphite)" />,
             },
           ].map(({ num, label, icon }) => (
             <div key={label} style={s.stat}>
@@ -382,7 +481,7 @@ export default function GitHubCard() {
                 style={{
                   display: "flex",
                   justifyContent: "center",
-                  marginBottom: "4px",
+                  marginBottom: "5px",
                 }}
               >
                 {icon}
@@ -396,7 +495,9 @@ export default function GitHubCard() {
         {/* Top languages */}
         {gh.topLanguages?.length > 0 && (
           <div style={s.section}>
-            <div style={s.secTitle}>Top languages</div>
+            <div style={{ ...s.secTitle, cursor: "default" }}>
+              Top languages
+            </div>
             {gh.topLanguages.map((lang) => (
               <span key={lang} style={s.langPill}>
                 {lang}
@@ -405,26 +506,12 @@ export default function GitHubCard() {
           </div>
         )}
 
-        {/* Pinned repos — expandable */}
+        {/* Pinned repos */}
         {gh.pinnedRepos?.length > 0 && (
           <div style={s.section}>
-            <div
-              style={{
-                ...s.secTitle,
-                display: "flex",
-                justifyContent: "space-between",
-                cursor: "pointer",
-              }}
-              onClick={() => setExpanded((p) => !p)}
-            >
+            <div style={s.secTitle} onClick={() => setExpanded((p) => !p)}>
               Top repositories
-              <span
-                style={{
-                  fontWeight: "400",
-                  color: "#aaa",
-                  textTransform: "none",
-                }}
-              >
+              <span style={s.secToggle}>
                 {expanded ? "▲ hide" : `▼ show ${gh.pinnedRepos.length}`}
               </span>
             </div>
@@ -450,8 +537,7 @@ export default function GitHubCard() {
                           gap: "3px",
                         }}
                       >
-                        <Star size={10} />
-                        {repo.stars}
+                        <Star size={9} /> {repo.stars}
                       </span>
                       <span
                         style={{
@@ -460,8 +546,7 @@ export default function GitHubCard() {
                           gap: "3px",
                         }}
                       >
-                        <Code2 size={10} />
-                        {repo.language}
+                        <Code2 size={9} /> {repo.language}
                       </span>
                     </div>
                   </div>
@@ -470,30 +555,28 @@ export default function GitHubCard() {
           </div>
         )}
 
-        {/* Last synced */}
         {gh.lastSynced && (
-          <div style={{ fontSize: "11px", color: "#bbb", marginBottom: "4px" }}>
+          <div style={s.lastSynced}>
             Last synced{" "}
             {formatDistanceToNow(new Date(gh.lastSynced), { addSuffix: true })}
           </div>
         )}
 
-        {/* Actions */}
         <div style={s.actions}>
           <button
-            style={s.btn("primary")}
+            style={s.btnPrimary}
             onClick={() => syncMutation.mutate()}
             disabled={syncMutation.isPending}
           >
-            <RefreshCw size={13} />{" "}
-            {syncMutation.isPending ? "Syncing..." : "Sync now"}
+            <RefreshCw size={11} />
+            {syncMutation.isPending ? "Syncing…" : "Sync now"}
           </button>
           <button
-            style={s.btn("danger")}
+            style={s.btnDanger}
             onClick={() => disconnectMutation.mutate()}
             disabled={disconnectMutation.isPending}
           >
-            <Unlink size={13} /> Disconnect
+            <Unlink size={11} /> Disconnect
           </button>
         </div>
       </div>

@@ -7,52 +7,130 @@ import { useState } from "react";
 import XAIPanel from "../../components/xai/XAIPanel";
 
 const s = {
-  h1: { fontSize: "20px", fontWeight: "600", marginBottom: "1.5rem" },
+  pageHead: {
+    marginBottom: "28px",
+  },
+  h1: {
+    fontFamily: "var(--font-display)",
+    fontSize: "30px",
+    fontWeight: "700",
+    letterSpacing: "-0.02em",
+    color: "var(--ink)",
+  },
+  sub: {
+    fontFamily: "var(--font-body)",
+    fontSize: "13px",
+    color: "var(--graphite)",
+    marginTop: "4px",
+  },
+  empty: {
+    fontFamily: "var(--font-mono)",
+    fontSize: "12px",
+    color: "var(--graphite)",
+    letterSpacing: "0.04em",
+  },
   card: {
     background: "#fff",
-    border: "1px solid #eee",
-    borderRadius: "12px",
-    marginBottom: "10px",
+    border: "1px solid var(--line-light)",
+    borderBottom: "none",
     overflow: "hidden",
+  },
+  cardFirst: {
+    borderTop: "1px solid var(--line-light)",
+  },
+  cardLast: {
+    borderBottom: "1px solid var(--line-light)",
   },
   header: {
     display: "flex",
     justifyContent: "space-between",
     alignItems: "center",
-    padding: "1rem 1.25rem",
+    padding: "14px 18px",
     cursor: "pointer",
+    gap: "18px",
   },
-  title: { fontWeight: "600", fontSize: "14px" },
-  company: { fontSize: "12px", color: "#888", marginTop: "2px" },
-  body: { padding: "0 1.25rem 1.25rem", borderTop: "1px solid #f5f5f5" },
-  label: {
-    fontSize: "11px",
+  title: {
     fontWeight: "600",
-    color: "#888",
+    fontSize: "14px",
+    color: "var(--ink)",
+  },
+  company: {
+    fontFamily: "var(--font-mono)",
+    fontSize: "11px",
+    color: "var(--graphite)",
+    marginTop: "3px",
+    letterSpacing: "0.02em",
+  },
+  chevron: {
+    fontFamily: "var(--font-mono)",
+    fontSize: "11px",
+    color: "var(--graphite)",
+  },
+  body: {
+    padding: "0 18px 18px",
+    borderTop: "1px solid var(--line-light)",
+  },
+  label: {
+    fontFamily: "var(--font-mono)",
+    fontSize: "10px",
+    fontWeight: "600",
+    color: "var(--graphite)",
     textTransform: "uppercase",
-    letterSpacing: "0.04em",
-    marginTop: "12px",
-    marginBottom: "5px",
+    letterSpacing: "0.1em",
+    marginTop: "16px",
+    marginBottom: "8px",
+    display: "block",
+  },
+  reasoning: {
+    fontSize: "13px",
+    color: "var(--ink)",
+    lineHeight: 1.65,
+    paddingTop: "2px",
   },
   pill: {
-    fontSize: "11px",
-    padding: "3px 9px",
-    borderRadius: "999px",
+    fontFamily: "var(--font-mono)",
+    fontSize: "10px",
+    fontWeight: "600",
+    padding: "4px 9px",
     marginRight: "5px",
-    marginBottom: "4px",
+    marginBottom: "5px",
     display: "inline-block",
+    border: "1px solid",
+    borderRadius: "var(--radius-sm)",
+  },
+  missing: {
+    background: "rgba(255,77,46,0.08)",
+    color: "var(--signal)",
+    borderColor: "rgba(255,77,46,0.2)",
   },
   qBox: {
-    background: "#f9f8ff",
-    border: "1px solid #e8e5fc",
-    borderRadius: "8px",
+    background: "var(--paper)",
+    border: "1px solid var(--line-light)",
+    borderRadius: "var(--radius-sm)",
     padding: "10px 14px",
     marginBottom: "6px",
     fontSize: "13px",
-    color: "#444",
+    color: "var(--ink)",
+    lineHeight: 1.55,
+    display: "flex",
+    gap: "10px",
   },
-  missing: { background: "#fdf0f0", color: "#c0392b" },
-  matched: { background: "#e8f8f0", color: "#1a7a4a" },
+  qNum: {
+    fontFamily: "var(--font-mono)",
+    fontSize: "10px",
+    fontWeight: "700",
+    color: "var(--graphite)",
+    letterSpacing: "0.04em",
+    paddingTop: "2px",
+    flexShrink: 0,
+  },
+  screening: {
+    fontFamily: "var(--font-mono)",
+    fontSize: "12px",
+    color: "var(--graphite)",
+    paddingTop: "14px",
+    letterSpacing: "0.02em",
+  },
 };
 
 export default function MyApplications() {
@@ -66,20 +144,30 @@ export default function MyApplications() {
 
   return (
     <Layout>
-      <div style={s.h1}>My applications ({apps.length})</div>
+      <div style={s.pageHead}>
+        <div style={s.h1}>Applications</div>
+        <div style={s.sub}>{apps.length} total · sorted by date</div>
+      </div>
 
       {isLoading ? (
-        <p style={{ color: "#aaa" }}>Loading...</p>
+        <p style={s.empty}>Loading…</p>
       ) : apps.length === 0 ? (
-        <p style={{ color: "#aaa", fontSize: "14px" }}>No applications yet.</p>
+        <p style={s.empty}>No applications yet.</p>
       ) : (
-        apps.map((app) => (
-          <div key={app._id} style={s.card}>
+        apps.map((app, idx) => (
+          <div
+            key={app._id}
+            style={{
+              ...s.card,
+              ...(idx === 0 ? s.cardFirst : {}),
+              ...(idx === apps.length - 1 ? s.cardLast : {}),
+            }}
+          >
             <div
               style={s.header}
               onClick={() => setExpanded(expanded === app._id ? null : app._id)}
             >
-              <div>
+              <div style={{ flex: 1, minWidth: 0 }}>
                 <div style={s.title}>{app.job?.title}</div>
                 <div style={s.company}>
                   {app.job?.company} ·{" "}
@@ -91,7 +179,7 @@ export default function MyApplications() {
               >
                 <ScoreBadge score={app.aiScore} />
                 <StatusBadge status={app.status} />
-                <span style={{ fontSize: "12px", color: "#aaa" }}>
+                <span style={s.chevron}>
                   {expanded === app._id ? "▲" : "▼"}
                 </span>
               </div>
@@ -100,13 +188,7 @@ export default function MyApplications() {
             {expanded === app._id && (
               <div style={s.body}>
                 {app.status === "screening" || app.status === "pending" ? (
-                  <p
-                    style={{
-                      fontSize: "13px",
-                      color: "#888",
-                      paddingTop: "12px",
-                    }}
-                  >
+                  <p style={s.screening}>
                     AI is still screening your application. Check back in a
                     moment.
                   </p>
@@ -114,21 +196,15 @@ export default function MyApplications() {
                   <>
                     {app.aiReasoning && (
                       <>
-                        <div style={s.label}>AI feedback on your resume</div>
-                        <p
-                          style={{
-                            fontSize: "13px",
-                            color: "#444",
-                            lineHeight: 1.6,
-                          }}
-                        >
-                          {app.aiReasoning}
-                        </p>
+                        <span style={s.label}>AI feedback on your resume</span>
+                        <p style={s.reasoning}>{app.aiReasoning}</p>
                       </>
                     )}
                     {app.aiMissingSkills?.length > 0 && (
                       <>
-                        <div style={s.label}>Skills to add to your resume</div>
+                        <span style={s.label}>
+                          Skills to add to your resume
+                        </span>
                         {app.aiMissingSkills.map((sk) => (
                           <span key={sk} style={{ ...s.pill, ...s.missing }}>
                             {sk}
@@ -138,26 +214,18 @@ export default function MyApplications() {
                     )}
                     {app.aiInterviewQuestions?.length > 0 && (
                       <>
-                        <div style={s.label}>Prepare for these questions</div>
+                        <span style={s.label}>Prepare for these questions</span>
                         {app.aiInterviewQuestions.map((q, i) => (
                           <div key={i} style={s.qBox}>
-                            <span
-                              style={{
-                                color: "#7F77DD",
-                                fontWeight: "600",
-                                marginRight: "8px",
-                              }}
-                            >
-                              Q{i + 1}.
-                            </span>
-                            {q}
+                            <span style={s.qNum}>Q{i + 1}.</span>
+                            <span>{q}</span>
                           </div>
                         ))}
                       </>
                     )}
                     {app.xai?.dimensions && (
                       <div style={{ marginTop: "12px" }}>
-                        <div style={s.label}>Your detailed AI analysis</div>
+                        <span style={s.label}>Your detailed AI analysis</span>
                         <XAIPanel xai={app.xai} overallScore={app.aiScore} />
                       </div>
                     )}

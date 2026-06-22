@@ -5,11 +5,15 @@ const CENTER = SIZE / 2;
 const LEVELS = 4;
 
 const dimensions = [
-  { key: "technicalSkills",      label: "Technical Skills",       short: "Technical"  },
-  { key: "experienceDepth",      label: "Experience Depth",       short: "Experience" },
-  { key: "projectImpact",        label: "Project Impact",         short: "Projects"   },
-  { key: "communicationClarity", label: "Communication Clarity",  short: "Comms"      },
-  { key: "growthPotential",      label: "Growth Potential",       short: "Growth"     },
+  { key: "technicalSkills", label: "Technical Skills", short: "Technical" },
+  { key: "experienceDepth", label: "Experience Depth", short: "Experience" },
+  { key: "projectImpact", label: "Project Impact", short: "Projects" },
+  {
+    key: "communicationClarity",
+    label: "Communication Clarity",
+    short: "Comms",
+  },
+  { key: "growthPotential", label: "Growth Potential", short: "Growth" },
 ];
 
 const N = dimensions.length;
@@ -19,17 +23,28 @@ const pt = (angle, r, cx = CENTER, offset = 0) => ({
   y: cx + r * Math.sin(toRad(angle - 90)) + offset,
 });
 
+// Signal token hex values (CSS vars unavailable inside SVG fill/stroke attrs)
 const getColor = (score) => {
-  if (score >= 8) return { fill: "#1D9E75", light: "#E1F5EE", text: "#085041" };
-  if (score >= 6) return { fill: "#7F77DD", light: "#EEEDFE", text: "#3C3489" };
-  if (score >= 4) return { fill: "#EF9F27", light: "#FAEEDA", text: "#633806" };
-  return { fill: "#E24B4A", light: "#FCEBEB", text: "#791F1F" };
+  if (score >= 8)
+    return { fill: "#1D8A4E", light: "rgba(29,138,78,0.08)", text: "#1D8A4E" }; // --success
+  if (score >= 6)
+    return { fill: "#4D7CFF", light: "rgba(77,124,255,0.08)", text: "#4D7CFF" }; // --wire
+  if (score >= 4)
+    return { fill: "#B07A0E", light: "rgba(176,122,14,0.08)", text: "#B07A0E" }; // --warning
+  return { fill: "#FF4D2E", light: "rgba(255,77,46,0.08)", text: "#FF4D2E" }; // --signal
 };
 
 const lerp = (a, b, t) => a + (b - a) * t;
-const lerpPoint = (p1, p2, t) => ({ x: lerp(p1.x, p2.x, t), y: lerp(p1.y, p2.y, t) });
+const lerpPoint = (p1, p2, t) => ({
+  x: lerp(p1.x, p2.x, t),
+  y: lerp(p1.y, p2.y, t),
+});
 
-export default function RadarChart({ dimensions: scores, size = SIZE, overallScore }) {
+export default function RadarChart({
+  dimensions: scores,
+  size = SIZE,
+  overallScore,
+}) {
   const [progress, setProgress] = useState(0);
   const [hovered, setHovered] = useState(null);
   const [tooltip, setTooltip] = useState(null);
@@ -38,7 +53,7 @@ export default function RadarChart({ dimensions: scores, size = SIZE, overallSco
 
   useEffect(() => {
     const duration = 900;
-    const ease = (t) => t < 0.5 ? 2 * t * t : -1 + (4 - 2 * t) * t;
+    const ease = (t) => (t < 0.5 ? 2 * t * t : -1 + (4 - 2 * t) * t);
 
     const animate = (ts) => {
       if (!startRef.current) startRef.current = ts;
@@ -63,22 +78,19 @@ export default function RadarChart({ dimensions: scores, size = SIZE, overallSco
     y: p.y * scale + offset,
   });
 
-  // Full data points (score-based)
   const fullDataPoints = dimensions.map((dim, i) => {
     const score = scores?.[dim.key]?.score || 0;
     const r = (score / 10) * mr;
     return pt(angles[i], r);
   });
 
-  // Animated: lerp from center to actual points
   const animDataPoints = fullDataPoints.map((p) =>
-    lerpPoint({ x: CENTER, y: CENTER }, p, progress)
+    lerpPoint({ x: CENTER, y: CENTER }, p, progress),
   );
 
   const toSvgPts = animDataPoints.map((p) => toSvg(p));
   const polygonPoints = toSvgPts.map((p) => `${p.x},${p.y}`).join(" ");
 
-  // Grid polygons
   const gridPolygons = Array.from({ length: LEVELS }, (_, li) => {
     const r = (mr * (li + 1)) / LEVELS;
     return angles
@@ -89,20 +101,26 @@ export default function RadarChart({ dimensions: scores, size = SIZE, overallSco
       .join(" ");
   });
 
-  // Labels (beyond max radius)
   const labelData = dimensions.map((dim, i) => {
     const r = mr + 26 * scale;
     const p = toSvg(pt(angles[i], r));
     const score = scores?.[dim.key]?.score || 0;
-    return { ...p, label: dim.short, fullLabel: dim.label, score, key: dim.key, index: i };
+    return {
+      ...p,
+      label: dim.short,
+      fullLabel: dim.label,
+      score,
+      key: dim.key,
+      index: i,
+    };
   });
 
   const avg = (
-  Object.values(scores || {}).reduce(
-    (sum, item) => sum + (Number(item?.score) || 0),
-    0
-  ) / Math.max(Object.keys(scores || {}).length, 1)
-).toFixed(1);
+    Object.values(scores || {}).reduce(
+      (sum, item) => sum + (Number(item?.score) || 0),
+      0,
+    ) / Math.max(Object.keys(scores || {}).length, 1)
+  ).toFixed(1);
 
   const avgColor = getColor(avg);
 
@@ -116,16 +134,9 @@ export default function RadarChart({ dimensions: scores, size = SIZE, overallSco
       >
         <defs>
           <radialGradient id="radarGrad" cx="50%" cy="50%" r="50%">
-            <stop offset="0%" stopColor="#7F77DD" stopOpacity="0.18" />
-            <stop offset="100%" stopColor="#7F77DD" stopOpacity="0.04" />
+            <stop offset="0%" stopColor="#4D7CFF" stopOpacity="0.14" />
+            <stop offset="100%" stopColor="#4D7CFF" stopOpacity="0.03" />
           </radialGradient>
-          <filter id="glow">
-            <feGaussianBlur stdDeviation="2" result="blur" />
-            <feMerge>
-              <feMergeNode in="blur" />
-              <feMergeNode in="SourceGraphic" />
-            </feMerge>
-          </filter>
         </defs>
 
         {/* Background grid */}
@@ -133,14 +144,14 @@ export default function RadarChart({ dimensions: scores, size = SIZE, overallSco
           <polygon
             key={i}
             points={pts}
-            fill={i % 2 === 0 ? "rgba(127,119,221,0.03)" : "none"}
-            stroke="#ede9fe"
+            fill={i % 2 === 0 ? "rgba(11,14,20,0.06)" : "none"}
+            stroke="rgba(11,14,20,0.25)"
             strokeWidth={0.8}
           />
         ))}
 
-        {/* Level value labels on one axis */}
-        {Array.from({ length: LEVELS }, (_, li) => {
+        {/* Level value labels */}
+        {/* {Array.from({ length: LEVELS }, (_, li) => {
           const r = (mr * (li + 1)) / LEVELS;
           const p = toSvg(pt(0, r));
           return (
@@ -149,14 +160,14 @@ export default function RadarChart({ dimensions: scores, size = SIZE, overallSco
               x={p.x + 4}
               y={p.y + 3}
               fontSize={7.5 * scale}
-              fill="#ccc"
-              fontFamily="sans-serif"
+              fill="#8A8D98"
+              fontFamily="'JetBrains Mono', monospace"
               textAnchor="start"
             >
               {((li + 1) / LEVELS) * 10}
             </text>
           );
-        })}
+        })} */}
 
         {/* Axis lines */}
         {angles.map((angle, i) => {
@@ -164,9 +175,13 @@ export default function RadarChart({ dimensions: scores, size = SIZE, overallSco
           return (
             <line
               key={i}
-              x1={cx} y1={cx}
-              x2={outer.x} y2={outer.y}
-              stroke={hovered === i ? "#c4c0f5" : "#ede9fe"}
+              x1={cx}
+              y1={cx}
+              x2={outer.x}
+              y2={outer.y}
+              stroke={
+                hovered === i ? "rgba(11,14,20,0.2)" : "rgba(11,14,20,0.08)"
+              }
               strokeWidth={hovered === i ? 1.5 : 0.8}
               style={{ transition: "stroke 0.2s, stroke-width 0.2s" }}
             />
@@ -174,39 +189,38 @@ export default function RadarChart({ dimensions: scores, size = SIZE, overallSco
         })}
 
         {/* Data polygon fill */}
-        <polygon
-          points={polygonPoints}
-          fill="url(#radarGrad)"
-          stroke="none"
-        />
+        <polygon points={polygonPoints} fill="url(#radarGrad)" stroke="none" />
 
         {/* Data polygon border */}
         <polygon
           points={polygonPoints}
           fill="none"
-          stroke="#7F77DD"
+          stroke="#4D7CFF"
           strokeWidth={1.8}
           strokeLinejoin="round"
-          style={{ filter: "drop-shadow(0 0 3px rgba(127,119,221,0.4))" }}
         />
 
         {/* Data point dots */}
         {toSvgPts.map((p, i) => {
-          const score = dimensions[i] ? scores?.[dimensions[i].key]?.score || 0 : 0;
+          const score = dimensions[i]
+            ? scores?.[dimensions[i].key]?.score || 0
+            : 0;
           const c = getColor(score);
           const isHov = hovered === i;
           return (
             <g key={i}>
               {isHov && (
                 <circle
-                  cx={p.x} cy={p.y}
+                  cx={p.x}
+                  cy={p.y}
                   r={10 * scale}
                   fill={c.fill}
-                  fillOpacity={0.15}
+                  fillOpacity={0.12}
                 />
               )}
               <circle
-                cx={p.x} cy={p.y}
+                cx={p.x}
+                cy={p.y}
                 r={isHov ? 5.5 * scale : 4 * scale}
                 fill={c.fill}
                 stroke="#fff"
@@ -216,7 +230,10 @@ export default function RadarChart({ dimensions: scores, size = SIZE, overallSco
                   setHovered(i);
                   setTooltip({ index: i, x: p.x, y: p.y });
                 }}
-                onMouseLeave={() => { setHovered(null); setTooltip(null); }}
+                onMouseLeave={() => {
+                  setHovered(null);
+                  setTooltip(null);
+                }}
               />
             </g>
           );
@@ -230,37 +247,42 @@ export default function RadarChart({ dimensions: scores, size = SIZE, overallSco
             <g
               key={i}
               style={{ cursor: "pointer" }}
-              onMouseEnter={() => { setHovered(i); setTooltip({ index: i, x: toSvgPts[i].x, y: toSvgPts[i].y }); }}
-              onMouseLeave={() => { setHovered(null); setTooltip(null); }}
+              onMouseEnter={() => {
+                setHovered(i);
+                setTooltip({ index: i, x: toSvgPts[i].x, y: toSvgPts[i].y });
+              }}
+              onMouseLeave={() => {
+                setHovered(null);
+                setTooltip(null);
+              }}
             >
               <text
                 x={p.x}
                 y={p.y - 4 * scale}
                 textAnchor="middle"
-                fontSize={9.5 * scale}
-                fill={isHov ? "#555" : "#999"}
-                fontFamily="sans-serif"
-                fontWeight="500"
+                fontSize={14 * scale}
+                fill={isHov ? "#0B0E14" : "#5C5F6B"}
+                fontFamily="'JetBrains Mono', monospace"
+                fontWeight="600"
                 style={{ transition: "fill 0.2s" }}
               >
                 {p.label}
               </text>
               <rect
-                x={p.x - 14 * scale}
+                x={p.x - 13 * scale}
                 y={p.y + 6 * scale}
-                width={28 * scale}
+                width={26 * scale}
                 height={14 * scale}
-                rx={4 * scale}
-                fill={isHov ? c.light : "#f7f5ff"}
+                fill={isHov ? c.light : "rgba(11,14,20,0.04)"}
                 style={{ transition: "fill 0.2s" }}
               />
               <text
                 x={p.x}
                 y={p.y + 16 * scale}
                 textAnchor="middle"
-                fontSize={9.5 * scale}
-                fill={isHov ? c.fill : "#7F77DD"}
-                fontFamily="sans-serif"
+                fontSize={14 * scale}
+                fill={isHov ? c.fill : "#5C5F6B"}
+                fontFamily="'JetBrains Mono', monospace"
                 fontWeight="700"
                 style={{ transition: "fill 0.2s" }}
               >
@@ -270,77 +292,101 @@ export default function RadarChart({ dimensions: scores, size = SIZE, overallSco
           );
         })}
 
-        {/* Center score */}
-        <circle cx={cx} cy={cx} r={28 * scale} fill="#fff" stroke="#ede9fe" strokeWidth={1} />
+        {/* Center score — square, ink background */}
+        <rect
+          x={cx - 26 * scale}
+          y={cx - 26 * scale}
+          width={52 * scale}
+          height={52 * scale}
+          fill="#0B0E14"
+        />
         <text
-          x={cx} y={cx - 5 * scale}
+          x={cx}
+          y={cx - 4 * scale}
           textAnchor="middle"
-          fontSize={20 * scale}
-          fill={avgColor.fill}
-          fontFamily="sans-serif"
+          fontSize={19 * scale}
+          fill="#C8FF4D"
+          fontFamily="'Space Grotesk', sans-serif"
           fontWeight="700"
         >
           {(avg * progress).toFixed(1)}
         </text>
         <text
-          x={cx} y={cx + 10 * scale}
+          x={cx}
+          y={cx + 10 * scale}
           textAnchor="middle"
-          fontSize={8 * scale}
-          fill="#bbb"
-          fontFamily="sans-serif"
+          fontSize={12 * scale}
+          fill="#c4c5cb"
+          fontFamily="'JetBrains Mono', monospace"
+          letterSpacing="0.08em"
         >
-          avg score
+          AVG
         </text>
 
         {/* Tooltip */}
-        {tooltip !== null && (() => {
-          const idx = tooltip.index;
-          const dim = dimensions[idx];
-          const score = scores?.[dim?.key]?.score || 0;
-          const c = getColor(score);
-          const reasoning = scores?.[dim?.key]?.reasoning || "";
-          const short = reasoning.length > 60 ? reasoning.slice(0, 57) + "…" : reasoning;
-          const tw = 110 * scale;
-          const th = short ? 36 * scale : 22 * scale;
-          let tx = tooltip.x - tw / 2;
-          let ty = tooltip.y - th - 10 * scale;
-          tx = Math.max(4, Math.min(tx, size - tw - 4));
-          ty = Math.max(4, ty);
+        {tooltip !== null &&
+          (() => {
+            const idx = tooltip.index;
+            const dim = dimensions[idx];
+            const score = scores?.[dim?.key]?.score || 0;
+            const c = getColor(score);
+            const reasoning = scores?.[dim?.key]?.reasoning || "";
+            const short = reasoning;
+            const tw = 220 * scale;
+            const th = 90 * scale;
+            let tx = tooltip.x - tw / 2;
+            let ty = tooltip.y - th - 10 * scale;
+            tx = Math.max(4, Math.min(tx, size - tw - 4));
+            ty = Math.max(4, ty);
 
-          return (
-            <g style={{ pointerEvents: "none" }}>
-              <rect
-                x={tx} y={ty}
-                width={tw} height={th}
-                rx={5 * scale}
-                fill={c.light}
-                stroke={c.fill}
-                strokeWidth={0.8}
-              />
-              <text
-                x={tx + tw / 2} y={ty + 11 * scale}
-                textAnchor="middle"
-                fontSize={9 * scale}
-                fill={c.text}
-                fontFamily="sans-serif"
-                fontWeight="700"
-              >
-                {dim?.label} · {score}/10
-              </text>
-              {short && (
+            return (
+              <g style={{ pointerEvents: "none" }}>
+                <rect
+                  x={tx}
+                  y={ty}
+                  width={tw}
+                  height={th}
+                  rx={8}
+                  fill="#0B0E14"
+                  style={{
+                    filter: "drop-shadow(0 4px 12px rgba(0,0,0,0.25))",
+                  }}
+                />
                 <text
-                  x={tx + 6 * scale} y={ty + 24 * scale}
-                  fontSize={7.5 * scale}
-                  fill={c.text}
-                  fontFamily="sans-serif"
-                  fillOpacity={0.8}
+                  x={tx + tw / 2}
+                  y={ty + 11 * scale}
+                  textAnchor="middle"
+                  fontSize={12 * scale}
+                  fill={c.fill}
+                  fontFamily="'JetBrains Mono', monospace"
+                  fontWeight="700"
                 >
-                  {short}
+                  {dim?.label} · {score}/10
                 </text>
-              )}
-            </g>
-          );
-        })()}
+                {short && (
+                  <foreignObject
+                    x={tx + 8 * scale}
+                    y={ty + 22 * scale}
+                    width={tw - 16 * scale}
+                    height={th - 28 * scale}
+                  >
+                    <div
+                      xmlns="http://www.w3.org/1999/xhtml"
+                      style={{
+                        fontSize: `${11 * scale}px`,
+                        color: "#D5D8E0",
+                        lineHeight: 1.4,
+                        fontFamily: "Inter, sans-serif",
+                        overflow: "hidden",
+                      }}
+                    >
+                      {reasoning}
+                    </div>
+                  </foreignObject>
+                )}
+              </g>
+            );
+          })()}
       </svg>
     </div>
   );

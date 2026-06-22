@@ -8,31 +8,73 @@ const s = {
     display: 'flex',
     flexDirection: 'column',
     height: 'calc(100vh - var(--layout-header-height, 64px))',
-    padding: '1rem',
+    padding: '28px',
     boxSizing: 'border-box',
-    gap: '1rem',
+    gap: '0',
+    fontFamily: "'Inter', -apple-system, BlinkMacSystemFont, sans-serif",
+  },
+  pageHead: {
+    display: 'flex',
+    alignItems: 'baseline',
+    gap: '10px',
+    marginBottom: '20px',
+    flexShrink: 0,
+  },
+  pageTitle: {
+    fontFamily: "'Space Grotesk', sans-serif",
+    fontWeight: '700',
+    fontSize: '24px',
+    letterSpacing: '-0.02em',
+    color: '#0B0E14',
+  },
+  pageLabel: {
+    fontFamily: "'JetBrains Mono', monospace",
+    fontSize: '10px',
+    fontWeight: '600',
+    letterSpacing: '0.1em',
+    textTransform: 'uppercase',
+    color: '#5C5F6B',
   },
   grid: {
     display: 'grid',
     gridTemplateColumns: '280px 1fr',
-    gap: '1rem',
+    gap: '0',
     flex: 1,
-    minHeight: 0,       // critical — lets the grid shrink inside a flex parent
+    minHeight: 0,
     alignItems: 'stretch',
+    border: '1px solid rgba(11,14,20,0.10)',
+    borderRadius: '4px',
+    overflow: 'hidden',
+    background: '#fff',
   },
   empty: {
     background: '#fff',
-    border: '1px solid #eee',
-    borderRadius: '14px',
+    borderLeft: '1px solid rgba(11,14,20,0.08)',
     display: 'flex',
     flexDirection: 'column',
     alignItems: 'center',
     justifyContent: 'center',
-    color: '#bbb',
+    color: '#8A8D98',
     height: '100%',
+    gap: '10px',
   },
-  emIcon: { fontSize: 36, marginBottom: 10 },
-  emText: { fontSize: 14 },
+  emIcon: {
+    width: '40px',
+    height: '40px',
+    background: 'rgba(11,14,20,0.04)',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    fontSize: '18px',
+  },
+  emText: {
+    fontFamily: "'JetBrains Mono', monospace",
+    fontSize: '10px',
+    fontWeight: '600',
+    letterSpacing: '0.08em',
+    textTransform: 'uppercase',
+    color: '#8A8D98',
+  },
 }
 
 export default function Messages() {
@@ -41,6 +83,11 @@ export default function Messages() {
   return (
     <Layout>
       <div style={s.outer}>
+        <div style={s.pageHead}>
+          <span style={s.pageTitle}>Messages</span>
+          <span style={s.pageLabel}>Inbox</span>
+        </div>
+
         <div style={s.grid}>
           <ConversationList
             selectedId={selected?._id}
@@ -50,8 +97,7 @@ export default function Messages() {
             ? <ChatWindow conversation={selected} key={selected._id} />
             : (
               <div style={s.empty}>
-                <div style={s.emIcon}>💬</div>
-                <div style={s.emText}>Select a conversation to start chatting</div>
+                <div style={s.emText}>Select a conversation!</div>
               </div>
             )
           }

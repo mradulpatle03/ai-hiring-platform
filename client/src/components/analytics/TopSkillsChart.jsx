@@ -1,71 +1,99 @@
 import { useQuery } from '@tanstack/react-query'
 import { fetchTopSkills } from '../../api/analytics'
 
-
-const BAR_COLOR = '#E24B4A'
-const BAR_BG = '#fcebeb'
-
+const BAR_COLOR = '#FF4D2E'   // --signal
+const BAR_BG = 'rgba(255,77,46,0.10)'
 
 export default function TopSkillsChart() {
   const { data, isLoading } = useQuery({ queryKey: ['analytics-skills'], queryFn: fetchTopSkills })
   const raw = data?.data || []
   const max = Math.max(...raw.map(d => d.count), 1)
 
-  // Calculate total skill gaps
   const totalGaps = raw.reduce((sum, d) => sum + d.count, 0)
-  // Calculate opacity for first item (for the footer summary dot)
   const firstItemOpacity = raw.length > 0 ? 1 : 1
-
 
   return (
     <div
       style={{
-        background: 'linear-gradient(180deg, #ffffff 0%, #fafbff 100%)',
-        border: '1px solid #e8e8ed',
-        borderRadius: '16px',
-        padding: '1.75rem 1.75rem',
-        boxShadow: '0 2px 12px rgba(0, 0, 0, 0.04), 0 8px 32px rgba(0, 0, 0, 0.02)',
-        transition: 'all 0.25s ease',
+        background: '#fff',
+        border: '1px solid rgba(11,14,20,0.10)',
+        borderRadius: '4px',
+        padding: '1.75rem',
+        transition: 'border-color 0.15s',
       }}
       onMouseEnter={(e) => {
-        e.currentTarget.style.boxShadow = '0 4px 16px rgba(0, 0, 0, 0.06), 0 12px 40px rgba(127, 119, 221, 0.08)'
-        e.currentTarget.style.borderColor = '#e0e0e6'
+        e.currentTarget.style.borderColor = 'rgba(11,14,20,0.20)'
       }}
       onMouseLeave={(e) => {
-        e.currentTarget.style.boxShadow = '0 2px 12px rgba(0, 0, 0, 0.04), 0 8px 32px rgba(0, 0, 0, 0.02)'
-        e.currentTarget.style.borderColor = '#e8e8ed'
+        e.currentTarget.style.borderColor = 'rgba(11,14,20,0.10)'
       }}
     >
       {/* Header */}
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '1.5rem' }}>
+      <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', marginBottom: '1.5rem' }}>
         <div>
-          <div style={{ fontSize: '16px', fontWeight: '700', color: '#1a1a1a', marginBottom: '4px', letterSpacing: '-0.5px' }}>
+          <div
+            style={{
+              fontFamily: "'Space Grotesk', sans-serif",
+              fontSize: '16px',
+              fontWeight: '700',
+              color: '#0B0E14',
+              marginBottom: '4px',
+              letterSpacing: '-0.02em',
+            }}
+          >
             Most missing skills
           </div>
-          <div style={{ fontSize: '12px', color: '#888', fontWeight: '500' }}>
+          <div
+            style={{
+              fontFamily: "'JetBrains Mono', monospace",
+              fontSize: '10px',
+              fontWeight: '600',
+              letterSpacing: '0.1em',
+              textTransform: 'uppercase',
+              color: '#5C5F6B',
+            }}
+          >
             Skills candidates lack across all jobs
           </div>
         </div>
         {!isLoading && raw.length > 0 && (
           <div
             style={{
-              background: 'linear-gradient(135deg, #fcebeb 0%, #f9e3eb 100%)',
-              borderRadius: '10px',
+              background: 'rgba(255,77,46,0.08)',
               padding: '10px 14px',
               textAlign: 'center',
-              border: '1px solid rgba(226, 75, 74, 0.15)',
+              border: '1px solid rgba(255,77,46,0.20)',
+              borderRadius: '2px',
             }}
           >
-            <div style={{ fontSize: '18px', fontWeight: '800', color: BAR_COLOR, lineHeight: 1, letterSpacing: '-0.5px' }}>
+            <div
+              style={{
+                fontFamily: "'Space Grotesk', sans-serif",
+                fontSize: '20px',
+                fontWeight: '700',
+                color: BAR_COLOR,
+                lineHeight: 1,
+                letterSpacing: '-0.02em',
+              }}
+            >
               {raw.length}
             </div>
-            <div style={{ fontSize: '10px', color: '#e07070', marginTop: '4px', fontWeight: '600', textTransform: 'uppercase', letterSpacing: '0.3px' }}>
+            <div
+              style={{
+                fontFamily: "'JetBrains Mono', monospace",
+                fontSize: '9px',
+                color: BAR_COLOR,
+                marginTop: '4px',
+                fontWeight: '600',
+                textTransform: 'uppercase',
+                letterSpacing: '0.1em',
+              }}
+            >
               skill gaps
             </div>
           </div>
         )}
       </div>
-
 
       {/* Content */}
       {isLoading ? (
@@ -75,13 +103,31 @@ export default function TopSkillsChart() {
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
-            background: 'linear-gradient(135deg, #fafbff 0%, #f2f4f8 100%)',
-            borderRadius: '12px',
-            border: '1px solid #e8e8ed',
+            background: '#F7F5EF',
+            border: '1px solid rgba(11,14,20,0.10)',
           }}
         >
-          <div style={{ display: 'flex', alignItems: 'center', gap: '8px', color: '#999', fontWeight: '500' }}>
-            <div style={{ width: '16px', height: '16px', borderRadius: '4px', background: '#7F77DD', animation: 'pulse 1s ease-in-out infinite' }} />
+          <div
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: '8px',
+              fontFamily: "'JetBrains Mono', monospace",
+              fontSize: '11px',
+              fontWeight: '600',
+              letterSpacing: '0.08em',
+              textTransform: 'uppercase',
+              color: '#5C5F6B',
+            }}
+          >
+            <div
+              style={{
+                width: '8px',
+                height: '8px',
+                background: '#FF4D2E',
+                animation: 'pulse 1s ease-in-out infinite',
+              }}
+            />
             Loading...
           </div>
         </div>
@@ -92,23 +138,28 @@ export default function TopSkillsChart() {
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
-            background: 'linear-gradient(135deg, #fafbff 0%, #f2f4f8 100%)',
-            borderRadius: '12px',
-            border: '1px solid #e8e8ed',
+            background: '#F7F5EF',
+            border: '1px solid rgba(11,14,20,0.10)',
           }}
         >
-          <div style={{ display: 'flex', alignItems: 'center', gap: '8px', color: '#bbb', fontWeight: '500' }}>
-            <div style={{ width: '12px', height: '12px', borderRadius: '50%', border: '2px solid #ddd', borderTop: '2px solid #7F77DD', animation: 'spin 1s linear infinite' }} />
+          <div
+            style={{
+              fontFamily: "'JetBrains Mono', monospace",
+              fontSize: '11px',
+              fontWeight: '600',
+              letterSpacing: '0.08em',
+              textTransform: 'uppercase',
+              color: '#8A8D98',
+            }}
+          >
             No data yet
           </div>
         </div>
       ) : (
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
           {raw.map((d, i) => {
             const pct = Math.round((d.count / max) * 100)
             const opacity = 1 - i * (0.55 / Math.max(raw.length - 1, 1))
-
-            // Determine if this is top 3 (highlighted)
             const isTop3 = i < 3
 
             return (
@@ -118,46 +169,42 @@ export default function TopSkillsChart() {
                   display: 'flex',
                   alignItems: 'center',
                   gap: '12px',
-                  padding: isTop3 ? '10px 12px' : '8px 12px',
-                  background: isTop3 ? 'linear-gradient(135deg, #fceebb 0%, #fcebeb 100%)' : 'transparent',
-                  borderRadius: isTop3 ? '10px' : '0',
-                  border: isTop3 ? `1px solid rgba(226, 75, 74, 0.15)` : 'none',
-                  transition: 'all 0.2s ease',
+                  padding: '10px 12px',
+                  background: isTop3 ? 'rgba(255,77,46,0.05)' : 'transparent',
+                  borderLeft: isTop3 ? `2px solid ${BAR_COLOR}` : '2px solid transparent',
+                  transition: 'background 0.15s',
                 }}
                 onMouseEnter={(e) => {
-                  if (!isTop3) {
-                    e.currentTarget.style.background = 'linear-gradient(135deg, #fafbff 0%, #f2f4f8 100%)'
-                  }
+                  if (!isTop3) e.currentTarget.style.background = '#F7F5EF'
                 }}
                 onMouseLeave={(e) => {
-                  if (!isTop3) {
-                    e.currentTarget.style.background = 'transparent'
-                  }
+                  if (!isTop3) e.currentTarget.style.background = 'transparent'
                 }}
               >
                 {/* Rank */}
                 <div
                   style={{
-                    width: '24px',
+                    width: '20px',
                     flexShrink: 0,
-                    fontSize: isTop3 ? '12px' : '11px',
-                    fontWeight: isTop3 ? '700' : '600',
-                    color: isTop3 ? BAR_COLOR : '#bbb',
+                    fontFamily: "'JetBrains Mono', monospace",
+                    fontSize: '10px',
+                    fontWeight: '600',
+                    color: isTop3 ? BAR_COLOR : '#8A8D98',
                     textAlign: 'right',
-                    letterSpacing: isTop3 ? '-0.3px' : '0',
+                    letterSpacing: '0.04em',
                   }}
                 >
-                  {isTop3 && '•'} {i + 1}
+                  {i + 1}
                 </div>
-
 
                 {/* Skill name */}
                 <div
                   style={{
                     width: '120px',
                     flexShrink: 0,
-                    fontSize: '14px',
-                    color: isTop3 ? '#333' : '#555',
+                    fontFamily: "'Inter', sans-serif",
+                    fontSize: '13px',
+                    color: isTop3 ? '#0B0E14' : '#5C5F6B',
                     fontWeight: isTop3 ? '600' : '500',
                     whiteSpace: 'nowrap',
                     overflow: 'hidden',
@@ -167,42 +214,40 @@ export default function TopSkillsChart() {
                   {d.skill}
                 </div>
 
-
                 {/* Bar track */}
                 <div
                   style={{
                     flex: 1,
-                    height: '10px',
-                    background: '#f0f0f5',
-                    borderRadius: '6px',
-                    overflow: 'hidden',
-                    boxShadow: 'inset 0 1px 2px rgba(0, 0, 0, 0.05)',
+                    height: '4px',
+                    background: '#E5E1D4',
+                    position: 'relative',
                   }}
                 >
                   <div
                     style={{
-                      height: '100%',
+                      position: 'absolute',
+                      left: 0,
+                      top: 0,
+                      bottom: 0,
                       width: `${pct}%`,
                       background: BAR_COLOR,
                       opacity,
-                      borderRadius: '6px',
                       transition: 'width 0.6s cubic-bezier(.4,0,.2,1)',
-                      boxShadow: isTop3 ? `0 2px 6px ${BAR_COLOR}40` : 'none',
                     }}
                   />
                 </div>
-
 
                 {/* Count */}
                 <div
                   style={{
                     width: '32px',
                     flexShrink: 0,
-                    fontSize: isTop3 ? '16px' : '13px',
-                    fontWeight: isTop3 ? '800' : '700',
-                    color: isTop3 ? BAR_COLOR : '#bbb',
+                    fontFamily: "'JetBrains Mono', monospace",
+                    fontSize: isTop3 ? '14px' : '12px',
+                    fontWeight: '700',
+                    color: isTop3 ? BAR_COLOR : '#8A8D98',
                     textAlign: 'right',
-                    letterSpacing: isTop3 ? '-0.5px' : '0',
+                    letterSpacing: '-0.02em',
                   }}
                 >
                   {d.count}
@@ -218,23 +263,63 @@ export default function TopSkillsChart() {
         <div
           style={{
             display: 'flex',
-            gap: '16px',
+            gap: '20px',
             marginTop: '1.5rem',
-            padding: '12px 14px',
-            background: 'linear-gradient(135deg, #fafbff 0%, #f2f4f8 100%)',
-            borderRadius: '10px',
-            border: '1px solid #e8e8ed',
+            paddingTop: '14px',
+            borderTop: '1px solid rgba(11,14,20,0.10)',
           }}
         >
           <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-            <div style={{ width: '8px', height: '8px', borderRadius: '2px', background: BAR_COLOR }} />
-            <span style={{ fontSize: '11px', color: '#777', fontWeight: '600', textTransform: 'uppercase' }}>Total gaps:</span>
-            <span style={{ fontSize: '14px', fontWeight: '700', color: '#1a1a1a' }}>{totalGaps}</span>
+            <div style={{ width: '6px', height: '6px', background: BAR_COLOR }} />
+            <span
+              style={{
+                fontFamily: "'JetBrains Mono', monospace",
+                fontSize: '10px',
+                color: '#5C5F6B',
+                fontWeight: '600',
+                textTransform: 'uppercase',
+                letterSpacing: '0.08em',
+              }}
+            >
+              Total gaps:
+            </span>
+            <span
+              style={{
+                fontFamily: "'Space Grotesk', sans-serif",
+                fontSize: '14px',
+                fontWeight: '700',
+                color: '#0B0E14',
+                letterSpacing: '-0.02em',
+              }}
+            >
+              {totalGaps}
+            </span>
           </div>
           <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-            <div style={{ width: '8px', height: '8px', borderRadius: '2px', background: BAR_COLOR, opacity: firstItemOpacity }} />
-            <span style={{ fontSize: '11px', color: '#777', fontWeight: '600', textTransform: 'uppercase' }}>Top skill:</span>
-            <span style={{ fontSize: '14px', fontWeight: '700', color: '#1a1a1a' }}>{raw[0]?.skill}</span>
+            <div style={{ width: '6px', height: '6px', background: BAR_COLOR, opacity: firstItemOpacity }} />
+            <span
+              style={{
+                fontFamily: "'JetBrains Mono', monospace",
+                fontSize: '10px',
+                color: '#5C5F6B',
+                fontWeight: '600',
+                textTransform: 'uppercase',
+                letterSpacing: '0.08em',
+              }}
+            >
+              Top skill:
+            </span>
+            <span
+              style={{
+                fontFamily: "'Space Grotesk', sans-serif",
+                fontSize: '14px',
+                fontWeight: '700',
+                color: '#0B0E14',
+                letterSpacing: '-0.02em',
+              }}
+            >
+              {raw[0]?.skill}
+            </span>
           </div>
         </div>
       )}

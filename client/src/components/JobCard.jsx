@@ -20,38 +20,47 @@ export default function JobCard({ job, onClick, action }) {
         (e.currentTarget.style.borderLeftColor = color.paper3)
       }
     >
+      {/* Title */}
       <div
         style={{
           fontFamily: font.display,
           fontWeight: 600,
           fontSize: "16px",
-          marginBottom: "5px",
+          color: color.ink,
           letterSpacing: "-0.01em",
+          marginBottom: "6px",
         }}
       >
         {job.title}
       </div>
+
+      {/* Company */}
       <div
         style={{
           display: "flex",
           alignItems: "center",
           gap: "6px",
-          fontSize: "13px",
+          fontFamily: font.mono,
+          fontSize: "12px",
           color: color.graphite,
-          marginBottom: "12px",
+          marginBottom: "14px",
         }}
       >
         <Building size={12} />
         {job.company}
       </div>
+
+      {/* Meta row */}
       <div
         style={{
           display: "flex",
-          gap: "14px",
+          gap: "16px",
           fontFamily: font.mono,
           fontSize: "11px",
           color: color.graphiteDim,
-          marginBottom: "12px",
+          textTransform: "uppercase",
+          letterSpacing: "0.04em",
+          marginBottom: "14px",
         }}
       >
         <span style={{ display: "flex", alignItems: "center", gap: "4px" }}>
@@ -62,8 +71,10 @@ export default function JobCard({ job, onClick, action }) {
           <Clock size={11} />
           {job.experienceYears}+ yrs
         </span>
-        {job.salary && <span>${job.salary}</span>}
+        {job.salary && <span>{job.salary}</span>}
       </div>
+
+      {/* Skills */}
       {job.skillsRequired?.length > 0 && (
         <div style={{ display: "flex", flexWrap: "wrap", gap: "6px" }}>
           {job.skillsRequired.slice(0, 4).map((sk) => (
@@ -74,7 +85,9 @@ export default function JobCard({ job, onClick, action }) {
                 fontSize: "10px",
                 color: color.graphite,
                 border: `1px solid ${color.lineLight}`,
-                padding: "3px 8px",
+                padding: "3px 9px",
+                textTransform: "uppercase",
+                letterSpacing: "0.03em",
               }}
             >
               {sk}
@@ -94,6 +107,7 @@ export default function JobCard({ job, onClick, action }) {
           )}
         </div>
       )}
+
       {action && <div style={{ marginTop: "14px" }}>{action}</div>}
     </div>
   );

@@ -8,7 +8,8 @@ export default function ScoreBadge({ score }) {
           fontFamily: font.mono,
           fontSize: "11px",
           color: color.graphiteDim,
-          letterSpacing: "0.02em",
+          letterSpacing: "0.04em",
+          textTransform: "uppercase",
         }}
       >
         pending…
@@ -22,12 +23,13 @@ export default function ScoreBadge({ score }) {
       style={{
         display: "inline-flex",
         alignItems: "baseline",
-        gap: "3px",
+        gap: "2px",
         fontFamily: font.display,
         fontWeight: 700,
-        fontSize: "16px",
+        fontSize: "18px",
         color: tier.color,
-        letterSpacing: "-0.01em",
+        letterSpacing: "-0.02em",
+        lineHeight: 1,
       }}
     >
       {score}
@@ -37,6 +39,7 @@ export default function ScoreBadge({ score }) {
           fontSize: "10px",
           fontWeight: 600,
           color: color.graphiteDim,
+          letterSpacing: "0.02em",
         }}
       >
         /100

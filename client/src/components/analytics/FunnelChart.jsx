@@ -1,7 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 import { fetchFunnel } from "../../api/analytics";
 
-
 export default function FunnelChart() {
   const { data, isLoading } = useQuery({
     queryKey: ["analytics-funnel"],
@@ -10,230 +9,241 @@ export default function FunnelChart() {
   const funnel = data?.funnel || [];
   const max = funnel[0]?.count || 1;
 
-  // Calculate overall conversion rate
   const overallConv = funnel.length > 1 && funnel[0].count > 0
     ? Math.round((funnel[funnel.length - 1].count / funnel[0].count) * 100)
-    : 0
-  const totalApplied = funnel[0]?.count || 0
-  const totalReachedEnd = funnel[funnel.length - 1]?.count || 0
+    : 0;
+  const totalApplied = funnel[0]?.count || 0;
+  const totalReachedEnd = funnel[funnel.length - 1]?.count || 0;
 
+  const emptyBox = (
+    <div
+      style={{
+        height: '200px',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        background: 'rgba(11,14,20,0.02)',
+        border: '1px solid rgba(11,14,20,0.06)',
+        borderRadius: '2px',
+      }}
+    >
+      <span
+        style={{
+          fontFamily: "'JetBrains Mono', monospace",
+          fontSize: '10px',
+          fontWeight: '600',
+          letterSpacing: '0.1em',
+          textTransform: 'uppercase',
+          color: '#8A8D98',
+        }}
+      >
+        {isLoading ? 'Loading…' : 'No data yet'}
+      </span>
+    </div>
+  );
 
   return (
     <div
       style={{
-        background: 'linear-gradient(180deg, #ffffff 0%, #fafbff 100%)',
-        border: '1px solid #e8e8ed',
-        borderRadius: '16px',
-        padding: '1.75rem',
-        boxShadow: '0 2px 12px rgba(0, 0, 0, 0.04), 0 8px 32px rgba(0, 0, 0, 0.02)',
-        transition: 'all 0.25s ease',
-      }}
-      onMouseEnter={(e) => {
-        e.currentTarget.style.boxShadow = '0 4px 16px rgba(0, 0, 0, 0.06), 0 12px 40px rgba(127, 119, 221, 0.08)'
-        e.currentTarget.style.borderColor = '#e0e0e6'
-      }}
-      onMouseLeave={(e) => {
-        e.currentTarget.style.boxShadow = '0 2px 12px rgba(0, 0, 0, 0.04), 0 8px 32px rgba(0, 0, 0, 0.02)'
-        e.currentTarget.style.borderColor = '#e8e8ed'
+        background: '#fff',
+        border: '1px solid rgba(11,14,20,0.10)',
+        borderRadius: '4px',
+        padding: '22px',
+        fontFamily: "'Inter', sans-serif",
       }}
     >
       {/* Header */}
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '1.5rem' }}>
+      <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', marginBottom: '20px' }}>
         <div>
-          <div style={{ fontSize: '16px', fontWeight: '700', color: '#1a1a1a', marginBottom: '4px', letterSpacing: '-0.5px' }}>
+          <div
+            style={{
+              fontFamily: "'Space Grotesk', sans-serif",
+              fontWeight: '700',
+              fontSize: '16px',
+              letterSpacing: '-0.02em',
+              color: '#0B0E14',
+              marginBottom: '4px',
+            }}
+          >
             Hiring funnel
           </div>
-          <div style={{ fontSize: '12px', color: '#888', fontWeight: '500' }}>
-            Candidate progression through stages
+          <div
+            style={{
+              fontFamily: "'JetBrains Mono', monospace",
+              fontSize: '10px',
+              fontWeight: '600',
+              letterSpacing: '0.08em',
+              textTransform: 'uppercase',
+              color: '#5C5F6B',
+            }}
+          >
+            Candidate progression
           </div>
         </div>
-        
-        {/* Overall stats */}
+
         {funnel.length > 0 && !isLoading && (
           <div
             style={{
-              background: 'linear-gradient(135deg, #fbeaf0 0%, #f9e3eb 100%)',
-              padding: '10px 14px',
-              borderRadius: '10px',
-              border: '1px solid rgba(212, 83, 126, 0.15)',
+              background: overallConv >= 50
+                ? 'rgba(29,138,78,0.08)'
+                : 'rgba(255,77,46,0.08)',
+              border: `1px solid ${overallConv >= 50
+                ? 'rgba(29,138,78,0.20)'
+                : 'rgba(255,77,46,0.20)'}`,
+              borderRadius: '2px',
+              padding: '8px 14px',
             }}
           >
-            <div style={{ fontSize: '10px', color: '#777', fontWeight: '600', textTransform: 'uppercase', letterSpacing: '0.3px' }}>
-              Overall conversion
+            <div
+              style={{
+                fontFamily: "'JetBrains Mono', monospace",
+                fontSize: '9px',
+                fontWeight: '600',
+                letterSpacing: '0.1em',
+                textTransform: 'uppercase',
+                color: '#5C5F6B',
+                marginBottom: '2px',
+              }}
+            >
+              Conversion
             </div>
-            <div style={{ fontSize: '20px', fontWeight: '800', color: '#D4537E', lineHeight: 1, letterSpacing: '-0.5px' }}>
+            <div
+              style={{
+                fontFamily: "'Space Grotesk', sans-serif",
+                fontWeight: '700',
+                fontSize: '22px',
+                letterSpacing: '-0.02em',
+                color: overallConv >= 50 ? '#1D8A4E' : '#FF4D2E',
+                lineHeight: 1,
+              }}
+            >
               {overallConv}%
             </div>
           </div>
         )}
       </div>
 
-
       {/* Funnel stages */}
-      {isLoading ? (
-        <div
-          style={{
-            height: '200px',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            background: 'linear-gradient(135deg, #fafbff 0%, #f2f4f8 100%)',
-            borderRadius: '12px',
-            border: '1px solid #e8e8ed',
-          }}
-        >
-          <div style={{ display: 'flex', alignItems: 'center', gap: '8px', color: '#999', fontWeight: '500' }}>
-            <div style={{ width: '16px', height: '16px', borderRadius: '4px', background: '#7F77DD', animation: 'pulse 1s ease-in-out infinite' }} />
-            Loading...
-          </div>
-        </div>
-      ) : funnel.length === 0 ? (
-        <div
-          style={{
-            height: '200px',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            background: 'linear-gradient(135deg, #fafbff 0%, #f2f4f8 100%)',
-            borderRadius: '12px',
-            border: '1px solid #e8e8ed',
-          }}
-        >
-          <div style={{ display: 'flex', alignItems: 'center', gap: '8px', color: '#bbb', fontWeight: '500' }}>
-            <div style={{ width: '12px', height: '12px', borderRadius: '50%', border: '2px solid #ddd', borderTop: '2px solid #7F77DD', animation: 'spin 1s linear infinite' }} />
-            No data yet
-          </div>
-        </div>
-      ) : (
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
+      {isLoading || funnel.length === 0 ? emptyBox : (
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '0' }}>
           {funnel.map((stage, i) => {
             const pct = Math.round((stage.count / max) * 100);
-            const convPct =
-              i > 0 && funnel[i - 1].count > 0
-                ? Math.round((stage.count / funnel[i - 1].count) * 100)
-                : null;
-
-            // Determine if this is a drop stage (show negative indicator)
-            const isDrop = i > 0 && stage.count < funnel[i - 1].count
-            const dropCount = i > 0 ? funnel[i - 1].count - stage.count : 0
+            const convPct = i > 0 && funnel[i - 1].count > 0
+              ? Math.round((stage.count / funnel[i - 1].count) * 100)
+              : null;
+            const isDrop = i > 0 && stage.count < funnel[i - 1].count;
+            const dropCount = i > 0 ? funnel[i - 1].count - stage.count : 0;
 
             return (
               <div
                 key={stage.stage}
                 style={{
-                  position: 'relative',
-                  padding: i > 0 ? '12px 0' : '0 0 12px 0',
+                  padding: '14px 0',
+                  borderBottom: i < funnel.length - 1 ? '1px solid rgba(11,14,20,0.06)' : 'none',
                 }}
               >
-                {/* Connector arrow for stages after first */}
-                {i > 0 && (
-                  <div
-                    style={{
-                      position: 'absolute',
-                      top: '-8px',
-                      left: '8px',
-                      width: '12px',
-                      height: '12px',
-                    }}
-                  >
-                    <svg width="12" height="12" viewBox="0 0 12 12">
-                      <path
-                        d="M6 0L6 10M6 10L3 6M6 10L9 6"
-                        stroke="#ccc"
-                        strokeWidth="1.5"
-                        fill="none"
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                      />
-                    </svg>
-                  </div>
-                )}
-
-                <div
-                  style={{
-                    display: 'flex',
-                    justifyContent: 'space-between',
-                    alignItems: 'center',
-                  }}
-                >
+                {/* Stage label row */}
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '10px' }}>
                   <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                    {/* Stage index dot */}
                     <div
                       style={{
-                        width: '28px',
-                        height: '28px',
-                        borderRadius: '7px',
-                        background: `${stage.color}15`,
+                        width: '20px',
+                        height: '20px',
+                        background: 'rgba(11,14,20,0.05)',
                         display: 'flex',
                         alignItems: 'center',
                         justifyContent: 'center',
+                        fontFamily: "'JetBrains Mono', monospace",
+                        fontSize: '9px',
+                        fontWeight: '700',
+                        color: '#5C5F6B',
+                        letterSpacing: '0',
+                        flexShrink: 0,
                       }}
                     >
-                      <div style={{ width: '6px', height: '6px', borderRadius: '50%', background: stage.color }} />
+                      {i + 1}
                     </div>
-                    <span style={{ fontSize: '14px', fontWeight: '600', color: '#1a1a1a' }}>
+                    <span
+                      style={{
+                        fontFamily: "'Inter', sans-serif",
+                        fontSize: '13px',
+                        fontWeight: '600',
+                        color: '#0B0E14',
+                      }}
+                    >
                       {stage.stage}
                     </span>
                   </div>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                     {convPct !== null && (
-                      <div
-                        style={{
-                          display: 'flex',
-                          alignItems: 'center',
-                          gap: '4px',
-                          padding: '4px 8px',
-                          background: isDrop ? '#faeeda' : '#e1f5ee',
-                          borderRadius: '6px',
-                          border: `1px solid ${isDrop ? '#EF9F2720' : '#1D9E7520'}`,
-                        }}
-                      >
-                        <span style={{ fontSize: '10px', fontWeight: '600', color: isDrop ? '#EF9F27' : '#1D9E75' }}>
-                          {isDrop ? '-' : '+'}{convPct}%
-                        </span>
-                      </div>
-                    )}
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
                       <span
                         style={{
-                          fontSize: '18px',
-                          fontWeight: '800',
-                          color: stage.color,
-                          letterSpacing: '-0.5px',
+                          fontFamily: "'JetBrains Mono', monospace",
+                          fontSize: '10px',
+                          fontWeight: '700',
+                          letterSpacing: '0.04em',
+                          color: isDrop ? '#FF4D2E' : '#1D8A4E',
+                          background: isDrop ? 'rgba(255,77,46,0.08)' : 'rgba(29,138,78,0.08)',
+                          border: `1px solid ${isDrop ? 'rgba(255,77,46,0.20)' : 'rgba(29,138,78,0.20)'}`,
+                          padding: '3px 7px',
+                          borderRadius: '2px',
                         }}
                       >
-                        {stage.count}
+                        {isDrop ? '▼' : '▲'} {convPct}%
                       </span>
-                    </div>
+                    )}
+                    <span
+                      style={{
+                        fontFamily: "'Space Grotesk', sans-serif",
+                        fontWeight: '700',
+                        fontSize: '20px',
+                        letterSpacing: '-0.02em',
+                        color: '#0B0E14',
+                        minWidth: '36px',
+                        textAlign: 'right',
+                      }}
+                    >
+                      {stage.count}
+                    </span>
                   </div>
                 </div>
 
                 {/* Progress bar */}
                 <div
                   style={{
-                    marginTop: '10px',
-                    height: '10px',
-                    background: '#f0f0f5',
-                    borderRadius: '6px',
+                    height: '4px',
+                    background: 'rgba(11,14,20,0.06)',
+                    borderRadius: '0',
                     overflow: 'hidden',
-                    boxShadow: 'inset 0 1px 2px rgba(0, 0, 0, 0.05)',
                   }}
                 >
                   <div
                     style={{
                       height: '100%',
                       width: `${pct}%`,
-                      background: stage.color,
-                      borderRadius: '6px',
+                      background: isDrop ? '#FF4D2E' : '#4D7CFF',
                       transition: 'width 0.6s ease',
-                      boxShadow: `0 2px 6px ${stage.color}40`,
                     }}
                   />
                 </div>
 
                 {/* Drop indicator */}
                 {isDrop && dropCount > 0 && (
-                  <div style={{ marginTop: '6px', fontSize: '11px', color: '#999', fontWeight: '500' }}>
-                    <span style={{ color: '#EF9F27' }}>↓</span> {dropCount} candidates dropped
+                  <div
+                    style={{
+                      marginTop: '6px',
+                      fontFamily: "'JetBrains Mono', monospace",
+                      fontSize: '9px',
+                      fontWeight: '600',
+                      letterSpacing: '0.06em',
+                      textTransform: 'uppercase',
+                      color: '#8A8D98',
+                    }}
+                  >
+                    <span style={{ color: '#FF4D2E' }}>↓ </span>
+                    {dropCount} dropped
                   </div>
                 )}
               </div>
@@ -247,23 +257,81 @@ export default function FunnelChart() {
         <div
           style={{
             display: 'flex',
-            gap: '16px',
-            marginTop: '1.5rem',
-            padding: '12px 14px',
-            background: 'linear-gradient(135deg, #fafbff 0%, #f2f4f8 100%)',
-            borderRadius: '10px',
-            border: '1px solid #e8e8ed',
+            gap: '0',
+            marginTop: '16px',
+            border: '1px solid rgba(11,14,20,0.08)',
+            borderRadius: '2px',
+            overflow: 'hidden',
           }}
         >
-          <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-            <div style={{ width: '8px', height: '8px', borderRadius: '2px', background: funnel[0]?.color || '#7F77DD' }} />
-            <span style={{ fontSize: '11px', color: '#777', fontWeight: '600', textTransform: 'uppercase' }}>Applied:</span>
-            <span style={{ fontSize: '14px', fontWeight: '700', color: '#1a1a1a' }}>{totalApplied}</span>
+          <div
+            style={{
+              flex: 1,
+              display: 'flex',
+              alignItems: 'center',
+              gap: '8px',
+              padding: '9px 14px',
+              borderRight: '1px solid rgba(11,14,20,0.08)',
+            }}
+          >
+            <div style={{ width: '3px', height: '16px', background: '#4D7CFF' }} />
+            <span
+              style={{
+                fontFamily: "'JetBrains Mono', monospace",
+                fontSize: '9px',
+                fontWeight: '600',
+                letterSpacing: '0.1em',
+                textTransform: 'uppercase',
+                color: '#5C5F6B',
+              }}
+            >
+              Applied
+            </span>
+            <span
+              style={{
+                fontFamily: "'Space Grotesk', sans-serif",
+                fontWeight: '700',
+                fontSize: '16px',
+                letterSpacing: '-0.02em',
+                color: '#0B0E14',
+              }}
+            >
+              {totalApplied}
+            </span>
           </div>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-            <div style={{ width: '8px', height: '8px', borderRadius: '2px', background: funnel[funnel.length - 1]?.color || '#D4537E' }} />
-            <span style={{ fontSize: '11px', color: '#777', fontWeight: '600', textTransform: 'uppercase' }}>Completed:</span>
-            <span style={{ fontSize: '14px', fontWeight: '700', color: '#1a1a1a' }}>{totalReachedEnd}</span>
+          <div
+            style={{
+              flex: 1,
+              display: 'flex',
+              alignItems: 'center',
+              gap: '8px',
+              padding: '9px 14px',
+            }}
+          >
+            <div style={{ width: '3px', height: '16px', background: '#1D8A4E' }} />
+            <span
+              style={{
+                fontFamily: "'JetBrains Mono', monospace",
+                fontSize: '9px',
+                fontWeight: '600',
+                letterSpacing: '0.1em',
+                textTransform: 'uppercase',
+                color: '#5C5F6B',
+              }}
+            >
+              Completed
+            </span>
+            <span
+              style={{
+                fontFamily: "'Space Grotesk', sans-serif",
+                fontWeight: '700',
+                fontSize: '16px',
+                letterSpacing: '-0.02em',
+                color: '#0B0E14',
+              }}
+            >
+              {totalReachedEnd}
+            </span>
           </div>
         </div>
       )}

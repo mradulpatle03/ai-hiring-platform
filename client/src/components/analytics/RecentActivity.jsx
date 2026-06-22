@@ -3,25 +3,15 @@ import { fetchRecentActivity } from "../../api/analytics";
 import StatusBadge from "../StatusBadge";
 import ScoreBadge from "../ScoreBadge";
 import { formatDistanceToNow } from "date-fns";
-import { Clock, TrendingUp, CheckCircle, XCircle, Eye } from "lucide-react";
-
+import { Clock } from "lucide-react";
 
 const dotColor = {
-  shortlisted: "#1D9E75",
-  screened: "#7F77DD",
-  rejected: "#E24B4A",
-  screening: "#378ADD",
-  pending: "#bbb",
+  shortlisted: "#1D8A4E",
+  screened: "#4D7CFF",
+  rejected: "#FF4D2E",
+  screening: "#4D7CFF",
+  pending: "#8A8D98",
 };
-
-const statusIcon = {
-  shortlisted: CheckCircle,
-  screened: Eye,
-  rejected: XCircle,
-  screening: TrendingUp,
-  pending: Clock,
-};
-
 
 export default function RecentActivity() {
   const { data, isLoading } = useQuery({
@@ -31,76 +21,144 @@ export default function RecentActivity() {
   });
   const activity = data?.activity || [];
 
-  // Calculate activity stats
-  const totalActivity = activity.length
-  const shortlistedCount = activity.filter(a => a.status === 'shortlisted').length
-  const avgScore = activity.length > 0 
-    ? Math.round(activity.filter(a => a.aiScore != null).reduce((sum, a) => sum + (a.aiScore || 0), 0) / activity.filter(a => a.aiScore != null).length)
-    : 0
+  const totalActivity = activity.length;
+  const shortlistedCount = activity.filter(a => a.status === 'shortlisted').length;
 
+  const emptyBox = (
+    <div
+      style={{
+        height: '200px',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        background: 'rgba(11,14,20,0.02)',
+        border: '1px solid rgba(11,14,20,0.06)',
+        borderRadius: '2px',
+      }}
+    >
+      <span
+        style={{
+          fontFamily: "'JetBrains Mono', monospace",
+          fontSize: '10px',
+          fontWeight: '600',
+          letterSpacing: '0.1em',
+          textTransform: 'uppercase',
+          color: '#8A8D98',
+        }}
+      >
+        {isLoading ? 'Loading…' : 'No activity yet'}
+      </span>
+    </div>
+  );
 
   return (
     <div
       style={{
-        background: 'linear-gradient(180deg, #ffffff 0%, #fafbff 100%)',
-        border: '1px solid #e8e8ed',
-        borderRadius: '16px',
-        padding: '1.75rem',
-        boxShadow: '0 2px 12px rgba(0, 0, 0, 0.04), 0 8px 32px rgba(0, 0, 0, 0.02)',
-        transition: 'all 0.25s ease',
-      }}
-      onMouseEnter={(e) => {
-        e.currentTarget.style.boxShadow = '0 4px 16px rgba(0, 0, 0, 0.06), 0 12px 40px rgba(127, 119, 221, 0.08)'
-        e.currentTarget.style.borderColor = '#e0e0e6'
-      }}
-      onMouseLeave={(e) => {
-        e.currentTarget.style.boxShadow = '0 2px 12px rgba(0, 0, 0, 0.04), 0 8px 32px rgba(0, 0, 0, 0.02)'
-        e.currentTarget.style.borderColor = '#e8e8ed'
+        background: '#fff',
+        border: '1px solid rgba(11,14,20,0.10)',
+        borderRadius: '4px',
+        padding: '22px',
+        fontFamily: "'Inter', sans-serif",
       }}
     >
       {/* Header */}
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '1.25rem' }}>
+      <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', marginBottom: '20px' }}>
         <div>
-          <div style={{ fontSize: '16px', fontWeight: '700', color: '#1a1a1a', marginBottom: '4px', letterSpacing: '-0.5px' }}>
+          <div
+            style={{
+              fontFamily: "'Space Grotesk', sans-serif",
+              fontWeight: '700',
+              fontSize: '16px',
+              letterSpacing: '-0.02em',
+              color: '#0B0E14',
+              marginBottom: '4px',
+            }}
+          >
             Recent activity
           </div>
-          <div style={{ fontSize: '12px', color: '#888', fontWeight: '500' }}>
+          <div
+            style={{
+              fontFamily: "'JetBrains Mono', monospace",
+              fontSize: '10px',
+              fontWeight: '600',
+              letterSpacing: '0.08em',
+              textTransform: 'uppercase',
+              color: '#5C5F6B',
+            }}
+          >
             Latest candidate updates
           </div>
         </div>
-        
-        {/* Stats */}
+
         {activity.length > 0 && !isLoading && (
-          <div style={{ display: 'flex', gap: '10px' }}>
+          <div style={{ display: 'flex', gap: '6px' }}>
             <div
               style={{
-                background: 'linear-gradient(135deg, #eeedfe 0%, #e7e5f9 100%)',
-                padding: '8px 12px',
-                borderRadius: '10px',
-                border: '1px solid rgba(90, 82, 192, 0.15)',
+                background: 'rgba(11,14,20,0.04)',
+                border: '1px solid rgba(11,14,20,0.10)',
+                borderRadius: '2px',
+                padding: '6px 12px',
               }}
             >
-              <div style={{ fontSize: '10px', color: '#777', fontWeight: '600', textTransform: 'uppercase', letterSpacing: '0.3px' }}>
+              <div
+                style={{
+                  fontFamily: "'JetBrains Mono', monospace",
+                  fontSize: '9px',
+                  fontWeight: '600',
+                  letterSpacing: '0.1em',
+                  textTransform: 'uppercase',
+                  color: '#5C5F6B',
+                  marginBottom: '2px',
+                }}
+              >
                 Updates
               </div>
-              <div style={{ fontSize: '16px', fontWeight: '800', color: '#5a52c0', lineHeight: 1 }}>
+              <div
+                style={{
+                  fontFamily: "'Space Grotesk', sans-serif",
+                  fontWeight: '700',
+                  fontSize: '18px',
+                  letterSpacing: '-0.02em',
+                  color: '#0B0E14',
+                  lineHeight: 1,
+                }}
+              >
                 {totalActivity}
               </div>
             </div>
-            
+
             {shortlistedCount > 0 && (
               <div
                 style={{
-                  background: 'linear-gradient(135deg, #e1f5ee 0%, #d6f0e8 100%)',
-                  padding: '8px 12px',
-                  borderRadius: '10px',
-                  border: '1px solid rgba(29, 158, 117, 0.15)',
+                  background: 'rgba(29,138,78,0.08)',
+                  border: '1px solid rgba(29,138,78,0.20)',
+                  borderRadius: '2px',
+                  padding: '6px 12px',
                 }}
               >
-                <div style={{ fontSize: '10px', color: '#777', fontWeight: '600', textTransform: 'uppercase', letterSpacing: '0.3px' }}>
+                <div
+                  style={{
+                    fontFamily: "'JetBrains Mono', monospace",
+                    fontSize: '9px',
+                    fontWeight: '600',
+                    letterSpacing: '0.1em',
+                    textTransform: 'uppercase',
+                    color: '#5C5F6B',
+                    marginBottom: '2px',
+                  }}
+                >
                   Shortlisted
                 </div>
-                <div style={{ fontSize: '16px', fontWeight: '800', color: '#1D9E75', lineHeight: 1 }}>
+                <div
+                  style={{
+                    fontFamily: "'Space Grotesk', sans-serif",
+                    fontWeight: '700',
+                    fontSize: '18px',
+                    letterSpacing: '-0.02em',
+                    color: '#1D8A4E',
+                    lineHeight: 1,
+                  }}
+                >
                   {shortlistedCount}
                 </div>
               </div>
@@ -110,46 +168,10 @@ export default function RecentActivity() {
       </div>
 
       {/* Activity list */}
-      {isLoading ? (
-        <div
-          style={{
-            height: '200px',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            background: 'linear-gradient(135deg, #fafbff 0%, #f2f4f8 100%)',
-            borderRadius: '12px',
-            border: '1px solid #e8e8ed',
-          }}
-        >
-          <div style={{ display: 'flex', alignItems: 'center', gap: '8px', color: '#999', fontWeight: '500' }}>
-            <div style={{ width: '16px', height: '16px', borderRadius: '4px', background: '#7F77DD', animation: 'pulse 1s ease-in-out infinite' }} />
-            Loading...
-          </div>
-        </div>
-      ) : activity.length === 0 ? (
-        <div
-          style={{
-            height: '200px',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            background: 'linear-gradient(135deg, #fafbff 0%, #f2f4f8 100%)',
-            borderRadius: '12px',
-            border: '1px solid #e8e8ed',
-          }}
-        >
-          <div style={{ display: 'flex', alignItems: 'center', gap: '8px', color: '#bbb', fontWeight: '500' }}>
-            <Clock size={16} color="#ccc" />
-            No activity yet
-          </div>
-        </div>
-      ) : (
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '0' }}>
+      {isLoading || activity.length === 0 ? emptyBox : (
+        <div style={{ display: 'flex', flexDirection: 'column' }}>
           {activity.map((a, i) => {
-            const Icon = statusIcon[a.status] || Clock
-            const isLast = i === activity.length - 1
-
+            const isLast = i === activity.length - 1;
             return (
               <div
                 key={i}
@@ -157,36 +179,18 @@ export default function RecentActivity() {
                   display: 'flex',
                   alignItems: 'center',
                   gap: '12px',
-                  padding: '14px 0',
-                  borderBottom: isLast ? 'none' : '1px solid #f0f0f5',
-                  transition: 'background 0.2s ease',
-                }}
-                onMouseEnter={(e) => {
-                  e.currentTarget.style.background = 'linear-gradient(135deg, #fafbff 0%, #f2f4f8 100%)'
-                  e.currentTarget.style.marginLeft = '-12px'
-                  e.currentTarget.style.marginRight = '-12px'
-                  e.currentTarget.style.paddingLeft = '12px'
-                  e.currentTarget.style.paddingRight = '12px'
-                  e.currentTarget.style.borderRadius = '8px'
-                }}
-                onMouseLeave={(e) => {
-                  e.currentTarget.style.background = 'transparent'
-                  e.currentTarget.style.marginLeft = '0'
-                  e.currentTarget.style.marginRight = '0'
-                  e.currentTarget.style.paddingLeft = '0'
-                  e.currentTarget.style.paddingRight = '0'
-                  e.currentTarget.style.borderRadius = '0'
+                  padding: '12px 0',
+                  borderBottom: isLast ? 'none' : '1px solid rgba(11,14,20,0.06)',
                 }}
               >
                 {/* Status dot */}
                 <div
                   style={{
-                    width: '10px',
-                    height: '10px',
+                    width: '6px',
+                    height: '6px',
                     borderRadius: '50%',
-                    background: dotColor[a.status] || '#bbb',
+                    background: dotColor[a.status] || '#8A8D98',
                     flexShrink: 0,
-                    boxShadow: `0 0 0 3px ${dotColor[a.status] ? `${dotColor[a.status]}20` : '#f0f0f5'}`,
                   }}
                 />
 
@@ -194,22 +198,26 @@ export default function RecentActivity() {
                 <div style={{ flex: 1, minWidth: 0 }}>
                   <div
                     style={{
-                      fontSize: '14px',
+                      fontFamily: "'Inter', sans-serif",
+                      fontSize: '13px',
                       fontWeight: '600',
-                      color: '#1a1a1a',
+                      color: '#0B0E14',
                       overflow: 'hidden',
                       textOverflow: 'ellipsis',
                       whiteSpace: 'nowrap',
-                      marginBottom: '3px',
+                      marginBottom: '2px',
                     }}
                   >
                     {a.candidateName}
                   </div>
                   <div
                     style={{
-                      fontSize: '12px',
-                      color: '#888',
-                      fontWeight: '500',
+                      fontFamily: "'JetBrains Mono', monospace",
+                      fontSize: '10px',
+                      fontWeight: '600',
+                      letterSpacing: '0.05em',
+                      textTransform: 'uppercase',
+                      color: '#8A8D98',
                       overflow: 'hidden',
                       textOverflow: 'ellipsis',
                       whiteSpace: 'nowrap',
@@ -219,15 +227,8 @@ export default function RecentActivity() {
                   </div>
                 </div>
 
-                {/* Right side badges */}
-                <div
-                  style={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: '8px',
-                    flexShrink: 0,
-                  }}
-                >
+                {/* Badges */}
+                <div style={{ display: 'flex', alignItems: 'center', gap: '6px', flexShrink: 0 }}>
                   <StatusBadge status={a.status} />
                   {a.aiScore != null && <ScoreBadge score={a.aiScore} />}
                 </div>
@@ -238,17 +239,16 @@ export default function RecentActivity() {
                     display: 'flex',
                     alignItems: 'center',
                     gap: '4px',
-                    fontSize: '11px',
-                    color: '#999',
-                    fontWeight: '500',
+                    fontFamily: "'JetBrains Mono', monospace",
+                    fontSize: '9px',
+                    fontWeight: '600',
+                    letterSpacing: '0.05em',
+                    color: '#8A8D98',
                     flexShrink: 0,
-                    marginLeft: '8px',
                   }}
                 >
-                  <Clock size={10} color="#ccc" />
-                  {formatDistanceToNow(new Date(a.updatedAt), {
-                    addSuffix: true,
-                  })}
+                  <Clock size={9} color="#8A8D98" />
+                  {formatDistanceToNow(new Date(a.updatedAt), { addSuffix: true })}
                 </div>
               </div>
             );
@@ -256,23 +256,38 @@ export default function RecentActivity() {
         </div>
       )}
 
-      {/* Footer - auto-refresh indicator */}
+      {/* Footer — auto-refresh indicator */}
       {!isLoading && activity.length > 0 && (
         <div
           style={{
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
-            gap: '6px',
-            marginTop: '1.25rem',
+            gap: '7px',
+            marginTop: '16px',
             padding: '8px 12px',
-            background: 'linear-gradient(135deg, #fafbff 0%, #f2f4f8 100%)',
-            borderRadius: '8px',
-            border: '1px solid #e8e8ed',
+            border: '1px solid rgba(11,14,20,0.08)',
+            borderRadius: '2px',
           }}
         >
-          <div style={{ width: '6px', height: '6px', borderRadius: '50%', background: '#7F77DD', animation: 'pulse 1.5s ease-in-out infinite' }} />
-          <span style={{ fontSize: '10px', color: '#888', fontWeight: '600', textTransform: 'uppercase', letterSpacing: '0.3px' }}>
+          <div
+            style={{
+              width: '5px',
+              height: '5px',
+              borderRadius: '50%',
+              background: '#1D8A4E',
+            }}
+          />
+          <span
+            style={{
+              fontFamily: "'JetBrains Mono', monospace",
+              fontSize: '9px',
+              fontWeight: '600',
+              letterSpacing: '0.1em',
+              textTransform: 'uppercase',
+              color: '#8A8D98',
+            }}
+          >
             Auto-refreshes every 15s
           </span>
         </div>

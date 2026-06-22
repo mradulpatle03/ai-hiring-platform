@@ -5,40 +5,58 @@ import {
   setHours,
   setMinutes,
   isBefore,
-  startOfToday,
 } from "date-fns";
 import { Plus, Trash2, Calendar } from "lucide-react";
 
 const s = {
   wrap: {
     background: "#fff",
-    border: "1px solid #eee",
-    borderRadius: "12px",
-    padding: "1.5rem",
+    border: "1px solid rgba(11,14,20,0.10)",
+    borderRadius: "4px",
+    padding: "22px",
+    fontFamily: "'Inter', -apple-system, BlinkMacSystemFont, sans-serif",
   },
-  title: { fontSize: "15px", fontWeight: "600", marginBottom: "4px" },
-  sub: { fontSize: "13px", color: "#888", marginBottom: "1.25rem" },
+  title: {
+    fontFamily: "'Space Grotesk', sans-serif",
+    fontWeight: "700",
+    fontSize: "18px",
+    letterSpacing: "-0.02em",
+    color: "#0B0E14",
+    marginBottom: "4px",
+  },
+  sub: {
+    fontFamily: "'JetBrains Mono', monospace",
+    fontSize: "10px",
+    fontWeight: "600",
+    letterSpacing: "0.08em",
+    textTransform: "uppercase",
+    color: "#5C5F6B",
+    marginBottom: "20px",
+  },
   slotRow: {
     display: "flex",
     gap: "8px",
     alignItems: "center",
-    marginBottom: "10px",
+    marginBottom: "8px",
   },
   input: {
     flex: 1,
     padding: "9px 12px",
-    border: "1px solid #e0e0e0",
-    borderRadius: "8px",
+    border: "1px solid rgba(11,14,20,0.15)",
+    borderRadius: "2px",
     fontSize: "13px",
+    fontFamily: "'JetBrains Mono', monospace",
     outline: "none",
+    color: "#0B0E14",
+    background: "#fff",
   },
   del: {
-    padding: "8px",
-    border: "1px solid #fde0e0",
-    borderRadius: "8px",
+    padding: "8px 10px",
+    border: "1px solid rgba(255,77,46,0.20)",
+    borderRadius: "2px",
     background: "#fff",
     cursor: "pointer",
-    color: "#e74c3c",
+    color: "#FF4D2E",
     display: "flex",
     alignItems: "center",
   },
@@ -47,54 +65,59 @@ const s = {
     alignItems: "center",
     gap: "6px",
     padding: "8px 14px",
-    border: "1px dashed #ccc",
-    borderRadius: "8px",
+    border: "1px dashed rgba(11,14,20,0.20)",
+    borderRadius: "2px",
     background: "none",
     cursor: "pointer",
-    fontSize: "13px",
-    color: "#888",
-    marginBottom: "1.25rem",
+    fontFamily: "'JetBrains Mono', monospace",
+    fontSize: "10px",
+    fontWeight: "600",
+    letterSpacing: "0.06em",
+    textTransform: "uppercase",
+    color: "#5C5F6B",
+    marginBottom: "14px",
   },
   label: {
-    fontSize: "12px",
-    fontWeight: "500",
-    color: "#555",
-    marginBottom: "5px",
+    fontFamily: "'JetBrains Mono', monospace",
+    fontSize: "10px",
+    fontWeight: "600",
+    letterSpacing: "0.1em",
+    textTransform: "uppercase",
+    color: "#5C5F6B",
+    marginBottom: "6px",
     display: "block",
   },
-  group: { marginBottom: "1rem" },
+  group: { marginBottom: "14px" },
   field: {
     width: "100%",
     padding: "9px 12px",
-    border: "1px solid #e0e0e0",
-    borderRadius: "8px",
+    border: "1px solid rgba(11,14,20,0.15)",
+    borderRadius: "2px",
+    fontFamily: "'Inter', sans-serif",
     fontSize: "13px",
     outline: "none",
     boxSizing: "border-box",
-  },
-  submit: {
-    width: "100%",
-    padding: "11px",
-    background: "#7F77DD",
-    color: "#fff",
-    border: "none",
-    borderRadius: "8px",
-    fontSize: "14px",
-    fontWeight: "500",
-    cursor: "pointer",
-    marginTop: "4px",
+    color: "#0B0E14",
+    background: "#fff",
   },
   err: {
-    background: "#fff0f0",
-    color: "#c0392b",
-    padding: "10px 12px",
-    borderRadius: "8px",
-    fontSize: "13px",
-    marginBottom: "1rem",
+    background: "rgba(255,77,46,0.08)",
+    color: "#FF4D2E",
+    border: "1px solid rgba(255,77,46,0.20)",
+    borderRadius: "2px",
+    padding: "10px 13px",
+    fontFamily: "'JetBrains Mono', monospace",
+    fontSize: "11px",
+    fontWeight: "600",
+    letterSpacing: "0.04em",
+    marginBottom: "14px",
+  },
+  divider: {
+    borderTop: "1px solid rgba(11,14,20,0.08)",
+    margin: "16px 0",
   },
 };
 
-// Generate quick slot options for today + next 7 days
 const generateQuickSlots = () => {
   const slots = [];
   for (let d = 1; d <= 7; d++) {
@@ -124,7 +147,7 @@ export default function SlotPicker({ applicationId, onSuccess, onCancel }) {
   };
 
   const addQuickSlot = (date) => {
-    const iso = date.toISOString(); // full ISO string with timezone: 2024-01-15T04:30:00.000Z
+    const iso = date.toISOString();
     if (slots.includes(iso)) return;
     if (slots.length >= 5) return;
     const empty = slots.findIndex((s) => !s);
@@ -146,12 +169,7 @@ export default function SlotPicker({ applicationId, onSuccess, onCancel }) {
     setLoading(true);
     try {
       const { proposeInterviewSlots } = await import("../../api/interviews");
-      await proposeInterviewSlots({
-        applicationId,
-        slots: filled,
-        meetLink,
-        notes,
-      });
+      await proposeInterviewSlots({ applicationId, slots: filled, meetLink, notes });
       onSuccess?.();
     } catch (err) {
       setError(err.response?.data?.message || "Failed to propose slots");
@@ -163,9 +181,7 @@ export default function SlotPicker({ applicationId, onSuccess, onCancel }) {
   return (
     <div style={s.wrap}>
       <div style={s.title}>Schedule an interview</div>
-      <div style={s.sub}>
-        Propose up to 5 time slots — the candidate will pick one.
-      </div>
+      <div style={s.sub}>Propose up to 5 slots — candidate picks one</div>
 
       {error && <div style={s.err}>{error}</div>}
 
@@ -175,14 +191,13 @@ export default function SlotPicker({ applicationId, onSuccess, onCancel }) {
           <input
             style={s.input}
             type="datetime-local"
-            // Convert stored ISO back to datetime-local format for display
             value={slot ? format(new Date(slot), "yyyy-MM-dd'T'HH:mm") : ""}
             min={format(new Date(), "yyyy-MM-dd'T'HH:mm")}
             onChange={(e) => updateSlot(i, e.target.value)}
           />
           {slots.length > 1 && (
             <button style={s.del} onClick={() => removeSlot(i)}>
-              <Trash2 size={14} />
+              <Trash2 size={13} />
             </button>
           )}
         </div>
@@ -190,34 +205,38 @@ export default function SlotPicker({ applicationId, onSuccess, onCancel }) {
 
       {slots.length < 5 && (
         <button style={s.add} onClick={addSlot}>
-          <Plus size={14} /> Add another slot
+          <Plus size={12} /> Add slot
         </button>
       )}
 
+      <div style={s.divider} />
+
       {/* Quick slot suggestions */}
-      <div style={{ marginBottom: "1rem" }}>
+      <div style={{ marginBottom: "16px" }}>
         <button
           style={{
             ...s.add,
+            marginBottom: "0",
             borderStyle: "solid",
-            color: "#7F77DD",
-            borderColor: "#c8c5f5",
+            color: "#4D7CFF",
+            borderColor: "rgba(77,124,255,0.30)",
           }}
           onClick={() => setShowQuick((p) => !p)}
         >
-          <Calendar size={14} /> {showQuick ? "Hide" : "Show"} quick slots
+          <Calendar size={12} /> {showQuick ? "Hide" : "Show"} quick slots
         </button>
+
         {showQuick && (
           <div
             style={{
               display: "flex",
               flexWrap: "wrap",
-              gap: "6px",
-              marginTop: "8px",
+              gap: "5px",
+              marginTop: "10px",
             }}
           >
             {quickSlots.slice(0, 16).map((d, i) => {
-              const iso = format(d, "yyyy-MM-dd'T'HH:mm");
+              const iso = d.toISOString();
               const selected = slots.includes(iso);
               return (
                 <button
@@ -225,13 +244,16 @@ export default function SlotPicker({ applicationId, onSuccess, onCancel }) {
                   onClick={() => addQuickSlot(d)}
                   style={{
                     padding: "5px 10px",
-                    fontSize: "11px",
-                    borderRadius: "6px",
+                    fontFamily: "'JetBrains Mono', monospace",
+                    fontSize: "10px",
+                    fontWeight: "600",
+                    letterSpacing: "0.04em",
+                    borderRadius: "2px",
                     border: "1px solid",
                     cursor: "pointer",
-                    background: selected ? "#7F77DD" : "#fff",
-                    color: selected ? "#fff" : "#555",
-                    borderColor: selected ? "#7F77DD" : "#ddd",
+                    background: selected ? "#0B0E14" : "#fff",
+                    color: selected ? "#C8FF4D" : "#5C5F6B",
+                    borderColor: selected ? "#0B0E14" : "rgba(11,14,20,0.15)",
                   }}
                 >
                   {format(d, "EEE MMM d, h:mm a")}
@@ -241,6 +263,8 @@ export default function SlotPicker({ applicationId, onSuccess, onCancel }) {
           </div>
         )}
       </div>
+
+      <div style={s.divider} />
 
       <div style={s.group}>
         <label style={s.label}>Meeting link (optional)</label>
@@ -259,18 +283,48 @@ export default function SlotPicker({ applicationId, onSuccess, onCancel }) {
           value={notes}
           onChange={(e) => setNotes(e.target.value)}
           rows={3}
-          placeholder="e.g. This will be a 1-hour technical interview with 2 engineers..."
+          placeholder="e.g. 1-hour technical round with 2 engineers..."
         />
       </div>
 
-      <div style={{ display: "flex", gap: "10px" }}>
+      <div style={{ display: "flex", gap: "8px", marginTop: "4px" }}>
         <button
-          style={{ ...s.submit, background: "#f5f5f5", color: "#555" }}
+          style={{
+            flex: 1,
+            padding: "10px",
+            borderRadius: "2px",
+            fontFamily: "'JetBrains Mono', monospace",
+            fontSize: "11px",
+            fontWeight: "700",
+            letterSpacing: "0.06em",
+            textTransform: "uppercase",
+            cursor: "pointer",
+            border: "1px solid rgba(11,14,20,0.15)",
+            background: "#fff",
+            color: "#5C5F6B",
+          }}
           onClick={onCancel}
         >
           Cancel
         </button>
-        <button style={s.submit} onClick={handleSubmit} disabled={loading}>
+        <button
+          style={{
+            flex: 2,
+            padding: "10px",
+            borderRadius: "2px",
+            fontFamily: "'JetBrains Mono', monospace",
+            fontSize: "11px",
+            fontWeight: "700",
+            letterSpacing: "0.06em",
+            textTransform: "uppercase",
+            cursor: "pointer",
+            border: "none",
+            background: loading ? "#8A8D98" : "#0B0E14",
+            color: "#fff",
+          }}
+          onClick={handleSubmit}
+          disabled={loading}
+        >
           {loading ? "Sending..." : "Send invitation →"}
         </button>
       </div>

@@ -1,15 +1,18 @@
 import { color, font } from "../styles/theme";
 
 const map = {
-  pending: { dot: color.graphiteDim, text: color.graphite },
-  screening: { dot: color.wire, text: color.wire },
-  screened: { dot: "#1D8A4E", text: "#1D8A4E" },
-  shortlisted: { dot: color.volt, text: "#5C7A1A" },
-  rejected: { dot: color.signal, text: color.signal },
+  pending: { dot: color.graphiteDim, text: color.graphite, label: "Pending" },
+  screening: { dot: "#4D7CFF", text: "#4D7CFF", label: "Screening" },
+  screened: { dot: "#1D8A4E", text: "#1D8A4E", label: "Screened" },
+  shortlisted: { dot: "#B07A0E", text: "#B07A0E", label: "Shortlisted" },
+  rejected: { dot: color.signal, text: color.signal, label: "Rejected" },
+  open: { dot: "#6eff4d", text: "#6eff4d", label: "Opened" },
+  closed: { dot: "#ff4d2e", text: "#ff4d2e", label: "Closed" },
 };
 
 export default function StatusBadge({ status }) {
   const c = map[status] || map.pending;
+
   return (
     <span
       style={{
@@ -20,23 +23,24 @@ export default function StatusBadge({ status }) {
         fontSize: "10px",
         fontWeight: 700,
         textTransform: "uppercase",
-        letterSpacing: "0.04em",
+        letterSpacing: "0.06em",
         color: c.text,
         border: `1px solid ${color.lineLight}`,
         padding: "4px 9px",
         whiteSpace: "nowrap",
+        background: "#fff",
       }}
     >
       <span
         style={{
-          width: "6px",
-          height: "6px",
+          width: "5px",
+          height: "5px",
           borderRadius: "50%",
           background: c.dot,
           flexShrink: 0,
         }}
       />
-      {status}
+      {c.label}
     </span>
   );
 }

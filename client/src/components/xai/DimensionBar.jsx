@@ -1,10 +1,37 @@
 import { useState, useEffect, useRef } from "react";
 
 const getColor = (score) => {
-  if (score >= 8) return { bar: "#1D9E75", bg: "#E1F5EE", text: "#085041", label: "Strong" };
-  if (score >= 6) return { bar: "#7F77DD", bg: "#EEEDFE", text: "#3C3489", label: "Good" };
-  if (score >= 4) return { bar: "#EF9F27", bg: "#FAEEDA", text: "#633806", label: "Fair" };
-  return { bar: "#E24B4A", bg: "#FCEBEB", text: "#791F1F", label: "Weak" };
+  if (score >= 8)
+    return {
+      bar: "#1D8A4E",
+      bg: "rgba(29,138,78,0.08)",
+      text: "#1D8A4E",
+      border: "rgba(29,138,78,0.2)",
+      label: "Strong",
+    };
+  if (score >= 6)
+    return {
+      bar: "#4D7CFF",
+      bg: "rgba(77,124,255,0.08)",
+      text: "#4D7CFF",
+      border: "rgba(77,124,255,0.2)",
+      label: "Good",
+    };
+  if (score >= 4)
+    return {
+      bar: "#B07A0E",
+      bg: "rgba(176,122,14,0.08)",
+      text: "#B07A0E",
+      border: "rgba(176,122,14,0.2)",
+      label: "Fair",
+    };
+  return {
+    bar: "#FF4D2E",
+    bg: "rgba(255,77,46,0.08)",
+    text: "#FF4D2E",
+    border: "rgba(255,77,46,0.2)",
+    label: "Weak",
+  };
 };
 
 const labels = {
@@ -15,49 +42,28 @@ const labels = {
   growthPotential: "Growth Potential",
 };
 
-const CIRCUMFERENCE = 2 * Math.PI * 14;
-
-function ScoreRing({ score, color }) {
-  const [animated, setAnimated] = useState(false);
-  useEffect(() => {
-    const t = setTimeout(() => setAnimated(true), 100);
-    return () => clearTimeout(t);
-  }, []);
-
-  const dashoffset = animated
-    ? CIRCUMFERENCE * (1 - (score * 10) / 100)
-    : CIRCUMFERENCE;
-
+function ScoreSquare({ score, color }) {
   return (
-    <div style={{ position: "relative", width: 36, height: 36, flexShrink: 0 }}>
-      <svg
-        width="36"
-        height="36"
-        viewBox="0 0 36 36"
-        style={{ transform: "rotate(-90deg)" }}
+    <div
+      style={{
+        width: 36,
+        height: 36,
+        flexShrink: 0,
+        background: "#0B0E14",
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+      }}
+    >
+      <span
+        style={{
+          fontFamily: "'Space Grotesk', sans-serif",
+          fontSize: 14,
+          fontWeight: 700,
+          color: color.bar,
+          letterSpacing: "-0.02em",
+        }}
       >
-        <circle
-          cx="18" cy="18" r="14"
-          fill="none"
-          stroke="#f0f0f0"
-          strokeWidth="2.5"
-        />
-        <circle
-          cx="18" cy="18" r="14"
-          fill="none"
-          stroke={color.bar}
-          strokeWidth="2.5"
-          strokeDasharray={CIRCUMFERENCE}
-          strokeDashoffset={dashoffset}
-          strokeLinecap="round"
-          style={{ transition: "stroke-dashoffset 0.7s cubic-bezier(.4,0,.2,1)" }}
-        />
-      </svg>
-      <span style={{
-        position: "absolute", inset: 0,
-        display: "flex", alignItems: "center", justifyContent: "center",
-        fontSize: 11, fontWeight: 600, color: "#1a1a1a",
-      }}>
         {score}
       </span>
     </div>
@@ -72,17 +78,47 @@ function AnimatedBar({ score, color }) {
   }, [score]);
 
   return (
-    <div style={{
-      height: 6, background: "#f5f5f5",
-      borderRadius: 3, overflow: "hidden",
-    }}>
-      <div style={{
-        height: "100%",
-        width: `${width}%`,
-        background: color.bar,
-        borderRadius: 3,
-        transition: "width 0.7s cubic-bezier(.4,0,.2,1)",
-      }} />
+    <div
+      style={{
+        height: 3,
+        background: "var(--paper-2)",
+        overflow: "hidden",
+      }}
+    >
+      <div
+        style={{
+          height: "100%",
+          width: `${width}%`,
+          background: color.bar,
+          transition: "width 0.7s cubic-bezier(.4,0,.2,1)",
+        }}
+      />
+    </div>
+  );
+}
+
+function BulletItem({ text, color }) {
+  return (
+    <div
+      style={{
+        fontSize: 12,
+        color: "var(--ink)",
+        padding: "3px 0 3px 13px",
+        position: "relative",
+        lineHeight: 1.5,
+      }}
+    >
+      <span
+        style={{
+          position: "absolute",
+          left: 0,
+          top: 8,
+          width: 4,
+          height: 4,
+          background: color,
+        }}
+      />
+      {text}
     </div>
   );
 }
@@ -102,27 +138,18 @@ export default function DimensionBar({ dimKey, data, defaultOpen = false }) {
   }, [open, data]);
 
   return (
-    <div style={{
-      marginBottom: 10,
-      border: "1px solid #eee",
-      borderRadius: 12,
-      overflow: "hidden",
-      background: "#fff",
-      transition: "border-color 0.2s, box-shadow 0.2s",
-    }}
-      onMouseEnter={e => {
-        e.currentTarget.style.borderColor = "#ddd";
-        e.currentTarget.style.boxShadow = "0 2px 8px rgba(0,0,0,0.06)";
-      }}
-      onMouseLeave={e => {
-        e.currentTarget.style.borderColor = "#eee";
-        e.currentTarget.style.boxShadow = "none";
+    <div
+      style={{
+        marginBottom: 6,
+        border: "1px solid var(--line-light)",
+        borderTop: "none",
+        background: "#fff",
       }}
     >
       {/* Header */}
       <div
         style={{
-          padding: "12px 14px",
+          padding: "11px 14px",
           cursor: "pointer",
           display: "flex",
           alignItems: "center",
@@ -131,44 +158,60 @@ export default function DimensionBar({ dimKey, data, defaultOpen = false }) {
         }}
         onClick={() => setOpen((p) => !p)}
       >
-        <ScoreRing score={score} color={c} />
+        <ScoreSquare score={score} color={c} />
 
-        <span style={{ flex: 1, fontSize: 13, fontWeight: 500, color: "#1a1a1a" }}>
+        <span
+          style={{
+            flex: 1,
+            fontFamily: "var(--font-body)",
+            fontSize: 13,
+            fontWeight: 600,
+            color: "var(--ink)",
+          }}
+        >
           {labels[dimKey]}
         </span>
 
-        <span style={{
-          padding: "2px 10px",
-          borderRadius: 999,
-          background: c.bg,
-          color: c.text,
-          fontSize: 11,
-          fontWeight: 600,
-          flexShrink: 0,
-        }}>
+        <span
+          style={{
+            padding: "3px 9px",
+            background: c.bg,
+            color: c.text,
+            border: `1px solid ${c.border}`,
+            fontFamily: "var(--font-mono)",
+            fontSize: 10,
+            fontWeight: 600,
+            letterSpacing: "0.06em",
+            textTransform: "uppercase",
+            flexShrink: 0,
+          }}
+        >
           {c.label}
         </span>
 
-        <span style={{
-          padding: "2px 8px",
-          borderRadius: 999,
-          background: "#f5f5f5",
-          color: "#555",
-          fontSize: 11,
-          fontWeight: 600,
-          flexShrink: 0,
-        }}>
+        <span
+          style={{
+            padding: "3px 8px",
+            background: "var(--paper)",
+            border: "1px solid var(--line-light)",
+            fontFamily: "var(--font-mono)",
+            fontSize: 10,
+            fontWeight: 600,
+            color: "var(--graphite)",
+            flexShrink: 0,
+          }}
+        >
           {score}/10
         </span>
 
-        {/* Chevron */}
         <svg
-          width="14" height="14"
+          width="12"
+          height="12"
           viewBox="0 0 14 14"
           fill="none"
           style={{
             flexShrink: 0,
-            color: "#aaa",
+            color: "var(--graphite)",
             transform: open ? "rotate(180deg)" : "rotate(0deg)",
             transition: "transform 0.3s ease",
           }}
@@ -183,12 +226,10 @@ export default function DimensionBar({ dimKey, data, defaultOpen = false }) {
         </svg>
       </div>
 
-      {/* Bar */}
-      <div style={{ padding: "0 14px 12px" }}>
-        <AnimatedBar score={score} color={c} />
-      </div>
+      {/* Progress bar */}
+      <AnimatedBar score={score} color={c} />
 
-      {/* Collapsible Detail */}
+      {/* Collapsible detail */}
       <div
         ref={detailRef}
         style={{
@@ -199,71 +240,100 @@ export default function DimensionBar({ dimKey, data, defaultOpen = false }) {
         }}
       >
         {data && (
-          <div style={{ padding: "0 14px 14px", borderTop: "1px solid #f5f5f5" }}>
-            <p style={{
-              fontSize: 13, color: "#444",
-              lineHeight: 1.65, margin: "12px 0 14px",
-            }}>
+          <div
+            style={{
+              padding: "12px 14px 14px",
+              borderTop: "1px solid var(--line-light)",
+            }}
+          >
+            <p
+              style={{
+                fontSize: 13,
+                color: "var(--ink)",
+                lineHeight: 1.65,
+                margin: "0 0 12px",
+              }}
+            >
               {data.reasoning}
             </p>
+
             <div style={{ display: "flex", gap: 12, flexWrap: "wrap" }}>
               {data.highlights?.length > 0 && (
                 <div style={{ flex: 1, minWidth: 140 }}>
-                  <div style={{
-                    fontSize: 11, fontWeight: 600,
-                    color: "#1a7a4a", textTransform: "uppercase",
-                    letterSpacing: "0.05em", marginBottom: 6,
-                    display: "flex", alignItems: "center", gap: 4,
-                  }}>
-                    <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
-                      <circle cx="6" cy="6" r="5.25" stroke="#1a7a4a" strokeWidth="1.2" />
-                      <path d="M3.5 6l1.7 1.7L8.5 4.5" stroke="#1a7a4a" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round" />
+                  <div
+                    style={{
+                      fontFamily: "var(--font-mono)",
+                      fontSize: 10,
+                      fontWeight: 600,
+                      color: "#1D8A4E",
+                      textTransform: "uppercase",
+                      letterSpacing: "0.1em",
+                      marginBottom: 6,
+                      display: "flex",
+                      alignItems: "center",
+                      gap: 5,
+                    }}
+                  >
+                    <svg width="11" height="11" viewBox="0 0 12 12" fill="none">
+                      <rect
+                        x="0.6"
+                        y="0.6"
+                        width="10.8"
+                        height="10.8"
+                        stroke="#1D8A4E"
+                        strokeWidth="1.2"
+                      />
+                      <path
+                        d="M3.5 6l1.7 1.7L8.5 4.5"
+                        stroke="#1D8A4E"
+                        strokeWidth="1.2"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                      />
                     </svg>
                     Strengths
                   </div>
                   {data.highlights.map((h, i) => (
-                    <div key={i} style={{
-                      fontSize: 12, color: "#444",
-                      padding: "3px 0 3px 14px",
-                      position: "relative", lineHeight: 1.5,
-                    }}>
-                      <span style={{
-                        position: "absolute", left: 0, top: 8,
-                        width: 5, height: 5,
-                        borderRadius: "50%", background: "#1D9E75",
-                      }} />
-                      {h}
-                    </div>
+                    <BulletItem key={i} text={h} color="#1D8A4E" />
                   ))}
                 </div>
               )}
               {data.gaps?.length > 0 && (
                 <div style={{ flex: 1, minWidth: 140 }}>
-                  <div style={{
-                    fontSize: 11, fontWeight: 600,
-                    color: "#c0392b", textTransform: "uppercase",
-                    letterSpacing: "0.05em", marginBottom: 6,
-                    display: "flex", alignItems: "center", gap: 4,
-                  }}>
-                    <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
-                      <circle cx="6" cy="6" r="5.25" stroke="#c0392b" strokeWidth="1.2" />
-                      <path d="M4 4l4 4M8 4l-4 4" stroke="#c0392b" strokeWidth="1.2" strokeLinecap="round" />
+                  <div
+                    style={{
+                      fontFamily: "var(--font-mono)",
+                      fontSize: 10,
+                      fontWeight: 600,
+                      color: "#FF4D2E",
+                      textTransform: "uppercase",
+                      letterSpacing: "0.1em",
+                      marginBottom: 6,
+                      display: "flex",
+                      alignItems: "center",
+                      gap: 5,
+                    }}
+                  >
+                    <svg width="11" height="11" viewBox="0 0 12 12" fill="none">
+                      <rect
+                        x="0.6"
+                        y="0.6"
+                        width="10.8"
+                        height="10.8"
+                        stroke="#FF4D2E"
+                        strokeWidth="1.2"
+                      />
+                      <path
+                        d="M4 4l4 4M8 4l-4 4"
+                        stroke="#FF4D2E"
+                        strokeWidth="1.2"
+                        strokeLinecap="round"
+                      />
                     </svg>
                     Gaps
                   </div>
                   {data.gaps.map((g, i) => (
-                    <div key={i} style={{
-                      fontSize: 12, color: "#444",
-                      padding: "3px 0 3px 14px",
-                      position: "relative", lineHeight: 1.5,
-                    }}>
-                      <span style={{
-                        position: "absolute", left: 0, top: 8,
-                        width: 5, height: 5,
-                        borderRadius: "50%", background: "#E24B4A",
-                      }} />
-                      {g}
-                    </div>
+                    <BulletItem key={i} text={g} color="#FF4D2E" />
                   ))}
                 </div>
               )}

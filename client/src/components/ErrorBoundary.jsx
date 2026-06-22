@@ -6,64 +6,113 @@ const s = {
     display: "flex",
     alignItems: "center",
     justifyContent: "center",
-    background: "#f8f8f8",
+    background: "var(--paper)",
     padding: "2rem",
+    fontFamily: "var(--font-body)",
   },
   card: {
     background: "#fff",
-    border: "1px solid #eee",
-    borderRadius: "16px",
+    border: "1px solid var(--line-light)",
+    borderRadius: "var(--radius-md)",
     padding: "2.5rem",
     maxWidth: "480px",
     width: "100%",
     textAlign: "center",
-    boxShadow: "0 1px 4px rgba(0,0,0,0.06)",
+    position: "relative",
+    overflow: "hidden",
   },
-  icon: { fontSize: "48px", marginBottom: "1rem" },
-  title: {
-    fontSize: "20px",
+  cardAccent: {
+    position: "absolute",
+    top: 0, left: 0, right: 0,
+    height: "3px",
+    background: "var(--signal)",
+  },
+  iconWrap: {
+    width: "48px",
+    height: "48px",
+    background: "var(--ink)",
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "center",
+    margin: "0 auto 16px",
+  },
+  iconSvg: {
+    width: "20px",
+    height: "20px",
+    fill: "none",
+    stroke: "var(--signal)",
+    strokeWidth: 2,
+    strokeLinecap: "round",
+    strokeLinejoin: "round",
+  },
+  eyebrow: {
+    fontFamily: "var(--font-mono)",
+    fontSize: "10px",
     fontWeight: "600",
-    color: "#1a1a1a",
-    marginBottom: "8px",
+    letterSpacing: "0.12em",
+    textTransform: "uppercase",
+    color: "var(--graphite)",
+    marginBottom: "6px",
+    display: "block",
+  },
+  title: {
+    fontFamily: "var(--font-display)",
+    fontSize: "22px",
+    fontWeight: "700",
+    letterSpacing: "-0.02em",
+    color: "var(--ink)",
+    marginBottom: "10px",
   },
   sub: {
-    fontSize: "14px",
-    color: "#888",
-    lineHeight: 1.6,
+    fontSize: "13px",
+    color: "var(--graphite)",
+    lineHeight: 1.65,
     marginBottom: "1.5rem",
   },
   detail: {
-    background: "#fdf0f0",
-    border: "1px solid #fde0e0",
-    borderRadius: "8px",
+    background: "rgba(255,77,46,0.05)",
+    border: "1px solid rgba(255,77,46,0.2)",
+    borderLeft: "3px solid var(--signal)",
+    borderRadius: "var(--radius-sm)",
     padding: "10px 14px",
-    fontSize: "12px",
-    color: "#c0392b",
-    fontFamily: "monospace",
+    fontFamily: "var(--font-mono)",
+    fontSize: "11px",
+    color: "var(--signal)",
     textAlign: "left",
     marginBottom: "1.5rem",
     wordBreak: "break-word",
     maxHeight: "100px",
     overflowY: "auto",
   },
-  btnRow: { display: "flex", gap: "10px", justifyContent: "center" },
+  btnRow: {
+    display: "flex",
+    gap: "8px",
+    justifyContent: "center",
+  },
   btnPri: {
-    padding: "10px 22px",
-    background: "#7F77DD",
+    padding: "9px 20px",
+    background: "var(--ink)",
     color: "#fff",
-    border: "none",
-    borderRadius: "8px",
-    fontSize: "14px",
-    fontWeight: "500",
+    border: "1px solid var(--ink)",
+    borderRadius: "var(--radius-sm)",
+    fontFamily: "var(--font-mono)",
+    fontSize: "11px",
+    fontWeight: "600",
+    letterSpacing: "0.05em",
+    textTransform: "uppercase",
     cursor: "pointer",
   },
   btnSec: {
-    padding: "10px 22px",
-    background: "#f5f5f5",
-    color: "#555",
-    border: "none",
-    borderRadius: "8px",
-    fontSize: "14px",
+    padding: "9px 20px",
+    background: "#fff",
+    color: "var(--ink)",
+    border: "1px solid var(--line-light-strong)",
+    borderRadius: "var(--radius-sm)",
+    fontFamily: "var(--font-mono)",
+    fontSize: "11px",
+    fontWeight: "600",
+    letterSpacing: "0.05em",
+    textTransform: "uppercase",
     cursor: "pointer",
   },
 };
@@ -97,14 +146,21 @@ class ErrorBoundary extends Component {
     return (
       <div style={s.page}>
         <div style={s.card}>
-          <div style={s.icon}>⚠️</div>
+          <div style={s.cardAccent} />
+          <div style={s.iconWrap}>
+            <svg style={s.iconSvg} viewBox="0 0 24 24">
+              <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z" />
+              <line x1="12" y1="9" x2="12" y2="13" />
+              <line x1="12" y1="17" x2="12.01" y2="17" />
+            </svg>
+          </div>
+          <span style={s.eyebrow}>Runtime error</span>
           <div style={s.title}>Something went wrong</div>
           <div style={s.sub}>
             An unexpected error occurred. This has been noted. Try reloading the
             page — if the problem persists, go back to the home page.
           </div>
 
-          {/* Show error details in dev only */}
           {import.meta.env.DEV && this.state.error && (
             <div style={s.detail}>
               {this.state.error.toString()}

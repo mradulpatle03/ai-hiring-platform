@@ -6,12 +6,15 @@ const s = {
   input: {
     width: "100%",
     padding: "10px 36px 10px 38px",
-    border: "1px solid #e0e0e0",
-    borderRadius: "10px",
-    fontSize: "14px",
+    border: "1px solid rgba(11,14,20,0.20)",
+    borderRadius: "2px",
+    fontSize: "13px",
+    fontFamily: "'Inter', sans-serif",
     outline: "none",
     boxSizing: "border-box",
     background: "#fff",
+    color: "#0B0E14",
+    transition: "border-color 0.15s",
   },
   icon: {
     position: "absolute",
@@ -28,7 +31,7 @@ const s = {
     background: "none",
     border: "none",
     cursor: "pointer",
-    color: "#aaa",
+    color: "#8A8D98",
     display: "flex",
     alignItems: "center",
     padding: "2px",
@@ -42,26 +45,26 @@ export default function SearchBar({
 }) {
   const [local, setLocal] = useState(value || "");
 
-  // Sync when parent clears filters
   useEffect(() => {
     setLocal(value || "");
   }, [value]);
 
-  // Debounce — fire onChange 500ms after user stops typing
   useEffect(() => {
-    if (local === (value || "")) return; // no change, skip
+    if (local === (value || "")) return;
     const t = setTimeout(() => onChange(local), 500);
     return () => clearTimeout(t);
-  }, [local]); // only depend on local
+  }, [local]);
 
   return (
     <div style={s.wrap}>
-      <Search size={15} color="#aaa" style={s.icon} />
+      <Search size={14} color="#8A8D98" style={s.icon} />
       <input
         style={s.input}
         value={local}
         onChange={(e) => setLocal(e.target.value)}
         placeholder={placeholder}
+        onFocus={(e) => (e.target.style.borderColor = "#0B0E14")}
+        onBlur={(e) => (e.target.style.borderColor = "rgba(11,14,20,0.20)")}
       />
       {local && (
         <button
@@ -70,8 +73,10 @@ export default function SearchBar({
             setLocal("");
             onChange("");
           }}
+          onMouseEnter={(e) => (e.currentTarget.style.color = "#FF4D2E")}
+          onMouseLeave={(e) => (e.currentTarget.style.color = "#8A8D98")}
         >
-          <X size={14} />
+          <X size={13} />
         </button>
       )}
     </div>

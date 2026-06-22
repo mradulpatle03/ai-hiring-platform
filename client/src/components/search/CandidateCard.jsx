@@ -3,117 +3,7 @@ import StatusBadge from "../StatusBadge";
 import { GitFork as Github, ChevronDown, ChevronUp } from "lucide-react";
 import { useState } from "react";
 import XAIPanel from "../xai/XAIPanel";
-
-const s = {
-  card: {
-    background: "#fff",
-    border: "1px solid #eee",
-    borderRadius: "12px",
-    padding: "1.25rem",
-    transition: "border-color 0.15s",
-  },
-  top: {
-    display: "flex",
-    alignItems: "center",
-    gap: "10px",
-    marginBottom: "10px",
-  },
-  avatar: {
-    width: "38px",
-    height: "38px",
-    borderRadius: "50%",
-    background: "#f0effc",
-    display: "flex",
-    alignItems: "center",
-    justifyContent: "center",
-    fontSize: "14px",
-    fontWeight: "600",
-    color: "#7F77DD",
-    flexShrink: 0,
-  },
-  name: { fontWeight: "600", fontSize: "14px", marginBottom: "2px" },
-  email: { fontSize: "12px", color: "#888" },
-  scores: {
-    display: "flex",
-    gap: "8px",
-    alignItems: "center",
-    flexWrap: "wrap",
-    marginBottom: "8px",
-  },
-  job: { fontSize: "12px", color: "#888", marginBottom: "8px" },
-  skills: {
-    display: "flex",
-    flexWrap: "wrap",
-    gap: "4px",
-    marginBottom: "8px",
-  },
-  skill: {
-    fontSize: "11px",
-    background: "#fdf0f0",
-    color: "#c0392b",
-    padding: "2px 7px",
-    borderRadius: "999px",
-  },
-  gh: {
-    display: "flex",
-    alignItems: "center",
-    gap: "4px",
-    fontSize: "11px",
-    color: "#555",
-    marginBottom: "8px",
-  },
-  expand: {
-    display: "flex",
-    alignItems: "center",
-    gap: "4px",
-    fontSize: "12px",
-    color: "#7F77DD",
-    background: "none",
-    border: "none",
-    cursor: "pointer",
-    padding: "4px 0",
-  },
-  detail: {
-    marginTop: "10px",
-    paddingTop: "10px",
-    borderTop: "1px solid #f5f5f5",
-  },
-  dtLabel: {
-    fontSize: "11px",
-    fontWeight: "600",
-    color: "#888",
-    textTransform: "uppercase",
-    letterSpacing: "0.04em",
-    marginBottom: "5px",
-  },
-  dtText: {
-    fontSize: "13px",
-    color: "#444",
-    lineHeight: 1.6,
-    marginBottom: "8px",
-  },
-  qBox: {
-    background: "#f9f8ff",
-    border: "1px solid #e8e5fc",
-    borderRadius: "7px",
-    padding: "8px 10px",
-    fontSize: "12px",
-    color: "#444",
-    marginBottom: "5px",
-  },
-  actions: { display: "flex", gap: "6px", marginTop: "10px", flexWrap: "wrap" },
-  btn: (v) => ({
-    padding: "6px 12px",
-    borderRadius: "6px",
-    fontSize: "12px",
-    fontWeight: "500",
-    border: "none",
-    cursor: "pointer",
-    background:
-      v === "shortlist" ? "#e8f8f0" : v === "reject" ? "#fdf0f0" : "#f5f5f5",
-    color: v === "shortlist" ? "#1a7a4a" : v === "reject" ? "#c0392b" : "#555",
-  }),
-};
+import { color, font } from "../../styles/theme";
 
 const getInitials = (name = "") =>
   name
@@ -135,92 +25,266 @@ export default function CandidateCard({
 
   return (
     <div
-      style={s.card}
-      onMouseEnter={(e) => (e.currentTarget.style.borderColor = "#c8c5f5")}
-      onMouseLeave={(e) => (e.currentTarget.style.borderColor = "#eee")}
+      style={{
+        background: "#fff",
+        border: `1px solid ${color.lineLight}`,
+        borderLeft: `3px solid ${color.paper3}`,
+        padding: "1.25rem",
+        transition: "border-left-color 0.15s",
+      }}
+      onMouseEnter={(e) => (e.currentTarget.style.borderLeftColor = color.signal)}
+      onMouseLeave={(e) => (e.currentTarget.style.borderLeftColor = color.paper3)}
     >
-      <div style={s.top}>
-        <div style={s.avatar}>{getInitials(app.candidate?.name)}</div>
+      {/* Candidate header */}
+      <div style={{ display: "flex", alignItems: "center", gap: "10px", marginBottom: "12px" }}>
+        <div
+          style={{
+            width: "36px",
+            height: "36px",
+            background: color.paper2,
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            flexShrink: 0,
+          }}
+        >
+          <span
+            style={{
+              fontFamily: font.mono,
+              fontSize: "11px",
+              fontWeight: 700,
+              color: color.graphite,
+              letterSpacing: "0.02em",
+            }}
+          >
+            {getInitials(app.candidate?.name)}
+          </span>
+        </div>
         <div style={{ flex: 1, minWidth: 0 }}>
-          <div style={s.name}>{app.candidate?.name}</div>
-          <div style={s.email}>{app.candidate?.email}</div>
+          <div
+            style={{
+              fontFamily: font.display,
+              fontWeight: 600,
+              fontSize: "14px",
+              color: color.ink,
+              letterSpacing: "-0.01em",
+              marginBottom: "2px",
+              overflow: "hidden",
+              textOverflow: "ellipsis",
+              whiteSpace: "nowrap",
+            }}
+          >
+            {app.candidate?.name}
+          </div>
+          <div
+            style={{
+              fontFamily: font.mono,
+              fontSize: "11px",
+              color: color.graphiteDim,
+              overflow: "hidden",
+              textOverflow: "ellipsis",
+              whiteSpace: "nowrap",
+            }}
+          >
+            {app.candidate?.email}
+          </div>
         </div>
       </div>
 
-      <div style={s.scores}>
+      {/* Score + Status */}
+      <div style={{ display: "flex", gap: "8px", alignItems: "center", flexWrap: "wrap", marginBottom: "10px" }}>
         <ScoreBadge score={app.aiScore} />
         <StatusBadge status={app.status} />
       </div>
 
-      <div style={s.job}>{app.job?.title}</div>
+      {/* Job title */}
+      <div
+        style={{
+          fontFamily: font.mono,
+          fontSize: "11px",
+          color: color.graphiteDim,
+          textTransform: "uppercase",
+          letterSpacing: "0.04em",
+          marginBottom: "10px",
+        }}
+      >
+        {app.job?.title}
+      </div>
 
+      {/* GitHub */}
       {gh?.connected && (
-        <div style={s.gh}>
+        <div
+          style={{
+            display: "flex",
+            alignItems: "center",
+            gap: "6px",
+            marginBottom: "10px",
+            fontFamily: font.mono,
+            fontSize: "11px",
+            color: color.graphite,
+          }}
+        >
           <Github size={11} />
           <span>@{gh.username}</span>
           {gh.topLanguages?.slice(0, 2).map((l) => (
             <span
               key={l}
               style={{
-                background: "#f0effc",
-                color: "#5a52c0",
-                padding: "1px 6px",
-                borderRadius: "999px",
+                background: color.paper2,
+                color: color.graphite,
+                border: `1px solid ${color.lineLight}`,
+                padding: "1px 7px",
                 fontSize: "10px",
+                fontFamily: font.mono,
+                textTransform: "uppercase",
+                letterSpacing: "0.04em",
               }}
             >
               {l}
             </span>
           ))}
           {gh.totalStars > 0 && (
-            <span style={{ color: "#aaa" }}>⭐ {gh.totalStars}</span>
+            <span style={{ color: color.graphiteDim }}>⭐ {gh.totalStars}</span>
           )}
         </div>
       )}
 
+      {/* Missing skills */}
       {app.aiMissingSkills?.length > 0 && (
-        <div style={s.skills}>
+        <div style={{ display: "flex", flexWrap: "wrap", gap: "4px", marginBottom: "10px" }}>
           <span
-            style={{ fontSize: "11px", color: "#aaa", alignSelf: "center" }}
+            style={{
+              fontFamily: font.mono,
+              fontSize: "10px",
+              color: color.graphiteDim,
+              textTransform: "uppercase",
+              letterSpacing: "0.04em",
+              alignSelf: "center",
+              marginRight: "2px",
+            }}
           >
             Missing:
           </span>
           {app.aiMissingSkills.slice(0, 3).map((sk) => (
-            <span key={sk} style={s.skill}>
+            <span
+              key={sk}
+              style={{
+                fontFamily: font.mono,
+                fontSize: "10px",
+                color: color.signal,
+                border: `1px solid ${color.signal}`,
+                padding: "2px 7px",
+                textTransform: "uppercase",
+                letterSpacing: "0.03em",
+              }}
+            >
               {sk}
             </span>
           ))}
           {app.aiMissingSkills.length > 3 && (
-            <span style={{ ...s.skill, background: "#f5f5f5", color: "#888" }}>
+            <span
+              style={{
+                fontFamily: font.mono,
+                fontSize: "10px",
+                color: color.graphiteDim,
+                border: `1px solid ${color.lineLight}`,
+                padding: "2px 7px",
+              }}
+            >
               +{app.aiMissingSkills.length - 3}
             </span>
           )}
         </div>
       )}
 
-      {/* Expand / collapse AI details */}
-      <button style={s.expand} onClick={() => setExpanded((p) => !p)}>
-        {expanded ? <ChevronUp size={13} /> : <ChevronDown size={13} />}
+      {/* Expand toggle */}
+      <button
+        style={{
+          display: "flex",
+          alignItems: "center",
+          gap: "4px",
+          fontFamily: font.mono,
+          fontSize: "10px",
+          fontWeight: 700,
+          color: color.graphite,
+          textTransform: "uppercase",
+          letterSpacing: "0.04em",
+          background: "none",
+          border: "none",
+          cursor: "pointer",
+          padding: "4px 0",
+          marginBottom: expanded ? "12px" : 0,
+        }}
+        onClick={() => setExpanded((p) => !p)}
+      >
+        {expanded ? <ChevronUp size={12} /> : <ChevronDown size={12} />}
         {expanded ? "Hide details" : "AI details"}
       </button>
 
+      {/* Expanded AI details */}
       {expanded && (
-        <div style={s.detail}>
+        <div
+          style={{
+            paddingTop: "12px",
+            borderTop: `1px solid ${color.lineLight}`,
+            marginBottom: "12px",
+          }}
+        >
           {app.aiReasoning && (
-            <>
-              <div style={s.dtLabel}>AI reasoning</div>
-              <div style={s.dtText}>{app.aiReasoning}</div>
-            </>
+            <div style={{ marginBottom: "12px" }}>
+              <div
+                style={{
+                  fontFamily: font.mono,
+                  fontSize: "10px",
+                  fontWeight: 700,
+                  color: color.graphite,
+                  textTransform: "uppercase",
+                  letterSpacing: "0.05em",
+                  marginBottom: "6px",
+                }}
+              >
+                AI reasoning
+              </div>
+              <p style={{ fontSize: "13px", color: color.ink, lineHeight: 1.65, margin: 0 }}>
+                {app.aiReasoning}
+              </p>
+            </div>
           )}
           {app.githubInsights && (
-            <>
-              <div style={s.dtLabel}>GitHub insights</div>
-              <div style={s.dtText}>{app.githubInsights}</div>
-            </>
+            <div style={{ marginBottom: "12px" }}>
+              <div
+                style={{
+                  fontFamily: font.mono,
+                  fontSize: "10px",
+                  fontWeight: 700,
+                  color: color.graphite,
+                  textTransform: "uppercase",
+                  letterSpacing: "0.05em",
+                  marginBottom: "6px",
+                }}
+              >
+                GitHub insights
+              </div>
+              <p style={{ fontSize: "13px", color: color.ink, lineHeight: 1.65, margin: 0 }}>
+                {app.githubInsights}
+              </p>
+            </div>
           )}
           {app.xai?.dimensions && (
-            <div style={{ marginTop: "10px" }}>
-              <div style={s.dtLabel}>XAI breakdown</div>
+            <div style={{ marginTop: "12px" }}>
+              <div
+                style={{
+                  fontFamily: font.mono,
+                  fontSize: "10px",
+                  fontWeight: 700,
+                  color: color.graphite,
+                  textTransform: "uppercase",
+                  letterSpacing: "0.05em",
+                  marginBottom: "8px",
+                }}
+              >
+                XAI breakdown
+              </div>
               <XAIPanel
                 xai={app.xai}
                 overallScore={app.aiScore}
@@ -229,15 +293,39 @@ export default function CandidateCard({
             </div>
           )}
           {app.aiInterviewQuestions?.length > 0 && (
-            <>
-              <div style={s.dtLabel}>Interview questions</div>
+            <div style={{ marginTop: "12px" }}>
+              <div
+                style={{
+                  fontFamily: font.mono,
+                  fontSize: "10px",
+                  fontWeight: 700,
+                  color: color.graphite,
+                  textTransform: "uppercase",
+                  letterSpacing: "0.05em",
+                  marginBottom: "8px",
+                }}
+              >
+                Interview questions
+              </div>
               {app.aiInterviewQuestions.slice(0, 3).map((q, i) => (
-                <div key={i} style={s.qBox}>
+                <div
+                  key={i}
+                  style={{
+                    background: color.paper,
+                    border: `1px solid ${color.lineLight}`,
+                    padding: "8px 12px",
+                    marginBottom: "6px",
+                    fontSize: "13px",
+                    color: color.ink,
+                  }}
+                >
                   <span
                     style={{
-                      color: "#7F77DD",
-                      fontWeight: "600",
-                      marginRight: "6px",
+                      fontFamily: font.mono,
+                      fontWeight: 700,
+                      color: color.signal,
+                      marginRight: "8px",
+                      fontSize: "11px",
                     }}
                   >
                     Q{i + 1}.
@@ -245,25 +333,82 @@ export default function CandidateCard({
                   {q}
                 </div>
               ))}
-            </>
+            </div>
           )}
         </div>
       )}
 
-      <div style={s.actions}>
-        <button style={s.btn("shortlist")} onClick={onShortlist}>
+      {/* Actions */}
+      <div style={{ display: "flex", gap: "6px", flexWrap: "wrap" }}>
+        <button
+          style={{
+            fontFamily: font.mono,
+            fontSize: "10px",
+            fontWeight: 700,
+            textTransform: "uppercase",
+            letterSpacing: "0.04em",
+            padding: "6px 12px",
+            border: "none",
+            cursor: "pointer",
+            background: "rgba(29,138,78,0.10)",
+            color: "#1D8A4E",
+          }}
+          onClick={onShortlist}
+        >
           Shortlist
         </button>
-        <button style={s.btn("reject")} onClick={onReject}>
+        <button
+          style={{
+            fontFamily: font.mono,
+            fontSize: "10px",
+            fontWeight: 700,
+            textTransform: "uppercase",
+            letterSpacing: "0.04em",
+            padding: "6px 12px",
+            border: "none",
+            cursor: "pointer",
+            background: `rgba(255,77,46,0.08)`,
+            color: color.signal,
+          }}
+          onClick={onReject}
+        >
           Reject
         </button>
         {app.status === "shortlisted" && (
           <>
-            <button style={s.btn("chat")} onClick={onOpenChat}>
-              💬 Chat
+            <button
+              style={{
+                fontFamily: font.mono,
+                fontSize: "10px",
+                fontWeight: 700,
+                textTransform: "uppercase",
+                letterSpacing: "0.04em",
+                padding: "6px 12px",
+                border: `1px solid ${color.lineLightStrong}`,
+                cursor: "pointer",
+                background: "#fff",
+                color: color.ink,
+              }}
+              onClick={onOpenChat}
+            >
+              Chat
             </button>
-            <button style={s.btn("schedule")} onClick={onSchedule}>
-              📅 Schedule
+            <button
+              style={{
+                fontFamily: font.mono,
+                fontSize: "10px",
+                fontWeight: 700,
+                textTransform: "uppercase",
+                letterSpacing: "0.04em",
+                padding: "6px 12px",
+                border: `1px solid ${color.lineLightStrong}`,
+                cursor: "pointer",
+                background: "#fff",
+                color: color.ink,
+              }}
+              onClick={onSchedule}
+            >
+              Schedule
             </button>
           </>
         )}
